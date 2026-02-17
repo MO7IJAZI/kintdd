@@ -26,6 +26,7 @@ export default function Hero() {
           alt="KINT Hero"
           fill
           priority
+          sizes="100vw"
           style={{ objectFit: 'cover', opacity: 0.6 }}
         />
         <div style={{
