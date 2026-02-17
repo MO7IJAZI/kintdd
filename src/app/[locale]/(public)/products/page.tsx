@@ -13,25 +13,25 @@ export default async function ProductsPage() {
     const isAr = locale === 'ar';
 
     // Fetch only active parent categories
-    const categories = await prisma.category.findMany({
-        where: {
-            isActive: true,
-            parentId: null,
-             NOT: {
+    let categories = [];
+    try {
+        categories = await prisma.category.findMany({
+            where: {
+                isActive: true,
+                parentId: null,
+                NOT: {
                     slug: {
-                        in: ['animal-products', 'agricultural-products', 'crop-farming'] // Exclude if needed, or keep based on user request "show ONLY main parent categories"
-                        // The user said "remove all contents... display only main parent categories".
-                        // Wait, the user previously asked to remove 'animal-products' and 'crop-farming' from header.
-                        // But here they say "display only main parent categories".
-                        // If I show ALL parent categories, these might appear.
-                        // However, the user said "remove all content of the page so it displays only main parent categories".
-                        // This likely means replacing the hardcoded cards with dynamic ones.
-                        // I will assume they want ALL active parent categories.
+                        in: ['animal-products', 'agricultural-products', 'crop-farming']
                     }
                 }
-        },
-        orderBy: { order: 'asc' },
-    });
+            },
+            orderBy: { order: 'asc' },
+        });
+    } catch (error) {
+        console.error("Error fetching categories in products page:", error);
+        // Fallback to empty array to avoid page crash
+        categories = [];
+    }
 
     return (
         <div style={{ direction: isAr ? 'rtl' : 'ltr', minHeight: '100vh', backgroundColor: '#f8fafc' }}>
@@ -125,13 +125,17 @@ export default async function ProductsPage() {
                                         className="category-card"
                                     >
                                         <div className="card-image-wrapper">
-                                            {category.image ? (
+                                            {category.image && category.image.trim() !== '' ? (
                                                 <Image 
                                                     src={category.image} 
                                                     alt={name} 
                                                     fill 
                                                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                                     className="card-image"
+                                                    onError={() => {
+                                                        // Fallback logic if needed, but for now just prevent crash
+                                                        console.error(`Failed to load image for category ${category.name}`);
+                                                    }}
                                                 />
                                             ) : (
                                                 <div className="placeholder-image">
