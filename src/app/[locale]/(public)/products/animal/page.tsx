@@ -12,8 +12,8 @@ export default async function AnimalProductsPage() {
     const tNav = await getTranslations('Navigation');
     const isAr = locale === 'ar';
 
-    let categories = [];
-    let products = [];
+    let categories: any[] = [];
+    let products: any[] = [];
 
     try {
         categories = await prisma.category.findMany({

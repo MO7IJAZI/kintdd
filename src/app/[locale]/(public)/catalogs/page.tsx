@@ -9,7 +9,7 @@ export default async function CatalogsPage() {
     const t = await getTranslations('Catalogs');
     const isAr = locale === 'ar';
 
-    let catalogs = [];
+    let catalogs: any[] = [];
     try {
         catalogs = await prisma.catalog.findMany({
             where: {
