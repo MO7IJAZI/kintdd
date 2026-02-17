@@ -1,0 +1,11 @@
+[2026-02-14T11:59:08.840Z] ----------------------------------------
+[2026-02-14T11:59:08.845Z] Server process started.
+[2026-02-14T11:59:08.845Z] NODE_ENV: undefined
+[2026-02-14T11:59:08.845Z] Current Directory: C:\Users\mo_hijazi\Desktop\kint_website-main\kint_website-main
+[2026-02-14T11:59:08.854Z] Loaded .env file
+[2026-02-14T11:59:08.858Z] Server listening on port 3000
+[2026-02-14T11:59:08.858Z] Initializing Next.js application...
+[2026-02-14T11:59:08.859Z] Found standalone directory: C:\Users\mo_hijazi\Desktop\kint_website-main\kint_website-main\.next\standalone
+[2026-02-14T11:59:08.859Z] Changed cwd to: C:\Users\mo_hijazi\Desktop\kint_website-main\kint_website-main\.next\standalone
+[2026-02-14T11:59:10.361Z] Next.js app.prepare() completed successfully.
+[2026-02-14T11:59:10.362Z] Server fully operational.
