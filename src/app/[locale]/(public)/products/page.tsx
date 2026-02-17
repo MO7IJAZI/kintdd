@@ -13,7 +13,7 @@ export default async function ProductsPage() {
     const isAr = locale === 'ar';
 
     // Fetch only active parent categories
-    let categories = [];
+    let categories: any[] = [];
     try {
         categories = await prisma.category.findMany({
             where: {
