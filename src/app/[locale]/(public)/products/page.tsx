@@ -121,7 +121,7 @@ export default async function ProductsPage() {
                                 return (
                                     <Link 
                                         key={category.id} 
-                                        href={`/product-category/${category.slug}`}
+                                        href={`/product-category/${category.slug}` as any}
                                         className="category-card"
                                     >
                                         <div className="card-image-wrapper">
