@@ -1226,5 +1226,12 @@
       "tagline": "Specialists in providing all agricultural and veterinary materials.",
       "description": "Our ambition is to become the leading provider of the most modern solutions for farmers and help them increase animal and plant agricultural productivity.\n\nIn addition, we will provide specialized advisory services to farmers, where we will provide them with professional information and guidance that helps them make the right decisions and improve the performance of their farms. We will work to build strategic partnerships with farmers and agricultural institutions to achieve cooperation and exchange of knowledge and experience.\n\nWe are committed to innovation and continuous development, and seek to provide the most updated and innovative solutions for farmers."
     }
+  },
+  "Search": {
+    "placeholder": "Search products...",
+    "search": "Search",
+    "title": "Search Results",
+    "noResults": "No products found matching \"{query}\"",
+    "resultsFound": "Found {count} products matching \"{query}\""
   }
 }
