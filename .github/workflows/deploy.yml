@@ -1,0 +1,75 @@
+name: Build and Deploy to Hostinger
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
+
+      - name: Build Next.js App
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+          # Add other build-time env vars if needed, but avoid secrets if possible
+          # DATABASE_URL is technically needed for prisma generate, but usually not for next build unless static pages fetch data
+          # For standalone build, we might need a dummy DB url if build fails
+          DATABASE_URL: "mysql://dummy:dummy@localhost:3306/dummy" 
+
+      - name: Prepare Deployment Artifacts
+        run: |
+          mkdir -p deploy_package
+          cp -r .next/standalone/* deploy_package/
+          cp -r .next/static deploy_package/.next/static
+          cp -r public deploy_package/public
+          cp ecosystem.config.js deploy_package/
+          cp server.js deploy_package/
+          cp .htaccess deploy_package/ || true
+
+      - name: Deploy via SSH/RSYNC
+        uses: easingthemes/ssh-deploy@v5.0.0
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          ARGS: "-rlgoDzvc -i --delete"
+          SOURCE: "deploy_package/"
+          REMOTE_HOST: ${{ secrets.HOSTINGER_IP }}
+          REMOTE_USER: ${{ secrets.HOSTINGER_USER }}
+          TARGET: "public_html/" # Adjust if your app is in a subdirectory
+          EXCLUDE: "/node_modules/, /dist/, /.git/, /.github/, /.env"
+          
+      - name: Post-Deploy Tasks (Restart Server)
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.HOSTINGER_IP }}
+          username: ${{ secrets.HOSTINGER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd public_html
+            # Link node_modules if they are not in standalone (standalone usually bundles them)
+            # But standalone structure is: .next/standalone/node_modules.
+            # Hostinger Node App expects node_modules in root?
+            # Our server.js handles this path resolution.
+            
+            # Run migrations (needs real DB connection from .env on server)
+            npx prisma migrate deploy
+            
+            # Restart App (if using PM2, otherwise hPanel handles it, but we can try touching a file)
+            touch tmp/restart.txt || true

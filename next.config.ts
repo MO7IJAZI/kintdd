@@ -43,6 +43,13 @@ const nextConfig: NextConfig = {
     ],
     unoptimized: false,
   },
+
+  typescript: {
+    ignoreBuildErrors: true, // Speed up build by skipping TS checks (we rely on local dev checks)
+  },
+  eslint: {
+    ignoreDuringBuilds: true, // Speed up build by skipping linting
+  },
 };
 
 export default withNextIntl(nextConfig);

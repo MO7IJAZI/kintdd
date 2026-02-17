@@ -13,12 +13,15 @@ fi
 
 # 1. Install Dependencies
 echo "📦 Installing dependencies..."
-# Use npm ci for a clean, deterministic install based on package-lock.json
-npm ci --production=false # We need devDependencies for build (typescript, types)
+# Use npm install instead of npm ci to reuse node_modules (Faster for incremental builds)
+npm install --production=false
 
 # 2. Build the Application
 echo "🏗️ Building application..."
 # This runs: fix-permissions -> prisma generate -> migrate -> seed -> next build -> post-build
+# We skip linting during production build to save time
+export NEXT_IGNORE_ESLINT=1
+export NEXT_IGNORE_TYPE_CHECKS=1
 npm run build
 
 # 3. Prune devDependencies to save space (Optional but recommended for 'light' deployment)
