@@ -1,28 +1,29 @@
 import { NextIntlClientProvider } from 'next-intl';
-import { getMessages } from 'next-intl/server';
-import type { Metadata } from "next";
-import { Cairo, Inter, Outfit } from 'next/font/google';
-import "../globals.css";
+import { getMessages, getTranslations } from 'next-intl/server';
+import { notFound } from 'next/navigation';
+import { routing } from '@/routing';
+import { inter, outfit, cairo } from '@/app/fonts';
+import '@/app/globals.css';
+import { Metadata } from 'next';
 
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-});
-
-const outfit = Outfit({
-  subsets: ['latin'],
-  variable: '--font-outfit',
-});
-
-const cairo = Cairo({
-  subsets: ['arabic', 'latin'],
-  variable: '--font-cairo',
-});
-
-export const metadata: Metadata = {
-  title: "KINT Kafri International | Manufacturer of Biostimulants & Specialty Fertilizers",
-  description: "Kafri International (KINT) is a leading global manufacturer of biostimulants, specialty fertilizers, and animal health products for sustainable agriculture.",
-};
+export async function generateMetadata({
+  params
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({locale, namespace: 'Metadata'});
+  
+  return {
+    title: t('title'),
+    description: t('description'),
+    openGraph: {
+      title: t('title'),
+      description: t('description'),
+      type: 'website',
+    },
+  };
+}
 
 export default async function LocaleLayout({
   children,
@@ -32,13 +33,17 @@ export default async function LocaleLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  
-  // Providing all messages to the client
-  // side is the easiest way to get started
+
+  // Ensure that the incoming `locale` is valid
+  if (!routing.locales.includes(locale as any)) {
+    notFound();
+  }
+
   const messages = await getMessages();
+  const direction = locale === 'ar' ? 'rtl' : 'ltr';
 
   return (
-    <html lang={locale} className={`${inter.variable} ${outfit.variable} ${cairo.variable}`}>
+    <html lang={locale} dir={direction} className={`${inter.variable} ${outfit.variable} ${cairo.variable}`}>
       <body className={locale === 'ar' ? 'font-arabic' : 'font-latin'}>
         <NextIntlClientProvider messages={messages}>
           {children}
