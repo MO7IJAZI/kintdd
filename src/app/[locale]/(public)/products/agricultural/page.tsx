@@ -12,48 +12,55 @@ export default async function AgriculturalProductsPage() {
     const tNav = await getTranslations('Navigation');
     const isAr = locale === 'ar';
 
-    const categories = await prisma.category.findMany({
-        where: { 
-            isActive: true, 
-            parentId: null,
-            NOT: {
-                slug: {
-                    in: ['animal', 'vet']
-                }
-            }
-        },
-        orderBy: { order: 'asc' },
-        select: {
-            id: true,
-            name: true,
-            name_ar: true,
-            slug: true,
-            image: true,
-            description: true,
-            description_ar: true,
-            children: {
-                where: { isActive: true },
-                select: {
-                    id: true,
-                    name: true,
-                    name_ar: true,
-                    slug: true
-                }
-            }
-        }
-    });
+    let categories = [];
+    let products = [];
 
-    const products = await prisma.product.findMany({
-        where: { isActive: true },
-        include: { 
-            category: {
-                include: {
-                    parent: true
+    try {
+        categories = await prisma.category.findMany({
+            where: { 
+                isActive: true, 
+                parentId: null,
+                NOT: {
+                    slug: {
+                        in: ['animal', 'vet']
+                    }
+                }
+            },
+            orderBy: { order: 'asc' },
+            select: {
+                id: true,
+                name: true,
+                name_ar: true,
+                slug: true,
+                image: true,
+                description: true,
+                description_ar: true,
+                children: {
+                    where: { isActive: true },
+                    select: {
+                        id: true,
+                        name: true,
+                        name_ar: true,
+                        slug: true
+                    }
                 }
             }
-        },
-        orderBy: { order: 'asc' }
-    });
+        });
+
+        products = await prisma.product.findMany({
+            where: { isActive: true },
+            include: { 
+                category: {
+                    include: {
+                        parent: true
+                    }
+                }
+            },
+            orderBy: { order: 'asc' }
+        });
+    } catch (error) {
+        console.error('Error fetching agricultural data:', error);
+    }
 
     const agriProducts = products.filter(p => {
         const slug = p.category?.slug.toLowerCase() || '';

@@ -9,15 +9,21 @@ export default async function CatalogsPage() {
     const t = await getTranslations('Catalogs');
     const isAr = locale === 'ar';
 
-    const catalogs = await prisma.catalog.findMany({
-        where: {
-            isActive: true,
-            locale: locale
-        },
-        orderBy: {
-            order: 'asc'
-        }
-    });
+    let catalogs = [];
+    try {
+        catalogs = await prisma.catalog.findMany({
+            where: {
+                isActive: true,
+                locale: locale
+            },
+            orderBy: {
+                order: 'asc'
+            }
+        });
+    } catch (error) {
+        console.error('Failed to fetch catalogs:', error);
+        // Fallback to empty array or handle gracefully
+    }
 
     const agriCatalogs = catalogs.filter(c => c.category === 'agricultural');
     const animalCatalogs = catalogs.filter(c => c.category === 'animal');

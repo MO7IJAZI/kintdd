@@ -35,16 +35,22 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
     const tProd = await getTranslations('Product');
     const isAr = locale === 'ar';
 
-    const categoryRaw = await prisma.category.findUnique({
-        where: { slug },
-        include: {
-            products: {
-                where: { isActive: true },
-                orderBy: { order: "asc" }
-            },
-            children: true
-        }
-    });
+    let categoryRaw = null;
+    
+    try {
+        categoryRaw = await prisma.category.findUnique({
+            where: { slug },
+            include: {
+                products: {
+                    where: { isActive: true },
+                    orderBy: { order: "asc" }
+                },
+                children: true
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching category:', error);
+    }
 
     if (!categoryRaw) {
         notFound();
