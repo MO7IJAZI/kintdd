@@ -76,11 +76,11 @@ export default function Footer() {
                     <div>
                         <h4 style={{ fontSize: '1.2rem', marginBottom: '2rem', fontWeight: '700' }}>{t('productOffer')}</h4>
                         <ul style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <li><Link href="/product-category/biostimulants" style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }}>{t('biostimulants')}</Link></li>
-                            <li><Link href="/product-category/activators" style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }}>{t('activators')}</Link></li>
-                            <li><Link href="/product-category/bioproducts" style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }}>{t('bioproducts')}</Link></li>
-                            <li><Link href="/product-category/foliar-fertilizers" style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }}>{t('foliarFertilizers')}</Link></li>
-                            <li><Link href="/product-category/organic-farming" style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }}>{t('organicSolutions')}</Link></li>
+                            <li><Link href={{pathname: '/product-category/biostimulants'}} style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }}>{t('biostimulants')}</Link></li>
+                            <li><Link href={{pathname: '/product-category/activators'}} style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }}>{t('activators')}</Link></li>
+                            <li><Link href={{pathname: '/product-category/bioproducts'}} style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }}>{t('bioproducts')}</Link></li>
+                            <li><Link href={{pathname: '/product-category/foliar-fertilizers'}} style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }}>{t('foliarFertilizers')}</Link></li>
+                            <li><Link href={{pathname: '/product-category/organic-farming'}} style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }}>{t('organicSolutions')}</Link></li>
                         </ul>
                     </div>
 
@@ -91,7 +91,7 @@ export default function Footer() {
                             <li><Link href="/crop-farming" style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }}>{t('cropGuides')}</Link></li>
                             <li><Link href="/mixing-table" style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }}>{t('mixingTable')}</Link></li>
                             <li><Link href="/about/rd-centre" style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }}>{t('rdCentre')}</Link></li>
-                            <li><Link href="/experts-forum" style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }}>{t('expertForum')}</Link></li>
+                            <li><Link href={{pathname: '/experts-forum'}} style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }}>{t('expertForum')}</Link></li>
                             <li><Link href="/about" style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }}>{t('companyProfile')}</Link></li>
                         </ul>
                     </div>

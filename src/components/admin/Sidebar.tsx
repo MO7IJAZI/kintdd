@@ -10,7 +10,7 @@ export default function Sidebar() {
     const t = useTranslations('Admin');
 
     const switchLocale = (nextLocale: string) => {
-        router.replace(pathname, {locale: nextLocale});
+        router.replace(pathname as any, {locale: nextLocale});
     };
 
     const menuItems = [
@@ -105,7 +105,7 @@ export default function Sidebar() {
                     return (
                         <Link
                             key={item.href}
-                            href={item.href}
+                            href={item.href as any}
                             style={{
                                 display: 'flex',
                                 alignItems: 'center',

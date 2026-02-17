@@ -77,7 +77,7 @@ export default function AdminCrops() {
                                     </span>
                                 </td>
                                 <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
-                                    <Link href={`/admin/crops/${crop.id}`} style={{ color: 'var(--primary)', fontWeight: '600', marginRight: '1rem' }}>{t('edit')}</Link>
+                                    <Link href={{pathname: '/admin/crops/[id]', params: {id: crop.id}}} style={{ color: 'var(--primary)', fontWeight: '600', marginRight: '1rem' }}>{t('edit')}</Link>
                                     <button onClick={() => handleDelete(crop.id)} style={{ color: '#ef4444', fontWeight: '600', background: 'none', border: 'none', cursor: 'pointer' }}>{t('delete')}</button>
                                 </td>
                             </tr>

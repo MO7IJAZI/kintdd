@@ -69,12 +69,12 @@ export default function DocumentsPage() {
     };
 
     const handleEdit = (id: string) => {
-        router.push(`/admin/documents/edit/${id}`);
+        router.push({pathname: '/admin/documents/edit/[id]', params: {id}});
     };
 
     const handleCreate = () => {
         const nextUrl = category ? `/admin/documents/create?category=${encodeURIComponent(category)}` : '/admin/documents/create';
-        router.push(nextUrl);
+        router.push(nextUrl as any);
     };
 
     if (loading) {

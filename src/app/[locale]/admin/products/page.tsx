@@ -61,7 +61,7 @@ export default async function AdminProducts() {
                                     </span>
                                 </td>
                                 <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
-                                    <Link href={`/admin/products/${product.id}`} style={{ color: 'var(--primary)', fontWeight: '600', marginRight: '1rem' }}>{tCommon('edit')}</Link>
+                                    <Link href={{pathname: '/admin/products/[id]', params: {id: product.id}}} style={{ color: 'var(--primary)', fontWeight: '600', marginRight: '1rem' }}>{tCommon('edit')}</Link>
                                     <DeleteButton id={product.id} type="product" />
                                 </td>
                             </tr>

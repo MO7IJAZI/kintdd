@@ -134,7 +134,7 @@ export default function CropGuidesList({ initialCrops }: { initialCrops: Crop[] 
                         {filteredCrops.map((crop) => {
                             const name = (isRtl && crop.name_ar) ? crop.name_ar : crop.name;
                             return (
-                                <Link key={crop.id} href={`/crops/${crop.slug}`} className="card crop-card" style={{
+                                <Link key={crop.id} href={{pathname: '/crops/[slug]', params: {slug: crop.slug}}} className="card crop-card" style={{
                                     display: 'flex',
                                     flexDirection: 'column',
                                     border: '1px solid #eee',

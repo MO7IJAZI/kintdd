@@ -96,7 +96,7 @@ export default async function AgriculturalProductsPage() {
                                     return (
                                         <Link
                                             key={category.id}
-                                            href={`/product-category/${category.slug}`}
+                                            href={{pathname: '/product-category/[slug]', params: {slug: category.slug}}}
                                             style={{ textDecoration: 'none', color: 'inherit' }}
                                         >
                                             <div className="card hover-card" style={{
@@ -166,7 +166,7 @@ export default async function AgriculturalProductsPage() {
                                     const catName = isAr && product.category?.name_ar ? product.category.name_ar : product.category?.name;
 
                                     return (
-                                        <Link key={product.id} href={`/product/${product.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                                        <Link key={product.id} href={{pathname: '/product/[slug]', params: {slug: product.slug}}} style={{ textDecoration: 'none', color: 'inherit' }}>
                                             <div className="card hover-card" style={{
                                                 overflow: 'hidden',
                                                 borderRadius: '1.5rem',

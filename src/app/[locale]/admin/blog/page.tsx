@@ -53,7 +53,7 @@ export default async function AdminBlog() {
                                     </span>
                                 </td>
                                 <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
-                                    <Link href={`/admin/blog/${post.id}`} style={{ color: 'var(--primary)', fontWeight: '600', marginRight: '1rem' }}>{t('edit')}</Link>
+                                    <Link href={{pathname: '/admin/blog/[id]', params: {id: post.id}}} style={{ color: 'var(--primary)', fontWeight: '600', marginRight: '1rem' }}>{t('edit')}</Link>
                                     <DeleteButton id={post.id} type="blog" />
                                 </td>
                             </tr>

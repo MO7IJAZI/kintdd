@@ -106,7 +106,7 @@ export default async function AdminDashboard() {
 
             <div className="stats-grid">
                 {statCards.map((stat, index) => (
-                    <Link key={index} href={stat.href} className="stat-card">
+                    <Link key={index} href={stat.href as any} className="stat-card">
                         <div className="stat-icon" style={{ backgroundColor: `${stat.color}15`, color: stat.color }}>
                             {stat.icon}
                         </div>
@@ -146,7 +146,7 @@ export default async function AdminDashboard() {
                             <span className="action-icon">🏦</span>
                             <span>{t('editCompanyData')}</span>
                         </Link>
-                        <Link href="/admin/documents?category=mixing-table" className="action-btn">
+                        <Link href={{pathname: '/admin/documents', query: {category: 'mixing-table'}}} className="action-btn">
                             <span className="action-icon">📑</span>
                             <span>{t('manageMixingTablePdf')}</span>
                         </Link>

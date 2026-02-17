@@ -116,7 +116,7 @@ const AdminPages = async ({ searchParams }: { searchParams: any }) => {
                                     }}
                                 >
                                     <Link
-                                        href={`/admin/pages/${page.id}`}
+                                        href={{pathname: '/admin/pages/[id]', params: {id: page.id}}}
                                         style={{ marginRight: "1rem" }}
                                     >
                                         {t('edit')}

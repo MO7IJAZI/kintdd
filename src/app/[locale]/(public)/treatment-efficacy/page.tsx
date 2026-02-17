@@ -63,7 +63,7 @@ export default async function TreatmentEfficacyPage() {
                         {t('subtitle')}
                     </p>
                     <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-                        <Link href="optimum-conditions" style={{ textDecoration: 'none' }}>
+                        <Link href={{pathname: '/treatment-efficacy/optimum-conditions'}} style={{ textDecoration: 'none' }}>
                             <Button size="lg" variant="primary">
                                 {t('viewConditions')}
                             </Button>
@@ -121,7 +121,7 @@ export default async function TreatmentEfficacyPage() {
 
                     {/* Key Articles Section */}
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem' }}>
-                        <Link href="optimum-conditions" style={{ textDecoration: 'none' }}>
+                        <Link href={{pathname: '/treatment-efficacy/optimum-conditions'}} style={{ textDecoration: 'none' }}>
                             <Card style={{ height: '100%', cursor: 'pointer' }}>
                                 <div style={{ position: 'relative', height: '16rem', overflow: 'hidden' }}>
                                     <Image

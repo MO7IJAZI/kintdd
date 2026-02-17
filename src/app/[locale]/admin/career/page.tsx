@@ -76,7 +76,7 @@ export default async function CareerAdminPage({ params }: { params: Promise<{ lo
                                     </span>
                                 </td>
                                 <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
-                                    <Link href={`/admin/career/${offer.id}`} style={{ color: 'var(--primary)', fontWeight: '600', marginRight: '1rem' }}>
+                                    <Link href={{pathname: '/admin/career/[id]', params: {id: offer.id}}} style={{ color: 'var(--primary)', fontWeight: '600', marginRight: '1rem' }}>
                                         {tCommon('edit')}
                                     </Link>
                                     <DeleteButton id={offer.id} type="job-offer" />

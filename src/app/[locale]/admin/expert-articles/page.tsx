@@ -66,7 +66,7 @@ export default async function AdminExpertArticles() {
                                     </span>
                                 </td>
                                 <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
-                                    <Link href={`/admin/expert-articles/${article.id}`} style={{ color: 'var(--primary)', fontWeight: '600', marginRight: '1rem' }}>{t('edit')}</Link>
+                                    <Link href={{pathname: '/admin/expert-articles/[id]', params: {id: article.id}}} style={{ color: 'var(--primary)', fontWeight: '600', marginRight: '1rem' }}>{t('edit')}</Link>
                                     <DeleteButton id={article.id} type="expert-article" />
                                 </td>
                             </tr>

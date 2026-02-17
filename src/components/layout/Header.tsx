@@ -79,7 +79,7 @@ export default function Header({ productCategories }: HeaderProps) {
     }, []);
 
     const switchLocale = (nextLocale: string) => {
-        router.replace(pathname, {locale: nextLocale});
+        router.replace(pathname as any, {locale: nextLocale});
     };
 
     const productOfferSubItems: SubItem[] = (productCategories ?? []).map((category) => {

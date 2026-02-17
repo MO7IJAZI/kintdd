@@ -46,7 +46,7 @@ export default async function BlogPage({ params }: { params: Promise<{ locale: s
                                     <p style={{ color: 'var(--muted-foreground)', fontSize: '1.1rem', marginBottom: '2.5rem' }}>
                                         {excerpt}
                                     </p>
-                                    <Link href={`/blog/${post.slug}`} className="btn btn-primary" style={{ alignSelf: isRtl ? 'flex-end' : 'flex-start', padding: '0.8rem 2rem' }}>
+                                    <Link href={{pathname: '/blog/[slug]', params: {slug: post.slug}}} className="btn btn-primary" style={{ alignSelf: isRtl ? 'flex-end' : 'flex-start', padding: '0.8rem 2rem' }}>
                                         {t('readMore')}
                                     </Link>
                                 </div>

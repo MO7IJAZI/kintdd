@@ -17,7 +17,7 @@ export default function TopBar() {
             }}>
                 <div style={{ display: 'flex', gap: '1.5rem' }}>
                     <span>KAFRI INTERNATIONAL - Leading Excellence in Agriculture</span>
-                    <Link href="/news" style={{ color: 'var(--accent)', fontWeight: '600' }}>
+                    <Link href={{pathname: '/news'}} style={{ color: 'var(--accent)', fontWeight: '600' }}>
                         Latest News: Innovations in Bio-fertilizers →
                     </Link>
                 </div>

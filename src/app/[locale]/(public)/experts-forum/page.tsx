@@ -46,7 +46,7 @@ function ArticleCard({ article, locale, t }: { article: Article, locale: string,
                     {excerpt}
                 </p>
                 <Link
-                    href={`/experts-forum/${article.slug}`}
+                    href={{pathname: '/experts-forum/[slug]', params: {slug: article.slug}}}
                     className="article-card-link"
                 >
                     {t('readMore')}

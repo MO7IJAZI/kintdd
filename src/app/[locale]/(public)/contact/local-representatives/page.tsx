@@ -59,7 +59,7 @@ export default async function LocalRepresentativesPage({ params }: { params: Pro
             <p style={{ color: 'var(--muted-foreground)', marginBottom: '1.5rem' }}>
               {t('contactFormDesc')}
             </p>
-            <Link href="/contact?dept=local" className="btn btn-primary" style={{ width: '100%', textAlign: 'center' }}>
+            <Link href={{pathname: '/contact', query: {dept: 'local'}}} className="btn btn-primary" style={{ width: '100%', textAlign: 'center' }}>
               {t('openFormBtn')}
             </Link>
           </div>
