@@ -7,12 +7,7 @@ export const getCachedProductCategories = unstable_cache(
             return await prisma.category.findMany({
                 where: { 
                     isActive: true, 
-                    parentId: null,
-                    NOT: {
-                        slug: {
-                            in: ['animal', 'vet', 'crop-guides', 'by-animal']
-                        }
-                    }
+                    parentId: null
                 },
                 orderBy: [{ order: 'asc' }, { name: 'asc' }],
                 select: {
@@ -22,6 +17,7 @@ export const getCachedProductCategories = unstable_cache(
                     slug: true,
                     description: true,
                     description_ar: true,
+                    image: true,
                     children: {
                         where: { isActive: true },
                         orderBy: [{ order: 'asc' }, { name: 'asc' }],

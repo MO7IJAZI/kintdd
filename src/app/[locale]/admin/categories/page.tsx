@@ -121,8 +121,14 @@ export default function AdminCategories() {
     async function handleDelete(id: string) {
         if (confirm(t('deleteConfirm'))) {
             setIsLoading(true);
-            await deleteCategory(id);
-            void fetchCategories();
+            setCategories((prev) => prev.filter((cat) => cat.id !== id));
+            try {
+                await deleteCategory(id);
+                void fetchCategories();
+            } catch (error) {
+                void fetchCategories();
+                alert(error instanceof Error ? error.message : "Error");
+            }
         }
     }
 

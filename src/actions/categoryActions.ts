@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export async function createCategory(formData: FormData) {
     try {
@@ -85,9 +85,9 @@ export async function deleteCategory(id: string) {
     revalidatePath("/", "layout");
 }
 
-const getCategoriesCached = unstable_cache(
-    async () =>
-        prisma.category.findMany({
+export async function getCategories() {
+    try {
+        return await prisma.category.findMany({
             include: {
                 parent: true,
                 children: true,
@@ -96,14 +96,7 @@ const getCategoriesCached = unstable_cache(
                 },
             },
             orderBy: { order: "asc" },
-        }),
-    ["categories:list"],
-    { revalidate: 10, tags: ["categories"] }
-);
-
-export async function getCategories() {
-    try {
-        return await getCategoriesCached();
+        });
     } catch (error) {
         console.error("Failed to fetch categories:", error);
         return [];

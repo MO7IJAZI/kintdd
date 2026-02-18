@@ -24,12 +24,7 @@ export default async function ProductsPage() {
         categories = await prisma.category.findMany({
             where: {
                 isActive: true,
-                parentId: null,
-                NOT: {
-                    slug: {
-                        in: ['animal-products', 'agricultural-products', 'crop-farming']
-                    }
-                }
+                parentId: null
             },
             orderBy: { order: 'asc' },
         });
