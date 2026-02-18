@@ -1209,6 +1209,14 @@
     "animalTitle": "Animal Production",
     "animalDesc": "Veterinary products and nutritional support for livestock health."
   },
+  "About": {
+    "awardsTitle": "Awards",
+    "awardsSubtitle": "Our awards and accreditations.",
+    "noAwards": "No awards available.",
+    "certificatesTitle": "Certificates",
+    "certificatesSubtitle": "Our certificates and quality standards.",
+    "noCertificates": "No certificates available."
+  },
   "AboutNew": {
     "whoWeAre": {
       "title": "Get to Know Us",

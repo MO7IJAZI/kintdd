@@ -1153,6 +1153,14 @@
     "animalTitle": "الإنتاج الحيواني",
     "animalDesc": "منتجات بيطرية ودعم غذائي لصحة الماشية."
   },
+  "About": {
+    "awardsTitle": "الجوائز",
+    "awardsSubtitle": "جوائزنا واعتماداتنا.",
+    "noAwards": "لا توجد جوائز متاحة حالياً.",
+    "certificatesTitle": "الشهادات",
+    "certificatesSubtitle": "شهاداتنا ومعايير الجودة الخاصة بنا.",
+    "noCertificates": "لا توجد شهادات متاحة حالياً."
+  },
   "AboutNew": {
     "whoWeAre": {
       "title": "تعرف علينا",

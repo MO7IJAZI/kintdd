@@ -411,7 +411,6 @@ export default function Header({ productCategories }: HeaderProps) {
         className={[
           "fixed inset-y-0 z-[1002] w-[320px] sm:w-[380px] bg-white shadow-2xl transition-transform duration-200 ease-out xl:hidden flex flex-col",
           isRtl ? "left-0" : "right-0",
-          mobileMenuOpen ? "translate-x-0" : isRtl ? "-translate-x-full" : "translate-x-full",
           styles.mobileDrawer,
           mobileMenuOpen ? styles.mobileDrawerOpenState : "",
           mobileMenuOpen ? styles.mobileDrawerOpen : "",
