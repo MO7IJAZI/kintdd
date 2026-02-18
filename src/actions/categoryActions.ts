@@ -34,7 +34,7 @@ export async function createCategory(formData: FormData) {
             },
         });
 
-        revalidatePath("/", 'layout'); 
+        revalidatePath("/");
         revalidateTag("categories");
     } catch (error: any) {
         console.error("Create Category Error:", error);
