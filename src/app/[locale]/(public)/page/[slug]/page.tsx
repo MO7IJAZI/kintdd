@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { getTranslations } from 'next-intl/server';
+import { stripScripts } from "@/lib/sanitizeHtml";
 
 export const revalidate = 300;
 
@@ -18,6 +19,7 @@ export default async function StaticPage({ params }: { params: Promise<{ slug: s
 
     const title = (isRtl && page.title_ar) ? page.title_ar : page.title;
     const content = (isRtl && page.content_ar) ? page.content_ar : page.content;
+    const safeContent = stripScripts(content || '');
 
     return (
         <div dir={isRtl ? 'rtl' : 'ltr'}>
@@ -42,7 +44,7 @@ export default async function StaticPage({ params }: { params: Promise<{ slug: s
                             color: 'var(--foreground)',
                             whiteSpace: 'pre-wrap'
                         }}
-                        dangerouslySetInnerHTML={{ __html: content || '' }}
+                        dangerouslySetInnerHTML={{ __html: safeContent }}
                     />
                 </div>
             </section>

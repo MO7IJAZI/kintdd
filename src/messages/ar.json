@@ -58,7 +58,8 @@
     "companyHeadquarter": "مقر الشركة",
     "exportDepartment": "قسم التصدير",
     "localRepresentatives": "الممثلون المحليون",
-    "contactForm": "نموذج الاتصال"
+    "contactForm": "نموذج الاتصال",
+    "searchPlaceholder": "بحث..."
   },
   "Product": {
     "description": "الوصف",
@@ -1144,6 +1145,7 @@
     "agentsSubtitle": "شركاء موثوقون يمثلون KINT في جميع أنحاء العالم."
   },
   "ProductsPage": {
+    "ourSolutions": "حلولنا",
     "title": "حلولنا",
     "subtitle": "اختر قطاع إنتاج لعرض المنتجات المتخصصة والأدلة الفنية.",
     "agriTitle": "الإنتاج النباتي",

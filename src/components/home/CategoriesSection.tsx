@@ -43,7 +43,7 @@ export default function CategoriesSection() {
           }}>
             <div style={{ position: 'relative', height: '400px' }}>
               <Image 
-                src="/images/plant_production.webp" 
+                src="/images/about/plant_production.webp" 
                 alt={tHomeNew('prodPlant')} 
                 fill 
                 style={{ objectFit: 'cover' }} 

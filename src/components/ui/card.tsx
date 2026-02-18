@@ -10,7 +10,7 @@ export function Card({ className, children, ...props }: CardProps) {
             backgroundColor: 'white',
             borderRadius: '1rem',
             boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-            border: '1px solid #f1f5f9',
+            border: '1px solid var(--border)',
             overflow: 'hidden',
         }} className={className} {...props}>
             {children}
@@ -20,7 +20,7 @@ export function Card({ className, children, ...props }: CardProps) {
 
 export function CardHeader({ children, className, ...props }: CardProps) {
     return (
-        <div style={{ padding: '1.5rem', borderBottom: '1px solid #f1f5f9' }} className={className} {...props}>
+        <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border)' }} className={className} {...props}>
             {children}
         </div>
     );
@@ -28,7 +28,7 @@ export function CardHeader({ children, className, ...props }: CardProps) {
 
 export function CardTitle({ children, className, ...props }: CardTitleProps) {
     return (
-        <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: '#1e293b', margin: 0 }} className={className} {...props}>
+        <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--secondary)', margin: 0 }} className={className} {...props}>
             {children}
         </h3>
     );

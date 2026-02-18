@@ -4,20 +4,20 @@
 
 :root {
   /* Brand Colors - Premium Agricultural Identity */
-  --primary: #10b981;      /* Emerald 500 - Fresh, growth, nature */
-  --primary-hover: #059669; /* Emerald 600 */
-  --primary-light: #ecfdf5; /* Emerald 50 */
+  --primary: #e9496c;
+  --primary-hover: #d93e60;
+  --primary-light: #fde8ee;
   
-  --secondary: #1e293b;    /* Slate 800 - Professional, stable */
-  --secondary-light: #334155;
+  --secondary: #142346;
+  --secondary-light: #1c2f5d;
   
-  --accent: #f59e0b;       /* Amber 500 - Sun, energy, premium quality */
-  --accent-hover: #d97706;  /* Amber 600 */
+  --accent: #e9496c;
+  --accent-hover: #d93e60;
   
-  --danger: #ef4444;
-  --success: #10b981;
-  --warning: #f59e0b;
-  --info: #3b82f6;
+  --danger: #e9496c;
+  --success: #e9496c;
+  --warning: #e9496c;
+  --info: #142346;
 
   /* Neutrals */
   --background: #ffffff;

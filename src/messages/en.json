@@ -58,7 +58,8 @@
     "companyHeadquarter": "Company Headquarter",
     "exportDepartment": "Export Department",
     "localRepresentatives": "Local Representatives",
-    "contactForm": "Contact Form"
+    "contactForm": "Contact Form",
+    "searchPlaceholder": "Search..."
   },
   "Product": {
     "description": "Description",
@@ -1200,6 +1201,7 @@
     "agentsSubtitle": "Trusted partners representing KINT worldwide."
   },
   "ProductsPage": {
+    "ourSolutions": "Our Solutions",
     "title": "Our Solutions",
     "subtitle": "Select a production sector to view specialized products and technical guides.",
     "agriTitle": "Plant Production",

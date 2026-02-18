@@ -25,21 +25,21 @@ export function Button({ className, variant = 'primary', size = 'md', children, 
 
     const variants: Record<ButtonVariant, React.CSSProperties> = {
         primary: {
-            backgroundColor: '#e9496c', // coral red
+            backgroundColor: 'var(--primary)',
             color: 'white',
         },
         secondary: {
-            backgroundColor: '#f1f5f9', // slate-100
-            color: '#1e293b', // slate-800
+            backgroundColor: 'var(--input)',
+            color: 'var(--secondary)',
         },
         outline: {
             backgroundColor: 'transparent',
-            border: '2px solid #e2e8f0', // slate-200
-            color: '#1e293b',
+            border: '2px solid var(--border)',
+            color: 'var(--secondary)',
         },
         ghost: {
             backgroundColor: 'transparent',
-            color: '#1e293b',
+            color: 'var(--secondary)',
         }
     };
 

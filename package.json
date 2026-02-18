@@ -13,7 +13,8 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --webpack",
+    "dev:turbo": "next dev --turbo",
     "build": "node scripts/fix-permissions.js && prisma generate && prisma migrate deploy && prisma db seed && cross-env NODE_OPTIONS=--max-old-space-size=4096 NEXT_IGNORE_ESLINT=1 NEXT_IGNORE_TYPE_CHECKS=1 next build && node scripts/post-build.js",
     "start": "node server.js",
     "lint": "eslint .",

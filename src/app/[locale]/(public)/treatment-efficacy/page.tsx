@@ -12,10 +12,10 @@ export default async function TreatmentEfficacyPage() {
     const isRtl = locale === 'ar';
 
     const features = [
-        { key: "yield", icon: <Sprout size={24} color="#e9496c" /> },
-        { key: "waste", icon: <CheckCircle2 size={24} color="#e9496c" /> },
-        { key: "cost", icon: <FlaskConical size={24} color="#e9496c" /> },
-        { key: "environment", icon: <Sun size={24} color="#e9496c" /> }
+        { key: "yield", icon: <Sprout size={24} color="var(--primary)" /> },
+        { key: "waste", icon: <CheckCircle2 size={24} color="var(--primary)" /> },
+        { key: "cost", icon: <FlaskConical size={24} color="var(--primary)" /> },
+        { key: "environment", icon: <Sun size={24} color="var(--primary)" /> }
     ];
 
     return (
@@ -29,7 +29,7 @@ export default async function TreatmentEfficacyPage() {
                 alignItems: 'center',
                 justifyContent: 'center',
                 overflow: 'hidden',
-                backgroundColor: '#064e3b'
+                backgroundColor: 'var(--secondary)'
             }}>
                 <div style={{ position: 'absolute', inset: 0, opacity: 0.6 }}>
                     <Image
@@ -53,7 +53,7 @@ export default async function TreatmentEfficacyPage() {
                         border: '1px solid rgba(255,255,255,0.2)',
                         marginBottom: '1.5rem'
                     }}>
-                        <FlaskConical size={20} color="#6ee7b7" />
+                        <FlaskConical size={20} color="var(--primary-light)" />
                         <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>{t('advancedScience')}</span>
                     </div>
                     <h1 style={{ fontSize: '3rem', fontWeight: 700, marginBottom: '1.5rem', lineHeight: 1.1 }}>
@@ -77,7 +77,7 @@ export default async function TreatmentEfficacyPage() {
                 <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1rem' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'center', marginBottom: '5rem' }}>
                         <div>
-                            <h2 style={{ fontSize: '2.25rem', fontWeight: 700, color: '#1e293b', marginBottom: '1.5rem' }}>
+                            <h2 style={{ fontSize: '2.25rem', fontWeight: 700, color: 'var(--secondary)', marginBottom: '1.5rem' }}>
                                 {t('whyMatters')}
                             </h2>
                             <div style={{ color: '#475569', fontSize: '1.125rem', lineHeight: 1.7, marginBottom: '2rem' }}>
@@ -92,10 +92,10 @@ export default async function TreatmentEfficacyPage() {
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1.5rem' }}>
                                 {features.map((item) => (
                                     <div key={item.key} className="feature-card" style={{ padding: '1.5rem' }}>
-                                        <div className="feature-icon-wrapper" style={{ backgroundColor: '#fce4e9', marginBottom: '1rem', width: '48px', height: '48px' }}>
+                                        <div className="feature-icon-wrapper" style={{ backgroundColor: 'var(--primary-light)', marginBottom: '1rem', width: '48px', height: '48px' }}>
                                             {item.icon}
                                         </div>
-                                        <h4 style={{ fontWeight: 700, color: '#1e293b' }}>{t(`features.${item.key}`)}</h4>
+                                        <h4 style={{ fontWeight: 700, color: 'var(--secondary)' }}>{t(`features.${item.key}`)}</h4>
                                     </div>
                                 ))}
                             </div>
@@ -111,7 +111,7 @@ export default async function TreatmentEfficacyPage() {
                                 <Sprout size={80} color="#cbd5e1" />
                             </div>
                             <Image
-                                src="/images/banners/field-check.jpg"
+                                src="/images/banners/laboratory-research.jpg"
                                 alt="Agronomist checking efficacy in field"
                                 fill
                                 style={{ objectFit: 'cover' }}
@@ -131,7 +131,7 @@ export default async function TreatmentEfficacyPage() {
                                         style={{ objectFit: 'cover' }}
                                     />
                                     <div style={{ position: 'absolute', top: '1rem', right: '1rem', backgroundColor: 'rgba(255,255,255,0.9)', padding: '0.5rem', borderRadius: '50%' }}>
-                                        <Sun size={24} color="#065f46" />
+                                        <Sun size={24} color="var(--primary)" />
                                     </div>
                                 </div>
                                 <CardHeader>
@@ -141,7 +141,7 @@ export default async function TreatmentEfficacyPage() {
                                     <p style={{ color: '#475569', marginBottom: '1rem' }}>
                                         {t('cards.optimum.desc')}
                                     </p>
-                                    <div style={{ display: 'flex', alignItems: 'center', color: '#e9496c', fontWeight: 500 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', color: 'var(--primary)', fontWeight: 500 }}>
                                         {t('cards.optimum.read')} <ArrowRight size={16} style={{ marginLeft: '0.25rem' }} />
                                     </div>
                                 </CardContent>

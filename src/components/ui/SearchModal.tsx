@@ -139,7 +139,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                     position: absolute;
                     right: ${isAr ? 'unset' : '1rem'};
                     left: ${isAr ? '1rem' : 'unset'};
-                    color: #e9496c;
+                    color: var(--primary);
                     animation: spin 1s linear infinite;
                 }
 
@@ -157,12 +157,12 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                 }
 
                 .search-input:focus {
-                    border-color: #e9496c;
+                    border-color: var(--primary);
                     box-shadow: 0 0 0 4px rgba(233, 73, 108, 0.1);
                 }
 
                 .search-submit-btn {
-                    background: #e9496c;
+                    background: var(--primary);
                     color: white;
                     border: none;
                     padding: 1rem;
@@ -174,7 +174,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                 }
 
                 .search-submit-btn:hover:not(:disabled) {
-                    background: #d63d5c;
+                    background: var(--primary-hover);
                     transform: translateY(-2px);
                     box-shadow: 0 4px 12px rgba(233, 73, 108, 0.3);
                 }

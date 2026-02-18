@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { useLocale } from 'next-intl';
+import { stripScripts } from '@/lib/sanitizeHtml';
 
 interface Section {
     id: string;
@@ -50,6 +51,7 @@ export default function DynamicSectionsRenderer({ sections, isRtl }: DynamicSect
                     {sections.map((section) => {
                         const title = locale === 'ar' && section.title_ar ? section.title_ar : section.title;
                         const content = locale === 'ar' && section.content_ar ? section.content_ar : section.content;
+                        const safeContent = stripScripts(content);
                         const themeKey = (section.colorTheme || 'blue') as keyof typeof colorThemes;
                         const theme = colorThemes[themeKey] || colorThemes.blue;
                         const isExpanded = expandedId === section.id;
@@ -79,7 +81,7 @@ export default function DynamicSectionsRenderer({ sections, isRtl }: DynamicSect
                                         alignItems: 'center',
                                         justifyContent: 'space-between',
                                         transition: 'all 0.4s ease',
-                                        color: isExpanded ? 'white' : '#1e293b'
+                                        color: isExpanded ? 'white' : 'var(--secondary)'
                                     }}
                                     aria-expanded={isExpanded}
                                 >
@@ -132,14 +134,14 @@ export default function DynamicSectionsRenderer({ sections, isRtl }: DynamicSect
                                                 color: '#334155'
                                             }}
                                             dangerouslySetInnerHTML={{
-                                                __html: content
+                                                __html: safeContent
                                                     .replace(/<p>/g, '<p style="margin-bottom: 1.5rem;">')
                                                     .replace(/<ul>/g, '<ul style="margin: 1.5rem 0; padding-left: 2rem; list-style-type: disc;">')
                                                     .replace(/<ol>/g, '<ol style="margin: 1.5rem 0; padding-left: 2rem; list-style-type: decimal;">')
                                                     .replace(/<li>/g, '<li style="margin-bottom: 0.75rem; padding-left: 0.5rem;">')
                                                     .replace(/<table>/g, '<div style="overflow-x: auto; margin: 2rem 0;"><table style="width: 100%; border-collapse: collapse; background: white; border-radius: 1rem; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">')
                                                     .replace(/<\/table>/g, '</table></div>')
-                                                    .replace(/<th>/g, '<th style="padding: 1.25rem; background-color: #f8fafc; text-align: left; border: 1px solid #e2e8f0; font-weight: 800; color: #1e293b; text-transform: uppercase; font-size: 0.85rem;">')
+                                                    .replace(/<th>/g, '<th style="padding: 1.25rem; background-color: #f8fafc; text-align: left; border: 1px solid #e2e8f0; font-weight: 800; color: var(--secondary); text-transform: uppercase; font-size: 0.85rem;">')
                                                     .replace(/<td>/g, '<td style="padding: 1.25rem; border: 1px solid #e2e8f0; color: #475569;">')
                                             }}
                                         />

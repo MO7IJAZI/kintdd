@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma";
 import Tabs from "@/components/ui/Tabs";
 import DynamicSectionsRenderer from "@/components/DynamicSectionsRenderer";
 import { generateProductSchema, createProductMetadata } from "@/lib/seoUtils";
+import { stripScripts } from "@/lib/sanitizeHtml";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -121,6 +122,9 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     const usageTable = (isAr && product.usageTable_ar) ? product.usageTable_ar : product.usageTable;
     const productTabs = (isAr && product.tabs_ar) ? product.tabs_ar : product.tabs;
     const categoryName = (isAr && product.category?.name_ar) ? product.category?.name_ar : product.category?.name;
+    const safeDescription = stripScripts(description || "");
+    const safeBenefits = stripScripts(benefits || "");
+    const safeUsage = stripScripts(usage || "");
 
     // Fetch related products (same category, excluding current)
     const relatedProductsRaw = product.categoryId ? await prisma.product.findMany({
@@ -238,12 +242,12 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                                         alignItems: 'center',
                                         gap: '0.5rem',
                                         padding: '0.75rem 1.5rem',
-                                        backgroundColor: '#ecfdf5',
-                                        color: '#059669',
+                                        backgroundColor: 'var(--primary-light)',
+                                        color: 'var(--primary-hover)',
                                         borderRadius: '50px',
                                         fontWeight: 700,
                                         fontSize: '0.9rem',
-                                        border: '1px solid #10b981'
+                                        border: '1px solid var(--primary)'
                                     }}>
                                         <span style={{ fontSize: '1.2rem' }}>🌿</span> {t('certifiedOrganic').toUpperCase()}
                                     </div>
@@ -289,8 +293,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                                     </h2>
                                     <div 
                                         className="prose prose-lg" 
-                                        style={{ color: '#334155', lineHeight: 1.8, fontSize: '1.1rem' }}
-                                        dangerouslySetInnerHTML={{ __html: description }}
+                                        style={{ color: 'var(--secondary-light)', lineHeight: 1.8, fontSize: '1.1rem' }}
+                                        dangerouslySetInnerHTML={{ __html: safeDescription }}
                                     />
                                 </div>
                             )}
@@ -303,8 +307,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                                     </h2>
                                     <div 
                                         className="prose prose-lg" 
-                                        style={{ color: '#334155', lineHeight: 1.8, fontSize: '1.1rem' }}
-                                        dangerouslySetInnerHTML={{ __html: benefits }}
+                                        style={{ color: 'var(--secondary-light)', lineHeight: 1.8, fontSize: '1.1rem' }}
+                                        dangerouslySetInnerHTML={{ __html: safeBenefits }}
                                     />
                                 </div>
                             )}
@@ -317,8 +321,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                                     </h2>
                                     <div 
                                         className="prose prose-lg" 
-                                        style={{ color: '#334155', lineHeight: 1.8, fontSize: '1.1rem' }}
-                                        dangerouslySetInnerHTML={{ __html: usage }}
+                                        style={{ color: 'var(--secondary-light)', lineHeight: 1.8, fontSize: '1.1rem' }}
+                                        dangerouslySetInnerHTML={{ __html: safeUsage }}
                                     />
                                 </div>
                             )}
@@ -352,7 +356,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                                                     backgroundColor: '#f8fafc',
                                                     borderRadius: '1rem',
                                                     textDecoration: 'none',
-                                                    color: '#334155',
+                                                    color: 'var(--secondary-light)',
                                                     fontWeight: 700,
                                                     fontSize: '0.9rem',
                                                     transition: 'all 0.2s ease',
@@ -413,7 +417,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                                                     <tbody>
                                                         {(table.data as CompositionRow[]).map((row, i) => (
                                                             <tr key={i} style={{ borderBottom: '1px solid #f1f5f9', transition: 'background-color 0.2s' }} className="hover:bg-slate-50">
-                                                                <td style={{ padding: '1.5rem 3rem', fontWeight: 700, color: '#1e293b' }}>{row.name}</td>
+                                                                <td style={{ padding: '1.5rem 3rem', fontWeight: 700, color: 'var(--secondary)' }}>{row.name}</td>
                                                                 <td style={{ padding: '1.5rem 3rem', color: 'var(--primary)', fontWeight: 800 }}>{row.value}</td>
                                                             </tr>
                                                         ))}
@@ -431,7 +435,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                                                     <tbody>
                                                         {(table.data as UsageRow[]).map((row, i) => (
                                                             <tr key={i} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                                                                <td style={{ padding: '1.5rem 3rem', fontWeight: 800, color: '#1e293b' }}>{row.crop}</td>
+                                                                <td style={{ padding: '1.5rem 3rem', fontWeight: 800, color: 'var(--secondary)' }}>{row.crop}</td>
                                                                 <td style={{ padding: '1.5rem 3rem', color: '#64748b', fontWeight: 500 }}>{row.stage}</td>
                                                                 <td style={{ padding: '1.5rem 3rem', color: 'var(--primary)', fontWeight: 800 }}>{row.dosage}</td>
                                                             </tr>
@@ -503,7 +507,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                                         }}>
                                             {related.categoryName || 'Product'}
                                         </span>
-                                        <h3 style={{ marginBottom: '0.75rem', fontSize: '1.25rem', fontWeight: '700', color: '#1e293b' }}>{related.name}</h3>
+                                        <h3 style={{ marginBottom: '0.75rem', fontSize: '1.25rem', fontWeight: '700', color: 'var(--secondary)' }}>{related.name}</h3>
                                         <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: '1.6', marginBottom: '1.5rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                                             {related.shortDesc || (related.description ? related.description.replace(/<[^>]*>?/gm, '').substring(0, 100) + "..." : "Learn more about this product.")}
                                         </p>

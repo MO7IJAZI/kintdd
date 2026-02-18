@@ -11,6 +11,12 @@ export default async function ProductsPage() {
     const t = await getTranslations('ProductsPage');
     const tHomeNew = await getTranslations('HomeNew');
     const isAr = locale === 'ar';
+    let ourSolutionsLabel = "Our Solutions";
+    try {
+        ourSolutionsLabel = t('ourSolutions');
+    } catch {
+        ourSolutionsLabel = "Our Solutions";
+    }
 
     // Fetch only active parent categories
     let categories: any[] = [];
@@ -38,7 +44,7 @@ export default async function ProductsPage() {
             {/* Hero Section */}
             <section style={{ 
                 padding: '6rem 0',
-                background: 'linear-gradient(135deg, var(--secondary) 0%, #1e293b 100%)',
+                background: 'linear-gradient(135deg, var(--secondary) 0%, var(--secondary-light) 100%)',
                 color: 'white',
                 textAlign: 'center',
                 position: 'relative',
@@ -46,7 +52,7 @@ export default async function ProductsPage() {
             }}>
                 <div style={{ 
                     position: 'absolute', inset: 0, 
-                    backgroundImage: 'url("/images/pattern-grid.png")',
+                    backgroundImage: 'none',
                     opacity: 0.05,
                     backgroundSize: 'cover'
                 }} />
@@ -74,9 +80,9 @@ export default async function ProductsPage() {
                         fontWeight: 600,
                         marginBottom: '1.5rem',
                         border: '1px solid rgba(255,255,255,0.2)',
-                        color: '#e9496c'
+                        color: 'var(--primary)'
                     }}>
-                        {t('ourSolutions') || "Our Solutions"}
+                        {ourSolutionsLabel}
                     </span>
                     <h1 style={{ 
                         fontSize: 'clamp(2.5rem, 5vw, 4rem)', 
@@ -263,7 +269,7 @@ export default async function ProductsPage() {
                 }
 
                 .category-card:hover .card-title {
-                    color: #e9496c;
+                    color: var(--primary);
                 }
 
                 .card-desc {
@@ -277,7 +283,7 @@ export default async function ProductsPage() {
                 .card-link {
                     font-size: 0.9rem;
                     font-weight: 600;
-                    color: #e9496c;
+                    color: var(--primary);
                     text-transform: uppercase;
                     letter-spacing: 0.05em;
                     display: inline-flex;

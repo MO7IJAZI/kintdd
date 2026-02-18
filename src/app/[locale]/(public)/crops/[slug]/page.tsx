@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
+import { stripScripts } from "@/lib/sanitizeHtml";
 
 export const revalidate = 300;
 
@@ -76,6 +77,7 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
     // Localized fields
     const name = (isRtl && crop.name_ar) ? crop.name_ar : crop.name;
     const description = (isRtl && crop.description_ar) ? crop.description_ar : (crop.description || 'Detailed technical information is currently being updated.');
+    const safeDescription = stripScripts(description);
 
     return (
         <div style={{ backgroundColor: '#fdfdfd', minHeight: '100vh' }} dir={isRtl ? 'rtl' : 'ltr'}>
@@ -130,16 +132,16 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
                                     style={{
                                         fontSize: '1.2rem',
                                         lineHeight: '1.9',
-                                        color: '#334155',
+                                        color: 'var(--secondary-light)',
                                         [isRtl ? 'paddingRight' : 'paddingLeft']: '2.5rem',
                                         [isRtl ? 'borderRight' : 'borderLeft']: '4px solid var(--primary)',
-                                        backgroundColor: 'rgba(26, 92, 55, 0.02)',
+                                        backgroundColor: 'rgba(233, 73, 108, 0.03)',
                                         paddingTop: '2rem',
                                         paddingBottom: '2rem',
                                         [isRtl ? 'paddingLeft' : 'paddingRight']: '1rem',
                                         borderRadius: isRtl ? '1rem 0 0 1rem' : '0 1rem 1rem 0'
                                     }}
-                                    dangerouslySetInnerHTML={{ __html: description }}
+                                    dangerouslySetInnerHTML={{ __html: safeDescription }}
                                 />
                             </div>
 
@@ -200,6 +202,7 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
                                     {crop.stages.map((stage) => {
                                         const stageName = (isRtl && stage.name_ar) ? stage.name_ar : stage.name;
                                         const stageDesc = (isRtl && stage.description_ar) ? stage.description_ar : (stage.description || t('defaultStageDescription', { name }));
+                                        const safeStageDesc = stripScripts(stageDesc);
                                         
                                         return (
                                             <div key={stage.id} className="card" style={{
@@ -223,7 +226,7 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
                                                 )}
 
                                                 <div style={{ padding: '2rem', backgroundColor: 'white' }}>
-                                                    <div style={{ color: '#666', fontSize: '0.95rem', lineHeight: '1.7' }} dangerouslySetInnerHTML={{ __html: stageDesc }} />
+                                                    <div style={{ color: '#666', fontSize: '0.95rem', lineHeight: '1.7' }} dangerouslySetInnerHTML={{ __html: safeStageDesc }} />
                                                     
                                                     {/* In a real app, recommendations would be many-to-many here too */}
                                                     <div style={{ marginTop: '1.5rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>

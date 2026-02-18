@@ -6,6 +6,7 @@ import { ChevronRight, ChevronLeft } from "lucide-react";
 import parse from 'html-react-parser';
 import ArticleStyles from "./ArticleStyles";
 import { getTranslations } from 'next-intl/server';
+import { stripScripts } from "@/lib/sanitizeHtml";
 
 export const revalidate = 300;
 
@@ -33,6 +34,7 @@ export default async function ExpertArticlePage({ params }: { params: Promise<{ 
     const title = (isRtl && article.title_ar) ? article.title_ar : article.title;
     const content = (isRtl && article.content_ar) ? article.content_ar : article.content;
     const processedContent = preprocessContent(content || "");
+    const safeContent = stripScripts(processedContent);
 
     return (
         <div style={{ minHeight: '100vh', backgroundColor: '#fff' }} dir={isRtl ? 'rtl' : 'ltr'}>
@@ -127,7 +129,7 @@ export default async function ExpertArticlePage({ params }: { params: Promise<{ 
                                 className="ql-editor blog-content"
                                 dir="auto"
                             >
-                                {parse(processedContent)}
+                                {parse(safeContent)}
                             </div>
                         </div>
                     </div>

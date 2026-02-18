@@ -12,7 +12,7 @@ export default async function PublicLayout({
     return (
         <>
             <Header productCategories={productCategories} />
-            <main style={{ minHeight: 'calc(100vh - 350px)', paddingTop: '80px' }}>
+            <main style={{ minHeight: 'calc(100vh - 350px)' }}>
                 {children}
             </main>
             <Footer />

@@ -42,7 +42,7 @@ export default function WhyUsSection() {
             </ul>
           </div>
           <div className="home-why-image" style={{ position: 'relative', height: '600px', borderRadius: '2rem', overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,0.1)' }}>
-            <Image src="/images/banners/field-check.jpg" alt="Why Us" fill style={{ objectFit: 'cover' }} />
+            <Image src="/images/banners/laboratory-research.jpg" alt="Why Us" fill style={{ objectFit: 'cover' }} />
           </div>
         </div>
       </div>

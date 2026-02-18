@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from 'next-intl/server';
+import { stripScripts } from "@/lib/sanitizeHtml";
 
 export const revalidate = 300;
 
@@ -23,6 +24,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     const title = (isRtl && post.title_ar) ? post.title_ar : post.title;
     // @ts-ignore
     const content = (isRtl && post.content_ar) ? post.content_ar : post.content;
+    const safeContent = stripScripts(content || "");
 
     return (
         <article className="section" dir={isRtl ? 'rtl' : 'ltr'}>
@@ -56,7 +58,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     fontSize: '1.2rem',
                     lineHeight: '1.8',
                     color: 'var(--foreground)',
-                }} className="blog-content" dangerouslySetInnerHTML={{ __html: content }} />
+                }} className="blog-content" dangerouslySetInnerHTML={{ __html: safeContent }} />
 
                 {post.tags && (() => {
                     try {

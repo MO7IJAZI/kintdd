@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Link, usePathname, useRouter } from "@/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import styles from "./Header.module.css";
 import {
   Award,
   BookOpen,
@@ -184,25 +185,29 @@ export default function Header({ productCategories }: HeaderProps) {
         className={[
           "sticky top-0 z-[1000] border-b transition-colors duration-200",
           isScrolled ? "bg-white/85 backdrop-blur-xl border-slate-200/60" : "bg-white border-transparent",
+          styles.header,
+          styles.bar,
+          isScrolled ? styles.barScrolled : "",
+          isScrolled ? styles.headerScrolled : "",
         ].join(" ")}
       >
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-3 sm:py-4">
-            <div className="flex items-center gap-3">
-              <Link href="/" className="flex items-center gap-3 group">
-                <div className="relative h-10 w-28 sm:h-11 sm:w-32">
+        <div className={["mx-auto max-w-7xl px-4 sm:px-6 lg:px-8", styles.container].join(" ")}>
+          <div className={["flex items-center justify-between py-3 sm:py-4", styles.row].join(" ")}>
+            <div className={["flex items-center gap-3", styles.brand].join(" ")}>
+              <Link href="/" className={["group", styles.logoLink].join(" ")}>
+                <div className={[styles.logoWrap, isScrolled ? styles.logoWrapScrolled : ""].join(" ")}>
                   <Image
                     src="/images/logo.png"
                     alt="KINT Logo"
                     fill
                     priority
-                    className="object-contain transition-transform duration-300 group-hover:scale-[1.02]"
+                    className={styles.logoImg}
                   />
                 </div>
               </Link>
             </div>
 
-            <nav className="hidden xl:flex items-center gap-1">
+            <nav className={["hidden xl:flex items-center gap-1", styles.navDesktop].join(" ")}>
               {navItems.map((item) => {
                 const open = activeDropdown === item.name;
                 const hasDropdown = !!item.subItems?.length;
@@ -223,6 +228,8 @@ export default function Header({ productCategories }: HeaderProps) {
                       className={[
                         "group flex items-center gap-2 px-3 py-2 rounded-full text-sm font-semibold transition-all duration-200",
                         active ? "text-primary bg-primary/8" : "text-slate-700 hover:text-primary hover:bg-slate-100/70",
+                        styles.navLink,
+                        active ? styles.navLinkActive : "",
                       ].join(" ")}
                       aria-haspopup={hasDropdown ? "menu" : undefined}
                       aria-expanded={hasDropdown ? open : undefined}
@@ -246,11 +253,12 @@ export default function Header({ productCategories }: HeaderProps) {
                           isRtl ? "right-0" : "left-0",
                           "transition-all duration-200 origin-top",
                           open ? "opacity-100 visible translate-y-0" : "opacity-0 invisible -translate-y-2 pointer-events-none",
+                          open ? styles.dropdownOpen : "",
                         ].join(" ")}
                       >
-                        <div className="rounded-2xl border border-slate-200/60 bg-white shadow-xl ring-1 ring-slate-900/5 overflow-hidden">
-                          <div className="max-h-[70vh] overflow-auto p-2">
-                            <div className={["grid gap-1", gridCols].join(" ")}>
+                        <div className={["rounded-2xl border border-slate-200/60 bg-white shadow-xl ring-1 ring-slate-900/5 overflow-hidden", styles.dropdownPanel].join(" ")}>
+                          <div className={["max-h-[70vh] overflow-auto p-2", styles.dropdownScroller].join(" ")}>
+                            <div className={["grid gap-1", gridCols, styles.dropdownGrid].join(" ")}>
                               {item.subItems!.map((sub) => {
                                 const nestedOpen = activeNestedDropdown === sub.name;
                                 const hasNested = !!sub.subItems?.length;
@@ -264,17 +272,20 @@ export default function Header({ productCategories }: HeaderProps) {
                                   >
                                     <Link
                                       href={sub.href}
-                                      className="group flex items-start gap-3 rounded-xl p-3 transition-colors hover:bg-slate-100/70"
+                                      className={[
+                                        "group flex items-start gap-3 rounded-xl p-3 transition-colors hover:bg-slate-100/70",
+                                        styles.dropdownItem,
+                                      ].join(" ")}
                                     >
-                                      <span className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-500 transition-all group-hover:bg-primary group-hover:text-white">
+                                      <span className={["mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-500 transition-all group-hover:bg-primary group-hover:text-white", styles.dropdownIcon].join(" ")}>
                                         {sub.icon || <ChevronRight size={18} />}
                                       </span>
                                       <span className="min-w-0 flex-1">
-                                        <span className="block text-sm font-bold text-slate-800 group-hover:text-primary">
+                                        <span className={["block text-sm font-bold text-slate-800 group-hover:text-primary", styles.dropdownTitle].join(" ")}>
                                           {sub.name}
                                         </span>
                                         {sub.description && (
-                                          <span className="mt-0.5 block text-xs text-slate-500 line-clamp-2">
+                                          <span className={["mt-0.5 block text-xs text-slate-500 line-clamp-2", styles.dropdownDesc].join(" ")}>
                                             {sub.description}
                                           </span>
                                         )}
@@ -299,17 +310,23 @@ export default function Header({ productCategories }: HeaderProps) {
                                           "transition-all duration-200",
                                           nestedOpen ? "opacity-100 visible translate-x-0" : "opacity-0 invisible pointer-events-none",
                                           isRtl ? "translate-x-2" : "-translate-x-2",
+                                          nestedOpen ? styles.nestedOpen : "",
                                         ].join(" ")}
                                       >
-                                        {sub.subItems!.map((nested) => (
+                                        <div className={styles.nestedPanel}>
+                                          {sub.subItems!.map((nested) => (
                                           <Link
                                             key={nested.name}
                                             href={nested.href}
-                                            className="block rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100/70 hover:text-primary"
+                                            className={[
+                                              "block rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100/70 hover:text-primary",
+                                              styles.nestedLink,
+                                            ].join(" ")}
                                           >
                                             {nested.name}
                                           </Link>
                                         ))}
+                                        </div>
                                       </div>
                                     )}
                                   </div>
@@ -325,22 +342,26 @@ export default function Header({ productCategories }: HeaderProps) {
               })}
             </nav>
 
-            <div className="flex items-center gap-2 sm:gap-3">
+            <div className={["flex items-center gap-2 sm:gap-3", styles.actions].join(" ")}>
               <button
                 type="button"
-                className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white/70 p-2 text-slate-700 shadow-sm transition-all hover:bg-slate-50 hover:text-primary"
+                className={[
+                  "inline-flex items-center justify-center rounded-full border border-slate-200 bg-white/70 p-2 text-slate-700 shadow-sm transition-all hover:bg-slate-50 hover:text-primary",
+                  styles.iconBtn,
+                ].join(" ")}
                 onClick={() => setIsSearchOpen(true)}
                 aria-label="Search"
               >
                 <Search size={18} strokeWidth={2.5} />
               </button>
 
-              <div className="hidden sm:flex items-center rounded-full border border-slate-200 bg-white/70 p-1 shadow-sm">
+              <div className={["hidden sm:flex items-center rounded-full border border-slate-200 bg-white/70 p-1 shadow-sm", styles.langSwitch].join(" ")}>
                 <button
                   type="button"
                   className={[
                     "px-3 py-1 rounded-full text-xs font-extrabold transition-all",
-                    locale === "en" ? "bg-primary text-white shadow-sm" : "text-slate-600 hover:text-slate-900",
+                    styles.langBtn,
+                    locale === "en" ? styles.langBtnActive : styles.langBtnInactive,
                   ].join(" ")}
                   onClick={() => switchLocale("en")}
                 >
@@ -350,7 +371,8 @@ export default function Header({ productCategories }: HeaderProps) {
                   type="button"
                   className={[
                     "px-3 py-1 rounded-full text-xs font-extrabold transition-all",
-                    locale === "ar" ? "bg-primary text-white shadow-sm" : "text-slate-600 hover:text-slate-900",
+                    styles.langBtn,
+                    locale === "ar" ? styles.langBtnActive : styles.langBtnInactive,
                   ].join(" ")}
                   onClick={() => switchLocale("ar")}
                 >
@@ -358,17 +380,12 @@ export default function Header({ productCategories }: HeaderProps) {
                 </button>
               </div>
 
-              <Link
-                href="/contact"
-                className="hidden lg:inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-extrabold text-white shadow-lg shadow-primary/25 transition-all hover:-translate-y-0.5 hover:bg-primary-dark hover:shadow-primary/40"
-              >
-                <span>{t("contact")}</span>
-                <ChevronRight size={16} className={isRtl ? "rotate-180" : ""} />
-              </Link>
-
               <button
                 type="button"
-                className="xl:hidden inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white/70 p-2.5 text-slate-800 shadow-sm transition-all hover:bg-slate-50"
+                className={[
+                  "xl:hidden inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white/70 p-2.5 text-slate-800 shadow-sm transition-all hover:bg-slate-50",
+                  styles.burger,
+                ].join(" ")}
                 onClick={() => setMobileMenuOpen(true)}
                 aria-label="Menu"
               >
@@ -383,6 +400,9 @@ export default function Header({ productCategories }: HeaderProps) {
         className={[
           "fixed inset-0 z-[1001] bg-slate-900/50 backdrop-blur-sm transition-opacity duration-200 xl:hidden",
           mobileMenuOpen ? "opacity-100 visible" : "opacity-0 invisible",
+          styles.mobileOverlay,
+          mobileMenuOpen ? styles.mobileOverlayVisible : "",
+          mobileMenuOpen ? styles.mobileOverlayOpen : "",
         ].join(" ")}
         onClick={() => setMobileMenuOpen(false)}
       />
@@ -392,14 +412,17 @@ export default function Header({ productCategories }: HeaderProps) {
           "fixed inset-y-0 z-[1002] w-[320px] sm:w-[380px] bg-white shadow-2xl transition-transform duration-200 ease-out xl:hidden flex flex-col",
           isRtl ? "left-0" : "right-0",
           mobileMenuOpen ? "translate-x-0" : isRtl ? "-translate-x-full" : "translate-x-full",
+          styles.mobileDrawer,
+          mobileMenuOpen ? styles.mobileDrawerOpenState : "",
+          mobileMenuOpen ? styles.mobileDrawerOpen : "",
         ].join(" ")}
         role="dialog"
         aria-modal="true"
       >
         <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
           <div className="flex items-center gap-3">
-            <div className="relative h-9 w-28">
-              <Image src="/images/logo.png" alt="KINT Logo" fill className="object-contain" />
+            <div className={styles.mobileLogoWrap}>
+              <Image src="/images/logo.png" alt="KINT Logo" fill className={styles.mobileLogoImg} />
             </div>
           </div>
           <button
@@ -412,10 +435,13 @@ export default function Header({ productCategories }: HeaderProps) {
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5 py-5">
+        <div className={["flex-1 overflow-y-auto px-5 py-5", styles.mobileBody].join(" ")}>
           <button
             type="button"
-            className="w-full flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:border-primary/30"
+            className={[
+              "w-full flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 transition-colors hover:border-primary/30",
+              styles.mobileSearchBtn,
+            ].join(" ")}
             onClick={() => {
               setMobileMenuOpen(false);
               setIsSearchOpen(true);
@@ -425,7 +451,7 @@ export default function Header({ productCategories }: HeaderProps) {
             <span>{t("searchPlaceholder") || "Search..."}</span>
           </button>
 
-          <div className="mt-5 space-y-2">
+          <div className={["mt-5 space-y-2", styles.mobileList].join(" ")}>
             {navItems.map((item) => {
               const hasDropdown = !!item.subItems?.length;
               const expanded = !!mobileExpanded[item.name];
@@ -435,7 +461,11 @@ export default function Header({ productCategories }: HeaderProps) {
                   <Link
                     key={item.name}
                     href={item.href}
-                    className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-extrabold text-slate-800 transition-colors hover:bg-slate-50"
+                    className={[
+                      "flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-extrabold text-slate-800 transition-colors hover:bg-slate-50",
+                      styles.mobileCard,
+                      styles.mobileLink,
+                    ].join(" ")}
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     <span className="flex items-center gap-3">
@@ -448,8 +478,8 @@ export default function Header({ productCategories }: HeaderProps) {
               }
 
               return (
-                <div key={item.name} className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
-                  <div className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-slate-50">
+                <div key={item.name} className={["rounded-2xl border border-slate-200 bg-white overflow-hidden", styles.mobileCard].join(" ")}>
+                  <div className={["flex items-center justify-between px-4 py-3 transition-colors hover:bg-slate-50", styles.mobileGroupHeader].join(" ")}>
                     <Link
                       href={item.href}
                       className="flex min-w-0 flex-1 items-center gap-3 text-sm font-extrabold text-slate-800"
@@ -460,7 +490,10 @@ export default function Header({ productCategories }: HeaderProps) {
                     </Link>
                     <button
                       type="button"
-                      className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white/70 p-2 text-slate-700 shadow-sm transition-colors hover:bg-white"
+                      className={[
+                        "inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white/70 p-2 text-slate-700 shadow-sm transition-colors hover:bg-white",
+                        styles.mobileToggleBtn,
+                      ].join(" ")}
                       onClick={() => toggleMobileItem(item.name)}
                       aria-expanded={expanded}
                       aria-label="Toggle"
@@ -472,13 +505,16 @@ export default function Header({ productCategories }: HeaderProps) {
                     </button>
                   </div>
                   <div className={["grid transition-all duration-200", expanded ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"].join(" ")}>
-                    <div className="overflow-hidden px-3 pb-3">
-                      <div className="mt-1 space-y-1">
+                    <div className={["overflow-hidden px-3 pb-3", styles.mobileSubWrap].join(" ")}>
+                      <div className={["mt-1 space-y-1", styles.mobileSubList].join(" ")}>
                         {item.subItems!.map((sub) => (
                           <div key={sub.name}>
                             <Link
                               href={sub.href}
-                              className="flex items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 hover:text-primary"
+                              className={[
+                                "flex items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 hover:text-primary",
+                                styles.mobileSubLink,
+                              ].join(" ")}
                               onClick={() => setMobileMenuOpen(false)}
                             >
                               <span className="flex items-center gap-2">
@@ -488,12 +524,15 @@ export default function Header({ productCategories }: HeaderProps) {
                               <ChevronRight size={14} className={isRtl ? "rotate-180 text-slate-300" : "text-slate-300"} />
                             </Link>
                             {sub.subItems?.length ? (
-                              <div className={["mt-1 space-y-1", isRtl ? "pr-4" : "pl-4"].join(" ")}>
+                              <div className={["mt-1 space-y-1", isRtl ? "pr-4" : "pl-4", styles.mobileNestedList].join(" ")}>
                                 {sub.subItems.map((nested) => (
                                   <Link
                                     key={nested.name}
                                     href={nested.href}
-                                    className="block rounded-xl px-3 py-2 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50 hover:text-primary"
+                                    className={[
+                                      "block rounded-xl px-3 py-2 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50 hover:text-primary",
+                                      styles.mobileNestedLink,
+                                    ].join(" ")}
                                     onClick={() => setMobileMenuOpen(false)}
                                   >
                                     {nested.name}
@@ -513,12 +552,13 @@ export default function Header({ productCategories }: HeaderProps) {
         </div>
 
         <div className="border-t border-slate-200 bg-slate-50 px-5 py-5">
-          <div className="flex items-center rounded-2xl border border-slate-200 bg-white p-1 shadow-sm">
+          <div className={["flex items-center rounded-2xl border border-slate-200 bg-white p-1 shadow-sm", styles.mobileLangSwitch].join(" ")}>
             <button
               type="button"
               className={[
                 "flex-1 py-2 rounded-xl text-sm font-extrabold transition-all",
-                locale === "en" ? "bg-primary text-white shadow-sm" : "text-slate-700 hover:bg-slate-50",
+                styles.mobileLangBtn,
+                locale === "en" ? styles.mobileLangBtnActive : styles.mobileLangBtnInactive,
               ].join(" ")}
               onClick={() => switchLocale("en")}
             >
@@ -528,7 +568,8 @@ export default function Header({ productCategories }: HeaderProps) {
               type="button"
               className={[
                 "flex-1 py-2 rounded-xl text-sm font-extrabold transition-all",
-                locale === "ar" ? "bg-primary text-white shadow-sm" : "text-slate-700 hover:bg-slate-50",
+                styles.mobileLangBtn,
+                locale === "ar" ? styles.mobileLangBtnActive : styles.mobileLangBtnInactive,
               ].join(" ")}
               onClick={() => switchLocale("ar")}
             >
@@ -536,13 +577,6 @@ export default function Header({ productCategories }: HeaderProps) {
             </button>
           </div>
 
-          <Link
-            href="/admin"
-            className="mt-4 block w-full rounded-2xl bg-white px-4 py-3 text-center text-sm font-extrabold text-primary border border-primary/25 transition-colors hover:bg-primary hover:text-white"
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            Customer Portal
-          </Link>
         </div>
       </div>
 

@@ -4,6 +4,7 @@ import { useState } from "react";
 import JobApplicationForm from "@/components/admin/JobApplicationForm";
 import { useTranslations, useLocale } from 'next-intl';
 import { ChevronDown } from 'lucide-react';
+import { stripScripts } from '@/lib/sanitizeHtml';
 
 interface JobOffer {
     id: string;
@@ -81,6 +82,9 @@ export default function JobListClient({ initialJobs }: JobListClientProps) {
                             const responsibilities = isRtl && job.responsibilities_ar ? job.responsibilities_ar : job.responsibilities;
                             const benefits = isRtl && job.benefits_ar ? job.benefits_ar : job.benefits;
                             const qualifications = isRtl && job.qualifications_ar ? job.qualifications_ar : job.qualifications;
+                            const safeResponsibilities = responsibilities ? stripScripts(responsibilities) : responsibilities;
+                            const safeBenefits = benefits ? stripScripts(benefits) : benefits;
+                            const safeQualifications = qualifications ? stripScripts(qualifications) : qualifications;
 
                             return (
                                 <div key={job.id} className="job-item" style={{ marginBottom: '2rem', borderRadius: '0.75rem', overflow: 'hidden', backgroundColor: 'white', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e5e7eb' }}>
@@ -146,7 +150,7 @@ export default function JobListClient({ initialJobs }: JobListClientProps) {
                                                     <h4 style={{ marginBottom: '0.5rem', fontSize: '1rem', fontWeight: 600, color: '#374151' }}>
                                                         {t('responsibilities')}
                                                     </h4>
-                                                    <div style={{ fontSize: '0.95rem', color: '#6b7280', lineHeight: 1.6 }} dangerouslySetInnerHTML={{ __html: responsibilities }} />
+                                                    <div style={{ fontSize: '0.95rem', color: '#6b7280', lineHeight: 1.6 }} dangerouslySetInnerHTML={{ __html: safeResponsibilities }} />
                                                 </div>
                                             )}
 
@@ -155,7 +159,7 @@ export default function JobListClient({ initialJobs }: JobListClientProps) {
                                                     <h4 style={{ marginBottom: '0.5rem', fontSize: '1rem', fontWeight: 600, color: '#374151' }}>
                                                         {t('benefits')}
                                                     </h4>
-                                                    <div style={{ fontSize: '0.95rem', color: '#6b7280', lineHeight: 1.6 }} dangerouslySetInnerHTML={{ __html: benefits }} />
+                                                    <div style={{ fontSize: '0.95rem', color: '#6b7280', lineHeight: 1.6 }} dangerouslySetInnerHTML={{ __html: safeBenefits }} />
                                                 </div>
                                             )}
 
@@ -164,7 +168,7 @@ export default function JobListClient({ initialJobs }: JobListClientProps) {
                                                     <h4 style={{ marginBottom: '0.5rem', fontSize: '1rem', fontWeight: 600, color: '#374151' }}>
                                                         {t('qualifications')}
                                                     </h4>
-                                                    <div style={{ fontSize: '0.95rem', color: '#6b7280', lineHeight: 1.6 }} dangerouslySetInnerHTML={{ __html: qualifications }} />
+                                                    <div style={{ fontSize: '0.95rem', color: '#6b7280', lineHeight: 1.6 }} dangerouslySetInnerHTML={{ __html: safeQualifications }} />
                                                 </div>
                                             )}
 
