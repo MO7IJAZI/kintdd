@@ -129,6 +129,7 @@ export default async function ProductsPage() {
                                         key={category.id} 
                                         href={`/product-category/${category.slug}` as any}
                                         className="category-card"
+                                        style={{ ["--enter-delay" as any]: `${index * 70}ms` }}
                                     >
                                         <div className="card-image-wrapper">
                                             {category.image && category.image.trim() !== '' ? (
@@ -174,23 +175,44 @@ export default async function ProductsPage() {
             </section>
 
             <style>{`
+                @keyframes categoryCardEnter {
+                    from {
+                        opacity: 0;
+                        transform: translate3d(0, 18px, 0) scale(0.98);
+                        filter: blur(6px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translate3d(0, 0, 0) scale(1);
+                        filter: blur(0);
+                    }
+                }
+
                 .category-card {
                     display: flex;
                     flex-direction: column;
-                    background: white;
+                    background:
+                        linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.92)) padding-box,
+                        linear-gradient(135deg, rgba(233, 73, 108, 0.18), rgba(51, 65, 85, 0.12)) border-box;
                     border-radius: 20px;
                     overflow: hidden;
                     text-decoration: none;
                     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-                    border: 1px solid rgba(226, 232, 240, 0.8);
+                    border: 1px solid transparent;
                     height: 100%;
                     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+                    opacity: 0;
+                    animation: categoryCardEnter 700ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+                    animation-delay: var(--enter-delay, 0ms);
+                    will-change: transform, opacity;
                 }
 
                 .category-card:hover {
-                    transform: translateY(-8px);
-                    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
-                    border-color: rgba(233, 73, 108, 0.2);
+                    transform: translate3d(0, -10px, 0) scale(1.01);
+                    box-shadow: 0 26px 40px -18px rgba(15, 23, 42, 0.28), 0 12px 18px -12px rgba(15, 23, 42, 0.12);
+                    background:
+                        linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(248, 250, 252, 0.92)) padding-box,
+                        linear-gradient(135deg, rgba(233, 73, 108, 0.55), rgba(96, 165, 250, 0.28)) border-box;
                 }
 
                 .card-image-wrapper {
@@ -220,9 +242,15 @@ export default async function ProductsPage() {
                 .overlay {
                     position: absolute;
                     inset: 0;
-                    background: linear-gradient(to top, rgba(0,0,0,0.3) 0%, transparent 100%);
-                    opacity: 0.6;
-                    transition: opacity 0.3s;
+                    background:
+                        radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.18) 0%, transparent 55%),
+                        linear-gradient(to top, rgba(2, 6, 23, 0.45) 0%, rgba(2, 6, 23, 0) 65%);
+                    opacity: 0.7;
+                    transition: opacity 0.35s ease;
+                }
+
+                .category-card:hover .overlay {
+                    opacity: 0.85;
                 }
 
                 .card-icon {
@@ -240,7 +268,7 @@ export default async function ProductsPage() {
                     opacity: 0;
                     transform: translateY(10px);
                     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.18);
                 }
                 
                 [dir="rtl"] .card-icon {
@@ -289,6 +317,23 @@ export default async function ProductsPage() {
                     display: inline-flex;
                     align-items: center;
                     gap: 0.5rem;
+                }
+
+                @media (prefers-reduced-motion: reduce) {
+                    .category-card {
+                        animation: none;
+                        opacity: 1;
+                        transform: none;
+                        filter: none;
+                    }
+                    .category-card:hover {
+                        transform: none;
+                    }
+                    .card-image,
+                    .overlay,
+                    .card-icon {
+                        transition: none;
+                    }
                 }
             `}</style>
         </div>
