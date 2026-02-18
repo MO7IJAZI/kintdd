@@ -4,34 +4,42 @@ import prisma from "@/lib/prisma";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 
 export async function createCategory(formData: FormData) {
-    const name = formData.get("name") as string;
-    const slug = formData.get("slug") as string;
-    const description = formData.get("description") as string;
-    const parentId = formData.get("parentId") as string;
-    const image = formData.get("image") as string;
+    try {
+        const name = formData.get("name") as string;
+        const slug = formData.get("slug") as string;
+        const description = formData.get("description") as string;
+        const parentId = formData.get("parentId") as string;
+        const image = formData.get("image") as string;
+        
+        const name_ar = formData.get("name_ar") as string;
+        const description_ar = formData.get("description_ar") as string;
 
-    const name_ar = formData.get("name_ar") as string;
-    const description_ar = formData.get("description_ar") as string;
+        if (!name || !name.trim()) throw new Error("Name is required");
+        if (!slug || !slug.trim()) throw new Error("Slug is required");
 
-    if (!name_ar || !name_ar.trim()) {
-        throw new Error("name_ar is required");
+        // Validate slug uniqueness
+        const existing = await prisma.category.findUnique({ where: { slug: slug.trim() } });
+        if (existing) throw new Error("Slug already exists");
+
+        await prisma.category.create({
+            data: {
+                name: name.trim(),
+                slug: slug.trim(),
+                description: description || null,
+                parentId: parentId || null,
+                name_ar: name_ar?.trim() || name.trim(), // Fallback to name if ar missing
+                description_ar: description_ar || null,
+                image: image && image.trim() ? image.trim() : null,
+                isActive: true, // Ensure active by default
+            },
+        });
+
+        revalidatePath("/", 'layout'); 
+        revalidateTag("categories");
+    } catch (error: any) {
+        console.error("Create Category Error:", error);
+        throw new Error(error.message || "Failed to create category");
     }
-
-    await prisma.category.create({
-        data: {
-            name,
-            slug,
-            description,
-            parentId: parentId || null,
-            name_ar: name_ar.trim(),
-            description_ar,
-            image: image && image.trim() ? image.trim() : null,
-        },
-    });
-
-    revalidatePath("/admin/categories");
-    revalidatePath("/products");
-    revalidateTag("categories", { expire: 0 });
 }
 
 export async function updateCategory(id: string, formData: FormData) {
