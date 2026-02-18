@@ -35,7 +35,7 @@ export async function createCategory(formData: FormData) {
         });
 
         revalidatePath("/");
-        revalidateTag("categories");
+        revalidateTag("categories", { expire: 0 } as any);
     } catch (error: any) {
         console.error("Create Category Error:", error);
         throw new Error(error.message || "Failed to create category");
