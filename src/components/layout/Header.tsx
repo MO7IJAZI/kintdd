@@ -111,7 +111,6 @@ export default function Header({ productCategories }: HeaderProps) {
 
     // Map Product Categories to Nav Structure
     const productNavItems: NavItem[] = (productCategories ?? [])
-        .filter(c => !['animal-products', 'agricultural-products', 'crop-farming'].includes(c.slug))
         .map((category) => {
             const name = getLocalized(category, 'name');
             const description = getLocalized(category, 'description');
@@ -136,11 +135,11 @@ export default function Header({ productCategories }: HeaderProps) {
 
     // Full Nav Configuration
     const navItems: NavItem[] = [
-        ...productNavItems,
         {
             name: t('productOffer'),
             href: '/products',
-            icon: <Award size={18} />
+            icon: <Award size={18} />,
+            subItems: productNavItems as unknown as SubItem[]
         },
         {
             name: t('about'),
