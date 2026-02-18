@@ -58,7 +58,7 @@ export default async function SearchPage({
                 <div style={{ marginBottom: '3rem' }}>
                     <h1 style={{ fontSize: '2.5rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
                         <Search size={32} />
-                        {t('title')} "{query}"
+                        {t('title')} &quot;{query}&quot;
                     </h1>
                     <p style={{ color: 'var(--muted-foreground)', fontSize: '1.1rem' }}>
                         {products.length > 0 
