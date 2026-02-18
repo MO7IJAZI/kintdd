@@ -7,10 +7,68 @@ import { Sprout, Users, ArrowRight, LayoutGrid } from 'lucide-react';
 export const revalidate = 300;
 
 export default async function ProductsPage() {
-    const locale = await getLocale();
-    const t = await getTranslations('ProductsPage');
-    const tHomeNew = await getTranslations('HomeNew');
-    const isAr = locale === 'ar';
+    try {
+        return await ProductsPageContent();
+    } catch (error) {
+        console.error("Critical error in ProductsPage:", error);
+        return (
+            <div style={{ 
+                minHeight: '100vh', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                backgroundColor: '#f8fafc',
+                fontFamily: 'system-ui, -apple-system, sans-serif'
+            }}>
+                <div style={{ textAlign: 'center', padding: '3rem' }}>
+                    <h1 style={{ color: '#1e293b', marginBottom: '1rem' }}>Server Error</h1>
+                    <p style={{ color: '#64748b', marginBottom: '2rem' }}>
+                        Unable to load the products page. Please try again later.
+                    </p>
+                    <Link 
+                        href="/" 
+                        style={{
+                            display: 'inline-block',
+                            padding: '0.75rem 1.5rem',
+                            backgroundColor: '#142346',
+                            color: 'white',
+                            textDecoration: 'none',
+                            borderRadius: '8px',
+                            fontWeight: '500'
+                        }}
+                    >
+                        Return to Home
+                    </Link>
+                </div>
+            </div>
+        );
+    }
+}
+
+async function ProductsPageContent() {
+    let locale = 'en';
+    let t: any = {};
+    let tHomeNew: any = {};
+    let isAr = false;
+    
+    try {
+        locale = await getLocale();
+        t = await getTranslations('ProductsPage');
+        tHomeNew = await getTranslations('HomeNew');
+        isAr = locale === 'ar';
+    } catch (error) {
+        console.error("Error loading translations for products page:", error);
+        // Fallback translations
+        t = {
+            ourSolutions: () => "Our Solutions",
+            title: () => "Our Solutions",
+            subtitle: () => "Select a production sector to view specialized products and technical guides."
+        };
+        tHomeNew = {
+            viewProducts: () => "View Products"
+        };
+    }
+    
     let ourSolutionsLabel = "Our Solutions";
     try {
         ourSolutionsLabel = t('ourSolutions');
@@ -20,7 +78,9 @@ export default async function ProductsPage() {
 
     // Fetch only active parent categories
     let categories: any[] = [];
+    let categoryError = null;
     try {
+        console.log("Fetching categories from database...");
         categories = await prisma.category.findMany({
             where: {
                 isActive: true,
@@ -28,8 +88,10 @@ export default async function ProductsPage() {
             },
             orderBy: { order: 'asc' },
         });
+        console.log(`Successfully fetched ${categories.length} categories`);
     } catch (error) {
         console.error("Error fetching categories in products page:", error);
+        categoryError = error;
         // Fallback to empty array to avoid page crash
         categories = [];
     }
@@ -86,7 +148,7 @@ export default async function ProductsPage() {
                         letterSpacing: '-0.02em',
                         lineHeight: 1.2
                     }}>
-                        {t('title')}
+                        {t('title') || "Our Solutions"}
                     </h1>
                     <p style={{ 
                         color: '#cbd5e1', 
@@ -95,7 +157,7 @@ export default async function ProductsPage() {
                         margin: '0 auto', 
                         lineHeight: 1.7
                     }}>
-                        {t('subtitle')}
+                        {t('subtitle') || "Select a production sector to view specialized products and technical guides."}
                     </p>
                 </div>
             </section>
@@ -103,10 +165,21 @@ export default async function ProductsPage() {
             {/* Categories Grid */}
             <section style={{ padding: '4rem 0 6rem' }}>
                 <div className="container">
-                    {categories.length === 0 ? (
+                    {categoryError ? (
+                        <div style={{ textAlign: 'center', padding: '4rem', color: '#64748b' }}>
+                            <LayoutGrid size={48} style={{ margin: '0 auto 1rem', opacity: 0.5 }} />
+                            <h3>Unable to load categories</h3>
+                            <p style={{ fontSize: '0.9rem', marginTop: '1rem' }}>
+                                Please try refreshing the page or contact support if the issue persists.
+                            </p>
+                        </div>
+                    ) : categories.length === 0 ? (
                         <div style={{ textAlign: 'center', padding: '4rem', color: '#64748b' }}>
                             <LayoutGrid size={48} style={{ margin: '0 auto 1rem', opacity: 0.5 }} />
                             <h3>No categories found</h3>
+                            <p style={{ fontSize: '0.9rem', marginTop: '1rem' }}>
+                                No active categories are available at the moment.
+                            </p>
                         </div>
                     ) : (
                         <div style={{ 
@@ -116,13 +189,20 @@ export default async function ProductsPage() {
                             padding: '0 1rem'
                         }}>
                             {categories.map((category, index) => {
-                                const name = isAr ? (category.name_ar || category.name) : category.name;
+                                // Validate category data
+                                if (!category || !category.id || !category.slug) {
+                                    console.warn('Invalid category data:', category);
+                                    return null;
+                                }
+                                
+                                const name = isAr ? (category.name_ar || category.name || 'Unnamed Category') : (category.name || 'Unnamed Category');
                                 const desc = isAr ? (category.description_ar || category.description) : category.description;
+                                const categoryUrl = `/product-category/${category.slug}`;
                                 
                                 return (
                                     <Link 
                                         key={category.id} 
-                                        href={`/product-category/${category.slug}` as any}
+                                        href={categoryUrl as any}
                                         className="category-card"
                                         style={{ ["--enter-delay" as any]: `${index * 70}ms` }}
                                     >
