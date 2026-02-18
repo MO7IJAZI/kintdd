@@ -28,6 +28,14 @@ export async function submitInquiry(formData: FormData) {
 const getInquiriesCached = unstable_cache(
     async () =>
         prisma.contactSubmission.findMany({
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                subject: true,
+                isRead: true,
+                createdAt: true,
+            },
             orderBy: { createdAt: "desc" },
         }),
     ["inquiries:list"],

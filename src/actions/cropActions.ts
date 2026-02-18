@@ -63,8 +63,15 @@ export async function createCrop(formData: FormData) {
 const getCropsCached = unstable_cache(
     async () =>
         prisma.crop.findMany({
-            include: {
-                stages: true,
+            select: {
+                id: true,
+                name: true,
+                slug: true,
+                _count: {
+                    select: {
+                        stages: true,
+                    },
+                },
             },
             orderBy: { createdAt: "desc" },
         }),

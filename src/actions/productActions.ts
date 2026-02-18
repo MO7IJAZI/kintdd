@@ -197,8 +197,18 @@ export async function deleteProduct(id: string) {
 const getProductsCached = unstable_cache(
     async () =>
         prisma.product.findMany({
-            include: {
-                category: true,
+            select: {
+                id: true,
+                name: true,
+                slug: true,
+                image: true,
+                isActive: true,
+                category: {
+                    select: {
+                        id: true,
+                        name: true,
+                    },
+                },
             },
             orderBy: { createdAt: "desc" },
         }),

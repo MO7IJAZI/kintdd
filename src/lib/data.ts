@@ -41,7 +41,7 @@ export const getCachedProductCategories = unstable_cache(
     },
     ['product-categories-header'],
     {
-        revalidate: 3600, // Cache for 1 hour
+        revalidate: 300, // Cache for 5 minutes
         tags: ['categories']
     }
 );

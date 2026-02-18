@@ -34,8 +34,9 @@ export async function createCategory(formData: FormData) {
             },
         });
 
-        revalidatePath("/");
         revalidateTag("categories", { expire: 0 } as any);
+        revalidatePath("/", "layout");
+        revalidatePath("/admin/categories");
     } catch (error: any) {
         console.error("Create Category Error:", error);
         throw new Error(error.message || "Failed to create category");
@@ -70,8 +71,8 @@ export async function updateCategory(id: string, formData: FormData) {
     });
 
     revalidatePath("/admin/categories");
-    revalidatePath("/products");
-    revalidateTag("categories", { expire: 0 });
+    revalidateTag("categories", { expire: 0 } as any);
+    revalidatePath("/", "layout");
 }
 
 export async function deleteCategory(id: string) {
@@ -80,8 +81,8 @@ export async function deleteCategory(id: string) {
     });
 
     revalidatePath("/admin/categories");
-    revalidatePath("/products");
-    revalidateTag("categories", { expire: 0 });
+    revalidateTag("categories", { expire: 0 } as any);
+    revalidatePath("/", "layout");
 }
 
 const getCategoriesCached = unstable_cache(

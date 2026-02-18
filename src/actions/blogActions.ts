@@ -108,6 +108,14 @@ export async function deleteBlogPost(id: string) {
 const getBlogPostsCached = unstable_cache(
     async () =>
         prisma.blogPost.findMany({
+            select: {
+                id: true,
+                title: true,
+                slug: true,
+                author: true,
+                isPublished: true,
+                createdAt: true,
+            },
             orderBy: { createdAt: "desc" },
         }),
     ["blog-posts:list"],
