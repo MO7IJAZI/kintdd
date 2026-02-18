@@ -4,7 +4,7 @@ import type { NextConfig } from 'next';
 const withNextIntl = createNextIntlPlugin();
 
 const nextConfig: NextConfig = {
-  output: 'standalone', // Enabled for Hostinger Shared Hosting compatibility
+  // output: 'standalone', // DISABLED: Causes files to be nested deep in .next/standalone which confuses Hostinger
   poweredByHeader: false, // Disable x-powered-by header for security
   compress: true, // Enable gzip compression
   reactStrictMode: true,
