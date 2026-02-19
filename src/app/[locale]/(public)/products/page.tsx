@@ -2,7 +2,7 @@ import prisma from "@/lib/prisma";
 import Image from 'next/image';
 import { Link } from '@/navigation';
 import { getTranslations, getLocale } from 'next-intl/server';
-import { ArrowRight, Package, Layers, Grid3X3, Sprout, Tractor, Heart, Shield, Zap, Leaf } from 'lucide-react';
+import { ArrowRight, Package, Layers, Grid3X3 } from 'lucide-react';
 
 export const revalidate = 300;
 
@@ -83,32 +83,8 @@ async function ProductsPageContent() {
         categories = [];
     }
 
-    // Get category icons based on slug/name
-    const getCategoryIcon = (category: any) => {
-        const slug = category.slug?.toLowerCase() || '';
-        const name = category.name?.toLowerCase() || '';
-        
-        if (slug.includes('agricultural') || name.includes('agricultural') || name.includes('زراعي')) {
-            return <Sprout className="w-6 h-6" />;
-        }
-        if (slug.includes('animal') || name.includes('animal') || name.includes('بيطري')) {
-            return <Heart className="w-6 h-6" />;
-        }
-        if (slug.includes('veterinary') || name.includes('veterinary') || name.includes('بيطري')) {
-            return <Shield className="w-6 h-6" />;
-        }
-        if (slug.includes('equipment') || name.includes('equipment') || name.includes('معدات')) {
-            return <Tractor className="w-6 h-6" />;
-        }
-        if (slug.includes('chemical') || name.includes('chemical') || name.includes('كيميائي')) {
-            return <Zap className="w-6 h-6" />;
-        }
-        if (slug.includes('organic') || name.includes('organic') || name.includes('عضوي')) {
-            return <Leaf className="w-6 h-6" />;
-        }
-        
-        return <Package className="w-6 h-6" />;
-    };
+    // Default category icon - simplified to use only database categories
+    const DefaultCategoryIcon = <Package className="w-6 h-6" />;
 
     return (
         <div className={`min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 ${isAr ? 'rtl' : 'ltr'}`}>
@@ -148,7 +124,7 @@ async function ProductsPageContent() {
                                 <span>Premium Quality</span>
                             </div>
                             <div className="flex items-center text-sm text-slate-500">
-                                <Shield className="w-4 h-4 mr-2 text-primary" />
+                                <Package className="w-4 h-4 mr-2 text-primary" />
                                 <span>Certified Products</span>
                             </div>
                         </div>
@@ -198,7 +174,7 @@ async function ProductsPageContent() {
                                 const name = isAr ? (category.name_ar || category.name || 'Unnamed Category') : (category.name || 'Unnamed Category');
                                 const desc = isAr ? (category.description_ar || category.description) : category.description;
                                 const categoryUrl = `/product-category/${category.slug}`;
-                                const IconComponent = getCategoryIcon(category);
+                                const IconComponent = DefaultCategoryIcon;
                                 
                                 return (
                                     <Link 
@@ -283,7 +259,7 @@ async function ProductsPageContent() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
                         <div className="text-center group">
                             <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-primary group-hover:scale-110 transition-all duration-300">
-                                <Shield className="w-8 h-8 text-primary group-hover:text-white" />
+                                <Package className="w-8 h-8 text-primary group-hover:text-white" />
                             </div>
                             <h3 className="text-xl font-bold text-slate-900 mb-3">Quality Assurance</h3>
                             <p className="text-slate-600">All products meet international quality standards and certifications</p>
@@ -299,7 +275,7 @@ async function ProductsPageContent() {
                         
                         <div className="text-center group">
                             <div className="w-16 h-16 bg-green-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-green-500 group-hover:scale-110 transition-all duration-300">
-                                <Leaf className="w-8 h-8 text-green-500 group-hover:text-white" />
+                                <Package className="w-8 h-8 text-green-500 group-hover:text-white" />
                             </div>
                             <h3 className="text-xl font-bold text-slate-900 mb-3">Sustainable Solutions</h3>
                             <p className="text-slate-600">Environmentally friendly products supporting sustainable agriculture</p>

@@ -25,59 +25,6 @@ export const routing = defineRouting({
       en: '/catalogs',
       ar: '/catalogs'
     },
-
-    '/product-category/agricultural': {
-      en: '/product-category/agricultural',
-      ar: '/product-category/agricultural'
-    },
-    '/product-category/crop-guides': {
-      en: '/product-category/crop-guides',
-      ar: '/product-category/crop-guides'
-    },
-    '/product-category/veterinary': {
-      en: '/product-category/veterinary',
-      ar: '/product-category/veterinary'
-    },
-    '/product-category/by-animal': {
-      en: '/product-category/by-animal',
-      ar: '/product-category/by-animal'
-    },
-    '/product-category/biostimulants': {
-      en: '/product-category/biostimulants',
-      ar: '/product-category/biostimulants'
-    },
-    '/product-category/activators': {
-      en: '/product-category/activators',
-      ar: '/product-category/activators'
-    },
-    '/product-category/bioproducts': {
-      en: '/product-category/bioproducts',
-      ar: '/product-category/bioproducts'
-    },
-    '/product-category/foliar-fertilizers': {
-      en: '/product-category/foliar-fertilizers',
-      ar: '/product-category/foliar-fertilizers'
-    },
-    '/product-category/organic-farming': {
-      en: '/product-category/organic-farming',
-      ar: '/product-category/organic-farming'
-    },
-    '/products-for-animals/poultry': {
-      en: '/products-for-animals/poultry',
-      ar: '/products-for-animals/poultry'
-    },
-    '/products-for-animals/ruminants': {
-      en: '/products-for-animals/ruminants',
-      ar: '/products-for-animals/ruminants'
-    },
-    '/products-for-animals/swine': {
-      en: '/products-for-animals/swine',
-      ar: '/products-for-animals/swine'
-    },
-    '/product-category/animal': {
-      en: '/product-category/animal',
-      ar: '/product-category/animal'
-    },
     '/about': {
       en: '/about',
       ar: '/about'
