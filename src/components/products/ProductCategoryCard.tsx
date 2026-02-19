@@ -85,7 +85,7 @@ export default function ProductCategoryCard({
         <h3 style={{
           fontSize: '1.25rem',
           fontWeight: 700,
-          color: '#071133',
+          color: '#142346',
           marginBottom: '0.5rem',
           lineHeight: 1.2
         }}>
@@ -115,8 +115,8 @@ export default function ProductCategoryCard({
                 style={{
                   display: 'inline-block',
                   padding: '0.35rem 0.75rem',
-                  backgroundColor: 'rgba(14, 165, 164, 0.1)',
-                  color: '#0ea5a4',
+                  backgroundColor: 'rgba(233, 73, 108, 0.1)',
+                  color: '#e9496c',
                   borderRadius: '999px',
                   fontSize: '0.8rem',
                   fontWeight: 500
@@ -136,7 +136,7 @@ export default function ProductCategoryCard({
         <Link
           href={categoryUrl as any}
           style={{
-            color: '#0ea5a4',
+            color: '#e9496c',
             textDecoration: 'none',
             fontWeight: 600,
             fontSize: '0.95rem',

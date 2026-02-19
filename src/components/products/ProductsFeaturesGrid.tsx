@@ -23,7 +23,7 @@ function FeatureCard({ icon, title, description, bgColor, iconColor }: FeatureCa
         backgroundColor: '#f8fafc',
         transition: 'all 0.3s ease',
         transform: isHovered ? 'translateY(-4px)' : 'translateY(0)',
-        boxShadow: isHovered ? '0 10px 30px rgba(124,58,237,0.08)' : 'none',
+        boxShadow: isHovered ? '0 10px 30px rgba(233,73,108,0.08)' : 'none',
         background: isHovered ? 'linear-gradient(180deg, #fff, #fbfbff)' : '#f8fafc'
       }}
       onMouseEnter={() => setIsHovered(true)}
@@ -51,7 +51,7 @@ function FeatureCard({ icon, title, description, bgColor, iconColor }: FeatureCa
       <h3 style={{
         fontSize: '1.25rem',
         fontWeight: 700,
-        color: '#071133',
+        color: '#142346',
         marginBottom: '0.75rem'
       }}>
         {title}
@@ -74,22 +74,22 @@ export default function ProductsFeaturesGrid() {
       icon: <CheckCircle2 className="w-8 h-8" />,
       title: 'Quality Assurance',
       description: 'All products meet international quality standards and certifications',
-      bgColor: 'linear-gradient(135deg, rgba(14,165,164,0.2), rgba(14,165,164,0.1))',
-      iconColor: '#0ea5a4'
+      bgColor: 'linear-gradient(135deg, rgba(233,73,108,0.2), rgba(233,73,108,0.1))',
+      iconColor: '#e9496c'
     },
     {
       icon: <Layers className="w-8 h-8" />,
       title: 'Wide Range',
       description: 'Comprehensive product portfolio across multiple sectors',
-      bgColor: 'linear-gradient(135deg, rgba(124,58,237,0.2), rgba(124,58,237,0.1))',
-      iconColor: '#7c3aed'
+      bgColor: 'linear-gradient(135deg, rgba(20,35,70,0.2), rgba(20,35,70,0.1))',
+      iconColor: '#142346'
     },
     {
       icon: <Package className="w-8 h-8" />,
       title: 'Sustainable Solutions',
       description: 'Environmentally friendly products for sustainable agriculture',
-      bgColor: 'linear-gradient(135deg, rgba(34,197,94,0.2), rgba(34,197,94,0.1))',
-      iconColor: '#22c55e'
+      bgColor: 'linear-gradient(135deg, rgba(233,73,108,0.2), rgba(233,73,108,0.1))',
+      iconColor: '#e9496c'
     }
   ];
 

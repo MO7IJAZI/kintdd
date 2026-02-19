@@ -23,9 +23,9 @@
   display: inline-flex;
   align-items: center;
   padding: 0.5rem 1.25rem;
-  background: rgba(14, 165, 164, 0.15);
+  background: rgba(233, 73, 108, 0.15);
   border-radius: 999px;
-  border: 1px solid rgba(14, 165, 164, 0.3);
+  border: 1px solid rgba(233, 73, 108, 0.3);
   backdrop-filter: blur(10px);
 }
 

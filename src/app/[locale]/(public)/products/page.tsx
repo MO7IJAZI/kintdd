@@ -146,15 +146,15 @@ async function ProductsPageContent() {
                         display: 'inline-flex', 
                         alignItems: 'center', 
                         gap: '0.5rem', 
-                        backgroundColor: 'rgba(14, 165, 164, 0.15)', 
+                        backgroundColor: 'rgba(233, 73, 108, 0.15)', 
                         padding: '0.5rem 1.25rem', 
                         borderRadius: '999px',
-                        border: '1px solid rgba(14, 165, 164, 0.3)',
+                        border: '1px solid rgba(233, 73, 108, 0.3)',
                         marginBottom: '2rem',
                         backdropFilter: 'blur(10px)'
                     }}>
-                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#0ea5a4' }}></span>
-                        <span style={{ fontSize: '0.9rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', color: '#0ea5a4' }}>
+                        <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#e9496c' }}></span>
+                        <span style={{ fontSize: '0.9rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', color: '#e9496c' }}>
                             {ourSolutionsLabel}
                         </span>
                     </div>
@@ -191,19 +191,19 @@ async function ProductsPageContent() {
             }}>
                 <div className="container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-                        <div style={{ color: '#0ea5a4', fontWeight: 700, fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>
+                        <div style={{ color: '#e9496c', fontWeight: 700, fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>
                             {translate('categories', 'Our Offerings')}
                         </div>
                         <h2 style={{ 
                             fontSize: 'clamp(2rem, 4vw, 3rem)', 
                             fontWeight: 800, 
-                            color: '#071133', 
+                            color: '#142346', 
                             marginBottom: '1rem',
                             lineHeight: 1.2
                         }}>
                             {translate('categories', 'Product Categories')}
                         </h2>
-                        <div style={{ width: '80px', height: '4px', background: 'linear-gradient(90deg, #0ea5a4, #7c3aed)', margin: '0 auto', borderRadius: '2px' }}></div>
+                        <div style={{ width: '80px', height: '4px', background: 'linear-gradient(90deg, #e9496c, #142346)', margin: '0 auto', borderRadius: '2px' }}></div>
                     </div>
 
                     {categoryError ? (
@@ -256,13 +256,13 @@ async function ProductsPageContent() {
             <section style={{ padding: '6rem 1rem', backgroundColor: 'white', borderTop: '1px solid #e2e8f0' }}>
                 <div className="container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-                        <div style={{ color: '#0ea5a4', fontWeight: 700, fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>
+                        <div style={{ color: '#e9496c', fontWeight: 700, fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>
                             Why Choose Us
                         </div>
                         <h2 style={{ 
                             fontSize: 'clamp(2rem, 4vw, 3rem)', 
                             fontWeight: 800, 
-                            color: '#071133', 
+                            color: '#142346', 
                             marginBottom: '1rem',
                             lineHeight: 1.2
                         }}>
