@@ -1200,6 +1200,14 @@
     "ourAgents": "Our Global Agents",
     "agentsSubtitle": "Trusted partners representing KINT worldwide."
   },
+  "ProductsFeaturesGrid": {
+    "qualityAssurance": "Quality Assurance",
+    "qualityAssuranceDesc": "All products meet international quality standards and certifications",
+    "wideRange": "Wide Range",
+    "wideRangeDesc": "Comprehensive product portfolio across multiple sectors",
+    "sustainableSolutions": "Sustainable Solutions",
+    "sustainableSolutionsDesc": "Environmentally friendly products for sustainable agriculture"
+  },
   "ProductsPage": {
     "ourSolutions": "Our Solutions",
     "title": "Our Products & Solutions",

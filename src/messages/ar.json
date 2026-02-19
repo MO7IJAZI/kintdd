@@ -1188,6 +1188,14 @@
     "ourAgents": "وكلاؤنا العالميون",
     "agentsSubtitle": "شركاء موثوقون يمثلون KINT في جميع أنحاء العالم."
   },
+  "ProductsFeaturesGrid": {
+    "qualityAssurance": "ضمان الجودة",
+    "qualityAssuranceDesc": "جميع المنتجات تلبي معايير الجودة الدولية والشهادات",
+    "wideRange": "نطاق واسع",
+    "wideRangeDesc": "محفظة منتجات شاملة عبر قطاعات متعددة",
+    "sustainableSolutions": "حلول مستدامة",
+    "sustainableSolutionsDesc": "منتجات صديقة للبيئة من أجل زراعة مستدامة"
+  },
   "ProductsPage": {
     "ourSolutions": "حلولنا",
     "title": "منتجاتنا وحلولنا",

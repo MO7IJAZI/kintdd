@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { CheckCircle2, Layers, Package } from 'lucide-react';
 
 interface FeatureCardProps {
@@ -69,25 +70,27 @@ function FeatureCard({ icon, title, description, bgColor, iconColor }: FeatureCa
 }
 
 export default function ProductsFeaturesGrid() {
+  const t = useTranslations('ProductsFeaturesGrid');
+  
   const features = [
     {
       icon: <CheckCircle2 className="w-8 h-8" />,
-      title: 'Quality Assurance',
-      description: 'All products meet international quality standards and certifications',
+      title: t('qualityAssurance'),
+      description: t('qualityAssuranceDesc'),
       bgColor: 'linear-gradient(135deg, rgba(233,73,108,0.2), rgba(233,73,108,0.1))',
       iconColor: '#e9496c'
     },
     {
       icon: <Layers className="w-8 h-8" />,
-      title: 'Wide Range',
-      description: 'Comprehensive product portfolio across multiple sectors',
+      title: t('wideRange'),
+      description: t('wideRangeDesc'),
       bgColor: 'linear-gradient(135deg, rgba(20,35,70,0.2), rgba(20,35,70,0.1))',
       iconColor: '#142346'
     },
     {
       icon: <Package className="w-8 h-8" />,
-      title: 'Sustainable Solutions',
-      description: 'Environmentally friendly products for sustainable agriculture',
+      title: t('sustainableSolutions'),
+      description: t('sustainableSolutionsDesc'),
       bgColor: 'linear-gradient(135deg, rgba(233,73,108,0.2), rgba(233,73,108,0.1))',
       iconColor: '#e9496c'
     }
