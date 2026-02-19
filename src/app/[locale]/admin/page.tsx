@@ -78,7 +78,6 @@ export default async function AdminDashboard() {
 
     const statCards = [
         { label: t('totalProducts'), value: stats.products, icon: '📦', color: '#10b981', href: '/admin/products' },
-        { label: t('categories'), value: stats.categories, icon: '📁', color: '#3b82f6', href: '/admin/categories' },
         { label: t('cropGuides'), value: stats.crops, icon: '🌾', color: '#22c55e', href: '/admin/crops' },
         { label: t('expertArticles'), value: stats.expertArticles, icon: '🎓', color: '#8b5cf6', href: '/admin/expert-articles' },
         { label: t('blogPosts'), value: stats.blogs, icon: '📝', color: '#f59e0b', href: '/admin/blog' },

@@ -24,6 +24,7 @@
     "pm2:stop": "pm2 stop kint-website",
     "pm2:restart": "pm2 restart kint-website",
     "pm2:logs": "pm2 logs kint-website",
+    "seed:categories": "ts-node prisma/seed-categories.ts",
     "postinstall": "prisma generate && node scripts/fix-permissions.js"
   },
   "prisma": {

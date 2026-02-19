@@ -95,25 +95,28 @@ async function ProductsPageContent() {
     
     const ourSolutionsLabel = translate('ourSolutions', 'Our Solutions');
 
-    // Fetch all active categories
+    // Fetch all active main categories (no parent)
     let categories: any[] = [];
     let categoryError = null;
     try {
-        console.log("Fetching categories from database...");
+        console.log("Fetching main categories from database...");
         categories = await prisma.category.findMany({
             where: {
                 isActive: true,
-                parentId: null
+                parentId: null  // Only root categories
             },
             include: {
                 children: {
                     where: { isActive: true },
                     orderBy: { order: 'asc' }
+                },
+                _count: {
+                    select: { products: true }
                 }
             },
             orderBy: { order: 'asc' },
         });
-        console.log(`Successfully fetched ${categories.length} categories`);
+        console.log(`Successfully fetched ${categories.length} main categories`);
     } catch (error) {
         console.error("Error fetching categories in products page:", error);
         categoryError = error;
