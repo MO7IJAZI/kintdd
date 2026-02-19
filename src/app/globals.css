@@ -1087,3 +1087,21 @@ button {
     grid-template-columns: 1fr;
   }
 }
+
+/* ========================================== */
+/* ANIMATIONS AND UTILITIES */
+/* ========================================== */
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .group * {
+    transition: none !important;
+    animation: none !important;
+  }
+}

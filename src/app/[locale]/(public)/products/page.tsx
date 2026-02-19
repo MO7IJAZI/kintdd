@@ -180,10 +180,9 @@ async function ProductsPageContent() {
                                     <Link 
                                         key={category.id} 
                                         href={categoryUrl as any}
-                                        className="group relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 ease-out border border-slate-100"
+                                        className="group relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 ease-out border border-slate-100 animate-fadeInUp"
                                         style={{ 
                                             animationDelay: `${index * 100}ms`,
-                                            animation: 'fadeInUp 0.6s ease-out forwards',
                                             opacity: 0
                                         }}
                                     >
@@ -283,33 +282,6 @@ async function ProductsPageContent() {
                     </div>
                 </div>
             </section>
-
-            <style jsx global>{`
-                @keyframes fadeInUp {
-                    from {
-                        opacity: 0;
-                        transform: translateY(30px);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
-                }
-                
-                .line-clamp-3 {
-                    display: -webkit-box;
-                    -webkit-line-clamp: 3;
-                    -webkit-box-orient: vertical;
-                    overflow: hidden;
-                }
-                
-                @media (prefers-reduced-motion: reduce) {
-                    .group * {
-                        transition: none !important;
-                        animation: none !important;
-                    }
-                }
-            `}</style>
         </div>
     );
 }
