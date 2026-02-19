@@ -237,7 +237,13 @@ async function ProductsPageContent() {
                                     return null;
                                 }
                                 
-                                const categoryUrl = `/product-category/${category.slug}`;
+                                // Route to fixed pages based on slug
+                                let categoryUrl = `/products`;
+                                if (category.slug === 'animal-production') {
+                                    categoryUrl = `/products/livestock`;
+                                } else if (category.slug === 'plant-production') {
+                                    categoryUrl = `/products/plant-wealth`;
+                                }
                                 
                                 return (
                                     <ProductCategoryCard
