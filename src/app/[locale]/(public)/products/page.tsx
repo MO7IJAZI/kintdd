@@ -2,7 +2,7 @@ import prisma from "@/lib/prisma";
 import Image from 'next/image';
 import { Link } from '@/navigation';
 import { getTranslations, getLocale } from 'next-intl/server';
-import { Sprout, Users, ArrowRight, LayoutGrid } from 'lucide-react';
+import { ArrowRight, Package, Layers, Grid3X3, Sprout, Tractor, Heart, Shield, Zap, Leaf } from 'lucide-react';
 
 export const revalidate = 300;
 
@@ -12,30 +12,16 @@ export default async function ProductsPage() {
     } catch (error) {
         console.error("Critical error in ProductsPage:", error);
         return (
-            <div style={{ 
-                minHeight: '100vh', 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                backgroundColor: '#f8fafc',
-                fontFamily: 'system-ui, -apple-system, sans-serif'
-            }}>
-                <div style={{ textAlign: 'center', padding: '3rem' }}>
-                    <h1 style={{ color: '#1e293b', marginBottom: '1rem' }}>Server Error</h1>
-                    <p style={{ color: '#64748b', marginBottom: '2rem' }}>
-                        Unable to load the products page. Please try again later.
-                    </p>
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+                <div className="text-center p-8 max-w-md mx-auto">
+                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Package className="w-8 h-8 text-red-600" />
+                    </div>
+                    <h1 className="text-2xl font-bold text-slate-800 mb-2">Server Error</h1>
+                    <p className="text-slate-600 mb-6">Unable to load the products page. Please try again later.</p>
                     <Link 
                         href="/" 
-                        style={{
-                            display: 'inline-block',
-                            padding: '0.75rem 1.5rem',
-                            backgroundColor: '#142346',
-                            color: 'white',
-                            textDecoration: 'none',
-                            borderRadius: '8px',
-                            fontWeight: '500'
-                        }}
+                        className="inline-flex items-center px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary-hover transition-colors"
                     >
                         Return to Home
                     </Link>
@@ -61,8 +47,10 @@ async function ProductsPageContent() {
         // Fallback translations
         t = {
             ourSolutions: () => "Our Solutions",
-            title: () => "Our Solutions",
-            subtitle: () => "Select a production sector to view specialized products and technical guides."
+            title: () => "Our Products & Solutions",
+            subtitle: () => "Discover our comprehensive range of products across multiple sectors",
+            exploreProducts: () => "Explore Products",
+            categories: () => "Product Categories"
         };
         tHomeNew = {
             viewProducts: () => "View Products"
@@ -76,7 +64,7 @@ async function ProductsPageContent() {
         ourSolutionsLabel = "Our Solutions";
     }
 
-    // Fetch only active parent categories
+    // Fetch all active categories
     let categories: any[] = [];
     let categoryError = null;
     try {
@@ -92,102 +80,114 @@ async function ProductsPageContent() {
     } catch (error) {
         console.error("Error fetching categories in products page:", error);
         categoryError = error;
-        // Fallback to empty array to avoid page crash
         categories = [];
     }
 
-    return (
-        <div style={{ direction: isAr ? 'rtl' : 'ltr', minHeight: '100vh', backgroundColor: '#f8fafc' }}>
-            {/* Hero Section */}
-            <section style={{ 
-                padding: '6rem 0',
-                background: 'linear-gradient(135deg, var(--secondary) 0%, var(--secondary-light) 100%)',
-                color: 'white',
-                textAlign: 'center',
-                position: 'relative',
-                overflow: 'hidden'
-            }}>
-                <div style={{ 
-                    position: 'absolute', inset: 0, 
-                    backgroundImage: 'none',
-                    opacity: 0.05,
-                    backgroundSize: 'cover'
-                }} />
-                
-                {/* Decorative Elements */}
-                <div style={{
-                    position: 'absolute',
-                    top: '-50%',
-                    left: '50%',
-                    transform: 'translate(-50%, 0)',
-                    width: '100%',
-                    height: '200%',
-                    background: 'radial-gradient(circle at center, rgba(233, 73, 108, 0.15) 0%, transparent 70%)',
-                    pointerEvents: 'none'
-                }} />
+    // Get category icons based on slug/name
+    const getCategoryIcon = (category: any) => {
+        const slug = category.slug?.toLowerCase() || '';
+        const name = category.name?.toLowerCase() || '';
+        
+        if (slug.includes('agricultural') || name.includes('agricultural') || name.includes('زراعي')) {
+            return <Sprout className="w-6 h-6" />;
+        }
+        if (slug.includes('animal') || name.includes('animal') || name.includes('بيطري')) {
+            return <Heart className="w-6 h-6" />;
+        }
+        if (slug.includes('veterinary') || name.includes('veterinary') || name.includes('بيطري')) {
+            return <Shield className="w-6 h-6" />;
+        }
+        if (slug.includes('equipment') || name.includes('equipment') || name.includes('معدات')) {
+            return <Tractor className="w-6 h-6" />;
+        }
+        if (slug.includes('chemical') || name.includes('chemical') || name.includes('كيميائي')) {
+            return <Zap className="w-6 h-6" />;
+        }
+        if (slug.includes('organic') || name.includes('organic') || name.includes('عضوي')) {
+            return <Leaf className="w-6 h-6" />;
+        }
+        
+        return <Package className="w-6 h-6" />;
+    };
 
-                <div className="container" style={{ position: 'relative', zIndex: 1 }}>
-                    <span style={{
-                        display: 'inline-block',
-                        padding: '0.5rem 1.5rem',
-                        backgroundColor: 'rgba(255,255,255,0.1)',
-                        backdropFilter: 'blur(10px)',
-                        borderRadius: '50px',
-                        fontSize: '0.9rem',
-                        fontWeight: 600,
-                        marginBottom: '1.5rem',
-                        border: '1px solid rgba(255,255,255,0.2)',
-                        color: 'var(--primary)'
-                    }}>
-                        {ourSolutionsLabel}
-                    </span>
-                    <h1 style={{ 
-                        fontSize: 'clamp(2.5rem, 5vw, 4rem)', 
-                        marginBottom: '1.5rem', 
-                        fontWeight: 800,
-                        letterSpacing: '-0.02em',
-                        lineHeight: 1.2
-                    }}>
-                        {t('title') || "Our Solutions"}
-                    </h1>
-                    <p style={{ 
-                        color: '#cbd5e1', 
-                        fontSize: '1.15rem', 
-                        maxWidth: '600px', 
-                        margin: '0 auto', 
-                        lineHeight: 1.7
-                    }}>
-                        {t('subtitle') || "Select a production sector to view specialized products and technical guides."}
-                    </p>
+    return (
+        <div className={`min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 ${isAr ? 'rtl' : 'ltr'}`}>
+            {/* Hero Section */}
+            <section className="relative py-20 lg:py-32 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5"></div>
+                
+                {/* Background Pattern */}
+                <div className="absolute inset-0 opacity-30">
+                    <div className="absolute inset-0" style={{
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+                    }}></div>
+                </div>
+
+                <div className="container mx-auto px-4 relative z-10">
+                    <div className="text-center max-w-4xl mx-auto">
+                        <div className="inline-flex items-center px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-slate-200 mb-6">
+                            <div className="w-2 h-2 bg-primary rounded-full mr-2"></div>
+                            <span className="text-sm font-medium text-slate-600">{ourSolutionsLabel}</span>
+                        </div>
+                        
+                        <h1 className="text-4xl md:text-6xl font-bold text-slate-900 mb-6 leading-tight">
+                            {t('title') || "Our Products & Solutions"}
+                        </h1>
+                        
+                        <p className="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
+                            {t('subtitle') || "Discover our comprehensive range of products across multiple sectors"}
+                        </p>
+
+                        <div className="flex flex-wrap justify-center gap-4 mt-8">
+                            <div className="flex items-center text-sm text-slate-500">
+                                <Layers className="w-4 h-4 mr-2 text-primary" />
+                                <span>{categories.length} Categories</span>
+                            </div>
+                            <div className="flex items-center text-sm text-slate-500">
+                                <Package className="w-4 h-4 mr-2 text-primary" />
+                                <span>Premium Quality</span>
+                            </div>
+                            <div className="flex items-center text-sm text-slate-500">
+                                <Shield className="w-4 h-4 mr-2 text-primary" />
+                                <span>Certified Products</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
             {/* Categories Grid */}
-            <section style={{ padding: '4rem 0 6rem' }}>
-                <div className="container">
+            <section className="py-16 lg:py-24">
+                <div className="container mx-auto px-4">
+                    <div className="text-center mb-16">
+                        <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+                            {t('categories') || "Product Categories"}
+                        </h2>
+                        <div className="w-24 h-1 bg-gradient-to-r from-primary to-secondary mx-auto rounded-full"></div>
+                    </div>
+
                     {categoryError ? (
-                        <div style={{ textAlign: 'center', padding: '4rem', color: '#64748b' }}>
-                            <LayoutGrid size={48} style={{ margin: '0 auto 1rem', opacity: 0.5 }} />
-                            <h3>Unable to load categories</h3>
-                            <p style={{ fontSize: '0.9rem', marginTop: '1rem' }}>
+                        <div className="text-center py-16">
+                            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Package className="w-8 h-8 text-red-600" />
+                            </div>
+                            <h3 className="text-xl font-semibold text-slate-800 mb-2">Unable to load categories</h3>
+                            <p className="text-slate-600 max-w-md mx-auto">
                                 Please try refreshing the page or contact support if the issue persists.
                             </p>
                         </div>
                     ) : categories.length === 0 ? (
-                        <div style={{ textAlign: 'center', padding: '4rem', color: '#64748b' }}>
-                            <LayoutGrid size={48} style={{ margin: '0 auto 1rem', opacity: 0.5 }} />
-                            <h3>No categories found</h3>
-                            <p style={{ fontSize: '0.9rem', marginTop: '1rem' }}>
+                        <div className="text-center py-16">
+                            <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Grid3X3 className="w-8 h-8 text-slate-400" />
+                            </div>
+                            <h3 className="text-xl font-semibold text-slate-800 mb-2">No categories found</h3>
+                            <p className="text-slate-600 max-w-md mx-auto">
                                 No active categories are available at the moment.
                             </p>
                         </div>
                     ) : (
-                        <div style={{ 
-                            display: 'grid', 
-                            gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
-                            gap: '2rem',
-                            padding: '0 1rem'
-                        }}>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8">
                             {categories.map((category, index) => {
                                 // Validate category data
                                 if (!category || !category.id || !category.slug) {
@@ -198,49 +198,77 @@ async function ProductsPageContent() {
                                 const name = isAr ? (category.name_ar || category.name || 'Unnamed Category') : (category.name || 'Unnamed Category');
                                 const desc = isAr ? (category.description_ar || category.description) : category.description;
                                 const categoryUrl = `/product-category/${category.slug}`;
+                                const IconComponent = getCategoryIcon(category);
                                 
                                 return (
                                     <Link 
                                         key={category.id} 
                                         href={categoryUrl as any}
-                                        className="category-card"
-                                        style={{ ["--enter-delay" as any]: `${index * 70}ms` }}
+                                        className="group relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 ease-out border border-slate-100"
+                                        style={{ 
+                                            animationDelay: `${index * 100}ms`,
+                                            animation: 'fadeInUp 0.6s ease-out forwards',
+                                            opacity: 0
+                                        }}
                                     >
-                                        <div className="card-image-wrapper">
+                                        {/* Card Background Gradient */}
+                                        <div className="absolute inset-0 bg-gradient-to-br from-white via-slate-50 to-slate-100 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                        
+                                        {/* Image Container */}
+                                        <div className="relative h-48 lg:h-56 overflow-hidden">
                                             {category.image && category.image.trim() !== '' ? (
                                                 <Image 
                                                     src={category.image} 
                                                     alt={name} 
                                                     fill 
                                                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                                                    className="card-image"
+                                                    className="object-cover w-full h-full group-hover:scale-110 transition-transform duration-700 ease-out"
                                                     onError={() => {
-                                                        // Fallback logic if needed, but for now just prevent crash
                                                         console.error(`Failed to load image for category ${category.name}`);
                                                     }}
                                                 />
                                             ) : (
-                                                <div className="placeholder-image">
-                                                    <Sprout size={48} color="#cbd5e1" />
+                                                <div className="w-full h-full bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
+                                                    <div className="text-slate-400">
+                                                        {IconComponent}
+                                                    </div>
                                                 </div>
                                             )}
-                                            <div className="overlay" />
-                                            <div className="card-icon">
-                                                <ArrowRight size={20} />
+                                            
+                                            {/* Image Overlay */}
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                            
+                                            {/* Category Icon Badge */}
+                                            <div className="absolute top-4 right-4 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-primary shadow-lg group-hover:scale-110 transition-transform duration-300">
+                                                {IconComponent}
                                             </div>
                                         </div>
                                         
-                                        <div className="card-content">
-                                            <h3 className="card-title">{name}</h3>
+                                        {/* Content */}
+                                        <div className="relative p-6">
+                                            <h3 className="text-xl font-bold text-slate-900 mb-3 group-hover:text-primary transition-colors duration-300">
+                                                {name}
+                                            </h3>
+                                            
                                             {desc && (
-                                                <p className="card-desc">
+                                                <p className="text-slate-600 text-sm leading-relaxed mb-4 line-clamp-3">
                                                     {desc.length > 120 ? `${desc.substring(0, 120)}...` : desc}
                                                 </p>
                                             )}
-                                            <span className="card-link">
-                                                {tHomeNew('viewProducts') || "View Products"}
-                                            </span>
+                                            
+                                            {/* Action Button */}
+                                            <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                                                <span className="text-sm font-medium text-primary group-hover:text-primary-hover transition-colors">
+                                                    {tHomeNew('viewProducts') || "View Products"}
+                                                </span>
+                                                <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center group-hover:bg-primary group-hover:scale-110 transition-all duration-300">
+                                                    <ArrowRight className="w-4 h-4 text-primary group-hover:text-white transition-colors duration-300" />
+                                                </div>
+                                            </div>
                                         </div>
+                                        
+                                        {/* Hover Effect Border */}
+                                        <div className="absolute inset-0 rounded-2xl border-2 border-transparent group-hover:border-primary/30 transition-colors duration-300 pointer-events-none"></div>
                                     </Link>
                                 );
                             })}
@@ -249,165 +277,60 @@ async function ProductsPageContent() {
                 </div>
             </section>
 
-            <style>{`
-                @keyframes categoryCardEnter {
+            {/* Features Section */}
+            <section className="py-16 lg:py-20 bg-white/50 backdrop-blur-sm">
+                <div className="container mx-auto px-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+                        <div className="text-center group">
+                            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-primary group-hover:scale-110 transition-all duration-300">
+                                <Shield className="w-8 h-8 text-primary group-hover:text-white" />
+                            </div>
+                            <h3 className="text-xl font-bold text-slate-900 mb-3">Quality Assurance</h3>
+                            <p className="text-slate-600">All products meet international quality standards and certifications</p>
+                        </div>
+                        
+                        <div className="text-center group">
+                            <div className="w-16 h-16 bg-secondary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-secondary group-hover:scale-110 transition-all duration-300">
+                                <Package className="w-8 h-8 text-secondary group-hover:text-white" />
+                            </div>
+                            <h3 className="text-xl font-bold text-slate-900 mb-3">Wide Range</h3>
+                            <p className="text-slate-600">Comprehensive product portfolio across multiple agricultural and industrial sectors</p>
+                        </div>
+                        
+                        <div className="text-center group">
+                            <div className="w-16 h-16 bg-green-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-green-500 group-hover:scale-110 transition-all duration-300">
+                                <Leaf className="w-8 h-8 text-green-500 group-hover:text-white" />
+                            </div>
+                            <h3 className="text-xl font-bold text-slate-900 mb-3">Sustainable Solutions</h3>
+                            <p className="text-slate-600">Environmentally friendly products supporting sustainable agriculture</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <style jsx global>{`
+                @keyframes fadeInUp {
                     from {
                         opacity: 0;
-                        transform: translate3d(0, 18px, 0) scale(0.98);
-                        filter: blur(6px);
+                        transform: translateY(30px);
                     }
                     to {
                         opacity: 1;
-                        transform: translate3d(0, 0, 0) scale(1);
-                        filter: blur(0);
+                        transform: translateY(0);
                     }
-                }
-
-                .category-card {
-                    display: flex;
-                    flex-direction: column;
-                    background:
-                        linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 255, 255, 0.92)) padding-box,
-                        linear-gradient(135deg, rgba(233, 73, 108, 0.18), rgba(51, 65, 85, 0.12)) border-box;
-                    border-radius: 20px;
-                    overflow: hidden;
-                    text-decoration: none;
-                    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-                    border: 1px solid transparent;
-                    height: 100%;
-                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-                    opacity: 0;
-                    animation: categoryCardEnter 700ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
-                    animation-delay: var(--enter-delay, 0ms);
-                    will-change: transform, opacity;
-                }
-
-                .category-card:hover {
-                    transform: translate3d(0, -10px, 0) scale(1.01);
-                    box-shadow: 0 26px 40px -18px rgba(15, 23, 42, 0.28), 0 12px 18px -12px rgba(15, 23, 42, 0.12);
-                    background:
-                        linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(248, 250, 252, 0.92)) padding-box,
-                        linear-gradient(135deg, rgba(233, 73, 108, 0.55), rgba(96, 165, 250, 0.28)) border-box;
-                }
-
-                .card-image-wrapper {
-                    position: relative;
-                    height: 240px;
-                    overflow: hidden;
-                }
-
-                .card-image {
-                    object-fit: cover;
-                    transition: transform 0.6s ease;
-                }
-
-                .category-card:hover .card-image {
-                    transform: scale(1.08);
-                }
-
-                .placeholder-image {
-                    width: 100%;
-                    height: 100%;
-                    background: #f1f5f9;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-
-                .overlay {
-                    position: absolute;
-                    inset: 0;
-                    background:
-                        radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.18) 0%, transparent 55%),
-                        linear-gradient(to top, rgba(2, 6, 23, 0.45) 0%, rgba(2, 6, 23, 0) 65%);
-                    opacity: 0.7;
-                    transition: opacity 0.35s ease;
-                }
-
-                .category-card:hover .overlay {
-                    opacity: 0.85;
-                }
-
-                .card-icon {
-                    position: absolute;
-                    bottom: 1rem;
-                    right: 1rem;
-                    width: 40px;
-                    height: 40px;
-                    background: white;
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    color: var(--primary);
-                    opacity: 0;
-                    transform: translateY(10px);
-                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.18);
                 }
                 
-                [dir="rtl"] .card-icon {
-                    right: auto;
-                    left: 1rem;
+                .line-clamp-3 {
+                    display: -webkit-box;
+                    -webkit-line-clamp: 3;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
                 }
-
-                .category-card:hover .card-icon {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
-
-                .card-content {
-                    padding: 1.5rem;
-                    display: flex;
-                    flex-direction: column;
-                    flex: 1;
-                }
-
-                .card-title {
-                    font-size: 1.35rem;
-                    font-weight: 700;
-                    color: #0f172a;
-                    margin-bottom: 0.75rem;
-                    line-height: 1.3;
-                }
-
-                .category-card:hover .card-title {
-                    color: var(--primary);
-                }
-
-                .card-desc {
-                    color: #64748b;
-                    font-size: 0.95rem;
-                    line-height: 1.6;
-                    margin-bottom: 1.5rem;
-                    flex: 1;
-                }
-
-                .card-link {
-                    font-size: 0.9rem;
-                    font-weight: 600;
-                    color: var(--primary);
-                    text-transform: uppercase;
-                    letter-spacing: 0.05em;
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 0.5rem;
-                }
-
+                
                 @media (prefers-reduced-motion: reduce) {
-                    .category-card {
-                        animation: none;
-                        opacity: 1;
-                        transform: none;
-                        filter: none;
-                    }
-                    .category-card:hover {
-                        transform: none;
-                    }
-                    .card-image,
-                    .overlay,
-                    .card-icon {
-                        transition: none;
+                    .group * {
+                        transition: none !important;
+                        animation: none !important;
                     }
                 }
             `}</style>

@@ -25,14 +25,7 @@ export const routing = defineRouting({
       en: '/catalogs',
       ar: '/catalogs'
     },
-    '/products/agricultural': {
-      en: '/products/agricultural',
-      ar: '/products/agricultural'
-    },
-    '/products/animal': {
-      en: '/products/animal',
-      ar: '/products/animal'
-    },
+
     '/product-category/agricultural': {
       en: '/product-category/agricultural',
       ar: '/product-category/agricultural'

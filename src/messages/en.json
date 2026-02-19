@@ -1202,12 +1202,10 @@
   },
   "ProductsPage": {
     "ourSolutions": "Our Solutions",
-    "title": "Our Solutions",
-    "subtitle": "Select a production sector to view specialized products and technical guides.",
-    "agriTitle": "Plant Production",
-    "agriDesc": "Comprehensive range of biostimulants, fertilizers, and crop-specific programs.",
-    "animalTitle": "Animal Production",
-    "animalDesc": "Veterinary products and nutritional support for livestock health."
+    "title": "Our Products & Solutions",
+    "subtitle": "Discover our comprehensive range of products across multiple sectors",
+    "categories": "Product Categories",
+    "exploreProducts": "Explore Products"
   },
   "About": {
     "awardsTitle": "Awards",
