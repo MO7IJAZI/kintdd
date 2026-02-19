@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 interface ImageUploadProps {
     value?: string;
@@ -10,6 +11,7 @@ interface ImageUploadProps {
 }
 
 export default function ImageUpload({ value, onChange, label }: ImageUploadProps) {
+    const t = useTranslations('AdminImageUpload');
     const [isUploading, setIsUploading] = useState(false);
     const [preview, setPreview] = useState(value || "");
 
@@ -34,7 +36,7 @@ export default function ImageUpload({ value, onChange, label }: ImageUploadProps
             }
         } catch (error) {
             console.error("Upload failed:", error);
-            alert("Image upload failed. Please try again.");
+            alert(t('uploadError'));
         } finally {
             setIsUploading(false);
         }
@@ -95,11 +97,11 @@ export default function ImageUpload({ value, onChange, label }: ImageUploadProps
                             className="btn btn-outline"
                             style={{ width: '100%', pointerEvents: 'none' }}
                         >
-                            {isUploading ? "UPLOADING..." : "CHOOSE IMAGE FROM COMPUTER"}
+                            {isUploading ? t('uploading') : t('chooseImage')}
                         </button>
                     </div>
                     <p style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>
-                        Recommended size: 800x600px. Formats: JPG, PNG, WEBP.
+                        {t('recommendedSize')}
                     </p>
                 </div>
 
@@ -108,6 +110,7 @@ export default function ImageUpload({ value, onChange, label }: ImageUploadProps
                         type="button"
                         onClick={() => { onChange(""); setPreview(""); }}
                         style={{ padding: '0.5rem', color: '#ef4444', fontSize: '1.25rem', background: 'none', border: 'none', cursor: 'pointer' }}
+                        title={t('deleteImage')}
                     >
                         🗑️
                     </button>

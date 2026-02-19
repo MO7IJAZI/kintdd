@@ -35,6 +35,7 @@ interface JobOfferFormProps {
 
 export default function JobOfferForm({ jobOffer }: JobOfferFormProps) {
     const t = useTranslations('AdminJobOfferForm');
+    const tErrors = useTranslations('AdminErrors');
     const isEditing = !!jobOffer;
     const [currentLang, setCurrentLang] = useState<'en' | 'ar'>('en');
     const router = useRouter();
@@ -83,7 +84,7 @@ export default function JobOfferForm({ jobOffer }: JobOfferFormProps) {
             router.refresh();
         } catch (error) {
             console.error("Operation failed:", error);
-            alert("Failed to save job offer. Please try again.");
+            alert(tErrors('savingFailed'));
         } finally {
             setIsPending(false);
         }

@@ -77,6 +77,7 @@ export default function ProductForm({
     const locale = useLocale();
     const t = useTranslations('AdminProductForm');
     const tCommon = useTranslations('AdminCommon');
+    const tErrors = useTranslations('AdminErrors');
     const [isPending, setIsPending] = useState(false);
     const [isTranslating, setIsTranslating] = useState(false);
     const [activeLang, setActiveLang] = useState<'en' | 'ar'>('en');
@@ -149,7 +150,7 @@ export default function ProductForm({
             });
             const data = (await res.json().catch(() => null)) as { translatedText?: string | string[]; error?: string } | null;
             if (!res.ok) {
-                throw new Error(data?.error || "Failed to translate");
+                throw new Error(data?.error || tErrors('translationFailed'));
             }
             return data?.translatedText;
         };
@@ -192,7 +193,7 @@ export default function ProductForm({
             setActiveLang("en");
         } catch (error) {
             console.error("Translation failed:", error);
-            alert(error instanceof Error ? error.message : "Failed to translate");
+            alert(error instanceof Error ? error.message : tErrors('translationFailed'));
         } finally {
             setIsTranslating(false);
         }

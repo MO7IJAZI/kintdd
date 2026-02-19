@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import RichTextEditor from "./RichTextEditor";
 
 interface Product {
@@ -23,6 +24,7 @@ interface StagesEditorProps {
 }
 
 export default function StagesEditor({ initialData, products, onChange }: StagesEditorProps) {
+    const t = useTranslations('AdminStages');
     const [stages, setStages] = useState<Stage[]>(initialData || []);
 
     const addStage = () => {
@@ -64,7 +66,7 @@ export default function StagesEditor({ initialData, products, onChange }: Stages
 
     return (
         <div style={{ marginBottom: '2rem' }}>
-            <label style={{ display: 'block', marginBottom: '1rem', fontWeight: '700', fontSize: '0.85rem', color: 'var(--foreground)', opacity: 0.8 }}>CROP GROWTH STAGES</label>
+            <label style={{ display: 'block', marginBottom: '1rem', fontWeight: '700', fontSize: '0.85rem', color: 'var(--foreground)', opacity: 0.8 }}>{t('cropGrowthStages')}</label>
 
             <div style={{ display: 'grid', gap: '1.5rem' }}>
                 {stages.map((stage, index) => (
@@ -89,12 +91,12 @@ export default function StagesEditor({ initialData, products, onChange }: Stages
                                 fontWeight: 'bold'
                             }}
                         >
-                            REMOVE
+                            {t('remove')}
                         </button>
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
                             <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.75rem', fontWeight: '600' }}>STAGE NAME (English)</label>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.75rem', fontWeight: '600' }}>{t('stageNameEn')}</label>
                                 <input 
                                     className="input" 
                                     style={{ width: '100%', backgroundColor: 'white' }}
@@ -104,7 +106,7 @@ export default function StagesEditor({ initialData, products, onChange }: Stages
                                 />
                             </div>
                             <div dir="rtl">
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.75rem', fontWeight: '600' }}>اسم المرحلة (بالعربية)</label>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.75rem', fontWeight: '600' }}>{t('stageNameAr')}</label>
                                 <input 
                                     className="input" 
                                     style={{ width: '100%', backgroundColor: 'white' }}
@@ -117,7 +119,7 @@ export default function StagesEditor({ initialData, products, onChange }: Stages
 
                         <div style={{ marginBottom: '1.5rem' }}>
                             <RichTextEditor
-                                label="STAGE DESCRIPTION (English)"
+                                label={t('stageDescriptionEn')}
                                 value={stage.description || ''}
                                 onChange={(value) => updateStageField(index, 'description', value)}
                             />
@@ -125,14 +127,14 @@ export default function StagesEditor({ initialData, products, onChange }: Stages
 
                         <div style={{ marginBottom: '1.5rem' }} dir="rtl">
                             <RichTextEditor
-                                label="وصف المرحلة (بالعربية)"
+                                label={t('stageDescriptionAr')}
                                 value={stage.description_ar || ''}
                                 onChange={(value) => updateStageField(index, 'description_ar', value)}
                             />
                         </div>
 
                         <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.75rem', fontWeight: '600' }}>RECOMMENDED PRODUCTS FOR THIS STAGE</label>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.75rem', fontWeight: '600' }}>{t('recommendedProducts')}</label>
                             
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
                                 {stage.products?.map(prodId => {
@@ -170,7 +172,7 @@ export default function StagesEditor({ initialData, products, onChange }: Stages
                                     e.target.value = ""; // Reset select
                                 }}
                             >
-                                <option value="">+ Add Product to Stage</option>
+                                <option value="">{t('addProductToStage')}</option>
                                 {products
                                     .filter(p => !stage.products?.includes(p.id))
                                     .map(p => (
@@ -189,7 +191,7 @@ export default function StagesEditor({ initialData, products, onChange }: Stages
                 className="btn btn-outline"
                 style={{ width: '100%', marginTop: '1rem', borderStyle: 'dashed', justifyContent: 'center' }}
             >
-                + ADD GROWTH STAGE
+                {t('addGrowthStage')}
             </button>
         </div>
     );

@@ -60,8 +60,8 @@ export default async function AdminProducts() {
                                         {product.isActive ? tCommon('active') : tCommon('inactive')}
                                     </span>
                                 </td>
-                                <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
-                                    <Link href={{pathname: '/admin/products/[id]', params: {id: product.id}}} style={{ color: 'var(--primary)', fontWeight: '600', marginRight: '1rem' }}>{tCommon('edit')}</Link>
+                                <td style={{ padding: '1rem 1.5rem', textAlign: 'right', display: 'flex', justifyContent: 'flex-end', gap: '1.5rem', alignItems: 'center' }}>
+                                    <Link href={{pathname: '/admin/products/[id]', params: {id: product.id}}} style={{ color: 'var(--primary)', fontWeight: '600' }}>{tCommon('edit')}</Link>
                                     <DeleteButton id={product.id} type="product" />
                                 </td>
                             </tr>

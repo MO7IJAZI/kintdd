@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import dynamic from "next/dynamic";
+import { useTranslations } from "next-intl";
 import { createProductSection, updateProductSection, deleteProductSection, getProductSections } from "@/actions/productSectionActions";
 import { Plus, Trash2, Edit2 } from "lucide-react";
 
@@ -24,6 +25,7 @@ export default function ProductSectionsManager({
     productId: string;
     initialSections?: Section[];
 }) {
+    const t = useTranslations('AdminProductSections');
     const [sections, setSections] = useState<Section[]>(initialSections);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [formData, setFormData] = useState({
@@ -111,7 +113,7 @@ export default function ProductSectionsManager({
     };
 
     const handleDeleteSection = async (sectionId: string) => {
-        if (!confirm("Are you sure you want to delete this section?")) return;
+        if (!confirm(t('deleteConfirm'))) return;
         setIsLoading(true);
         await deleteProductSection(sectionId, productId);
         
@@ -125,7 +127,7 @@ export default function ProductSectionsManager({
     return (
         <div className="mt-8">
             <h3 className="text-2xl font-bold mb-6">
-                Product Sections
+                {t('title')}
             </h3>
 
             {/* Form */}
@@ -134,7 +136,7 @@ export default function ProductSectionsManager({
                     <input
                         type="text"
                         name="title"
-                        placeholder="Section Title (English)"
+                        placeholder={t('sectionTitleEn')}
                         value={formData.title}
                         onChange={handleInputChange}
                         required
@@ -143,7 +145,7 @@ export default function ProductSectionsManager({
                     <input
                         type="text"
                         name="title_ar"
-                        placeholder="Section Title (Arabic)"
+                        placeholder={t('sectionTitleAr')}
                         value={formData.title_ar}
                         onChange={handleInputChange}
                         className="p-3 border border-border rounded-lg text-base w-full"
@@ -151,7 +153,7 @@ export default function ProductSectionsManager({
                     <input
                         type="number"
                         name="order"
-                        placeholder="Order"
+                        placeholder={t('order')}
                         value={formData.order}
                         onChange={handleInputChange}
                         min="0"
@@ -172,14 +174,14 @@ export default function ProductSectionsManager({
 
                 <div className="mb-6">
                     <RichTextEditor
-                        label="Content (English)"
+                        label={t('contentEn')}
                         value={formData.content}
                         onChange={(html) => setFormData(prev => ({ ...prev, content: html }))}
                     />
                 </div>
                 <div className="mb-6">
                     <RichTextEditor
-                        label="Content (Arabic)"
+                        label={t('contentAr')}
                         value={formData.content_ar}
                         onChange={(html) => setFormData(prev => ({ ...prev, content_ar: html }))}
                         dir="rtl"
@@ -192,7 +194,7 @@ export default function ProductSectionsManager({
                     className={`inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg font-semibold transition-opacity ${isLoading ? 'opacity-60 cursor-not-allowed' : 'hover:bg-primary-hover'}`}
                 >
                     <Plus size={18} />
-                    {editingId ? "Update Section" : "Add Section"}
+                    {editingId ? t('updateSection') : t('addSection')}
                 </button>
                 {editingId && (
                     <button

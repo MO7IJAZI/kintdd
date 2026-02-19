@@ -193,8 +193,8 @@ export default function AdminCategories() {
                                     {cat._count?.products || 0} {t('productsCount')}
                                     </span>
                                 </td>
-                                <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
-                                    <button onClick={() => openEditModal(cat)} style={{ color: 'var(--primary)', fontWeight: '600', marginRight: '1rem' }}>{tCommon('edit')}</button>
+                                <td style={{ padding: '1rem 1.5rem', textAlign: 'right', display: 'flex', justifyContent: 'flex-end', gap: '1.5rem', alignItems: 'center' }}>
+                                    <button onClick={() => openEditModal(cat)} style={{ color: 'var(--primary)', fontWeight: '600' }}>{tCommon('edit')}</button>
                                     <button onClick={() => handleDelete(cat.id)} style={{ color: '#ef4444', fontWeight: '600' }}>{tCommon('delete')}</button>
                                 </td>
                             </tr>
