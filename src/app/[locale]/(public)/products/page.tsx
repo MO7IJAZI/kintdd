@@ -257,7 +257,7 @@ async function ProductsPageContent() {
                 <div className="container" style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
                         <div style={{ color: '#e9496c', fontWeight: 700, fontSize: '0.9rem', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>
-                            Why Choose Us
+                            {translate('whyChooseUs', 'Why Choose Us')}
                         </div>
                         <h2 style={{ 
                             fontSize: 'clamp(2rem, 4vw, 3rem)', 
@@ -266,7 +266,7 @@ async function ProductsPageContent() {
                             marginBottom: '1rem',
                             lineHeight: 1.2
                         }}>
-                            Our Advantages
+                            {translate('ourAdvantages', 'Our Advantages')}
                         </h2>
                     </div>
 
