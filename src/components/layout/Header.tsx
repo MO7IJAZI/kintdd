@@ -30,6 +30,7 @@ type NavSubItem = {
   href: any;
   description?: string;
   icon?: ReactNode;
+  image?: string;
   subItems?: NavSubItem[];
 };
 
@@ -54,6 +55,7 @@ type ProductCategoryNav = {
   slug: string;
   description: string | null;
   description_ar: string | null;
+  image?: string | null;
   children?: ProductCategoryNavChild[];
 };
 
@@ -100,21 +102,11 @@ export default function Header({ productCategories }: HeaderProps) {
     const name = getLocalized(category as any, "name");
     const description = getLocalized(category as any, "description");
 
-    const children = category.children ?? [];
-    const subItems = children.length
-      ? children.map((child) => ({
-          name: getLocalized(child as any, "name"),
-          href: `/product-category/${child.slug}` as any,
-          icon: <Sprout size={16} />,
-        }))
-      : undefined;
-
     return {
       name,
       href: `/product-category/${category.slug}` as any,
       description: description || undefined,
-      icon: <Sprout size={18} />,
-      subItems,
+      image: category.image || undefined,
     };
   });
 
@@ -277,8 +269,22 @@ export default function Header({ productCategories }: HeaderProps) {
                                         styles.dropdownItem,
                                       ].join(" ")}
                                     >
-                                      <span className={["mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-500 transition-all group-hover:bg-primary group-hover:text-white", styles.dropdownIcon].join(" ")}>
-                                        {sub.icon || <ChevronRight size={18} />}
+                                      <span className={["mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-500 transition-all group-hover:bg-primary group-hover:text-white overflow-hidden flex-shrink-0", styles.dropdownIcon].join(" ")}>
+                                        {sub.image ? (
+                                          <Image
+                                            src={sub.image}
+                                            alt={sub.name}
+                                            width={36}
+                                            height={36}
+                                            style={{
+                                              objectFit: 'cover',
+                                              width: '100%',
+                                              height: '100%'
+                                            }}
+                                          />
+                                        ) : (
+                                          sub.icon || <ChevronRight size={18} />
+                                        )}
                                       </span>
                                       <span className="min-w-0 flex-1">
                                         <span className={["block text-sm font-bold text-slate-800 group-hover:text-primary", styles.dropdownTitle].join(" ")}>

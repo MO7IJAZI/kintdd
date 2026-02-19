@@ -447,6 +447,30 @@ button {
   transform: scale(1.1) rotate(5deg);
 }
 
+/* Products page specific styles */
+.products-hero-search input {
+  font-size: 1rem;
+  padding-right: 5.5rem;
+}
+
+.category-chip {
+  border: 1px solid rgba(15,23,42,0.04);
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+.category-card {
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.45s ease;
+}
+.category-card:hover {
+  transform: translateY(-8px) scale(1.01);
+  box-shadow: 0 30px 60px rgba(2,6,23,0.08);
+}
+
+/* Staggered animation helper (applies delay inline) */
+.stagger-item { opacity: 0; }
+.stagger-item.animate-visible { opacity: 1; }
+
 /* ========================================== */
 /* PERFECT WORD WRAPPING AT SPACES SOLUTION  */
 /* ========================================== */
