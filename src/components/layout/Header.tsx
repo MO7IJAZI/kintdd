@@ -2,9 +2,11 @@
 
 import Image from "next/image";
 import { Link, usePathname, useRouter } from "@/navigation";
+import { useParams } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import styles from "./Header.module.css";
+import { routing } from '@/routing';
 import {
   Award,
   BookOpen,
@@ -68,6 +70,7 @@ export default function Header({ productCategories }: HeaderProps) {
   const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
+  const params = useParams() as Record<string, string | string[]>;
   const isRtl = locale === "ar";
 
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -86,7 +89,12 @@ export default function Header({ productCategories }: HeaderProps) {
   }, []);
 
   const switchLocale = (nextLocale: string) => {
-    router.replace(pathname as any, { locale: nextLocale });
+    const { locale: _ignored, ...rest } = (params || {}) as Record<string, string | string[]>;
+    if (rest && Object.keys(rest).length > 0) {
+      router.replace({ pathname, params: rest } as any, { locale: nextLocale });
+    } else {
+      router.replace(pathname as any, { locale: nextLocale });
+    }
   };
 
   const getLocalized = <T extends Record<string, any>>(obj: T, key: string): string => {
@@ -98,15 +106,50 @@ export default function Header({ productCategories }: HeaderProps) {
     return (base || "") as string;
   };
 
-  const productSubItems: NavSubItem[] = (productCategories ?? []).map((category) => {
+  // Fallback static categories if database is empty
+  const fallbackCategories = [
+    {
+      id: 'animal-production',
+      name: 'Livestock',
+      name_ar: 'الثروة الحيوانية',
+      slug: 'animal-production',
+      description: 'Veterinary products and animal nutrition solutions',
+      description_ar: 'منتجات الثروة الحيوانية وحلول تغذية الحيوان',
+    },
+    {
+      id: 'plant-production',
+      name: 'Plant Wealth',
+      name_ar: 'الثروة النباتية',
+      slug: 'plant-production',
+      description: 'Agricultural products for crop nutrition and protection',
+      description_ar: 'منتجات الثروة النباتية لتغذية وحماية المحاصيل',
+    },
+  ];
+
+  // Use database categories if available, otherwise use fallback
+  const categories = (productCategories && productCategories.length > 0)
+    ? productCategories
+    : fallbackCategories;
+
+  const productSubItems: NavSubItem[] = (categories).map((category) => {
     const name = getLocalized(category as any, "name");
     const description = getLocalized(category as any, "description");
 
+    // Map to fixed routes based on slug
+    let href = "/products";
+    if (category.slug === "animal-production") {
+      href = "/products/livestock";
+    } else if (category.slug === "plant-production") {
+      href = "/products/plant-wealth";
+    } else {
+      href = `/product-category/${category.slug}`;
+    }
+
     return {
       name,
-      href: `/product-category/${category.slug}` as any,
+      href: href as any,
       description: description || undefined,
-      image: category.image || undefined,
+      image: (category as any).image || undefined,
     };
   });
 
@@ -321,17 +364,17 @@ export default function Header({ productCategories }: HeaderProps) {
                                       >
                                         <div className={styles.nestedPanel}>
                                           {sub.subItems!.map((nested) => (
-                                          <Link
-                                            key={nested.name}
-                                            href={nested.href}
-                                            className={[
-                                              "block rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100/70 hover:text-primary",
-                                              styles.nestedLink,
-                                            ].join(" ")}
-                                          >
-                                            {nested.name}
-                                          </Link>
-                                        ))}
+                                            <Link
+                                              key={nested.name}
+                                              href={nested.href}
+                                              className={[
+                                                "block rounded-xl px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100/70 hover:text-primary",
+                                                styles.nestedLink,
+                                              ].join(" ")}
+                                            >
+                                              {nested.name}
+                                            </Link>
+                                          ))}
                                         </div>
                                       </div>
                                     )}

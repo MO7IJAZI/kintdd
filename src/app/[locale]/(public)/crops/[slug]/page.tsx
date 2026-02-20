@@ -31,6 +31,9 @@ interface CropDetailData {
     pdfUrl?: string | null;
     description?: string | null;
     description_ar?: string | null;
+    category?: string | null;
+    category_ar?: string | null;
+    harvestSeason_ar?: string | null;
     stages: CropStage[];
     recommendedProducts: Product[];
 }
@@ -78,6 +81,19 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
     const name = (isRtl && crop.name_ar) ? crop.name_ar : crop.name;
     const description = (isRtl && crop.description_ar) ? crop.description_ar : (crop.description || 'Detailed technical information is currently being updated.');
     const safeDescription = stripScripts(description);
+    const categoryLabel = (() => {
+        const lookup: Record<string, string> = {
+            vegetables: t('vegetables'),
+            fruits: t('fruits'),
+            legumes: t('legumes'),
+            cereals: t('cereals'),
+            industrial: t('industrial'),
+            herbs: t('herbs'),
+        };
+        if (isRtl && crop.category_ar) return crop.category_ar;
+        if (crop.category) return lookup[crop.category] || crop.category;
+        return '';
+    })();
 
     return (
         <div style={{ backgroundColor: '#fdfdfd', minHeight: '100vh' }} dir={isRtl ? 'rtl' : 'ltr'}>
@@ -103,10 +119,39 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
 
             <section className="section">
                 <div className="container-technical">
-                    <div className="crop-detail-grid">
+                    {/* Full-width image */}
+                    {crop.image && (
+                        <div style={{ position: 'relative', width: '100%', height: '420px', margin: '0 0 2rem 0', border: '1px solid #eee', overflow: 'hidden' }}>
+                            <Image
+                                src={crop.image}
+                                alt={name}
+                                fill
+                                style={{ objectFit: 'cover' }}
+                            />
+                        </div>
+                    )}
 
+                    <div style={{ maxWidth: '900px', margin: '0 auto' }}>
                         {/* Main Content */}
                         <div>
+
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', alignItems: 'center', marginBottom: '2rem' }}>
+                                {categoryLabel && (
+                                    <span style={{ padding: '0.4rem 0.8rem', backgroundColor: '#f1f5f9', color: '#475569', borderRadius: '0.5rem', fontSize: '0.75rem', fontWeight: 800 }}>
+                                        {categoryLabel}
+                                    </span>
+                                )}
+                                {isRtl && crop.harvestSeason_ar && (
+                                    <span style={{ padding: '0.4rem 0.8rem', backgroundColor: '#fff7ed', color: '#ea580c', borderRadius: '0.5rem', fontSize: '0.75rem', fontWeight: 800 }}>
+                                        {crop.harvestSeason_ar}
+                                    </span>
+                                )}
+                                {crop.pdfUrl && (
+                                    <Link href={crop.pdfUrl} target="_blank" rel="noopener noreferrer" style={{ padding: '0.4rem 0.8rem', backgroundColor: '#eef2ff', color: '#3730a3', borderRadius: '0.5rem', fontSize: '0.75rem', fontWeight: 800, textDecoration: 'none' }}>
+                                        {t('documentation')} · {t('downloadPdf')}
+                                    </Link>
+                                )}
+                            </div>
                             {/* Premium Technical Description Sheet */}
                             <div style={{ marginBottom: '5rem' }}>
                                 <div style={{
@@ -143,6 +188,11 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
                                     }}
                                     dangerouslySetInnerHTML={{ __html: safeDescription }}
                                 />
+                                {(!safeDescription || safeDescription.trim() === '') && (
+                                    <div style={{ color: '#999', fontSize: '0.95rem', fontWeight: 700, marginTop: '1rem' }}>
+                                        {isRtl ? 'يتم تحديث المعلومات الفنية التفصيلية حالياً.' : 'Detailed technical information is currently being updated.'}
+                                    </div>
+                                )}
                             </div>
 
                             {/* Products Recommended Section */}
@@ -281,50 +331,6 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
                                 </div>
                             </div>
                         </div>
-
-                        {/* Sidebar */}
-                        <aside>
-                            <div style={{ position: 'sticky', top: '100px' }}>
-                                <div className="card" style={{ overflow: 'hidden', border: '1px solid #eee' }}>
-                                    <div style={{ position: 'relative', height: '220px', backgroundColor: '#eee' }}>
-                                        {crop.image ? (
-                                            <Image
-                                                src={crop.image}
-                                                alt={name}
-                                                fill
-                                                style={{ objectFit: 'cover' }}
-                                            />
-                                        ) : (
-                                            <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem' }}>🌱</div>
-                                        )}
-                                    </div>
-                                    <div style={{ padding: '2rem' }}>
-                                        <h4 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '1rem', textTransform: 'uppercase' }}>{t('expertSupport')}</h4>
-                                        <p style={{ fontSize: '0.85rem', color: '#666', lineHeight: '1.6', marginBottom: '1.5rem' }}>
-                                            {t('consultText')}
-                                        </p>
-                                        <Link href="/contact" className="btn btn-primary" style={{ width: '100%', fontSize: '0.8rem', fontWeight: 800 }}>
-                                            {tNav('contact').toUpperCase()}
-                                        </Link>
-                                    </div>
-                                </div>
-
-                                {crop.pdfUrl && (
-                                    <div className="card" style={{ marginTop: '2rem', padding: '2rem', border: '1px solid #eee' }}>
-                                        <h4 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '1.25rem', textTransform: 'uppercase' }}>{t('documentation')}</h4>
-                                        <a
-                                            href={crop.pdfUrl}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="btn btn-outline"
-                                            style={{ width: '100%', fontSize: '0.8rem', fontWeight: 700, justifyContent: 'flex-start', gap: '1rem', textDecoration: 'none', display: 'flex', alignItems: 'center' }}
-                                        >
-                                            📄 {t('downloadPdf')}
-                                        </a>
-                                    </div>
-                                )}
-                            </div>
-                        </aside>
 
                     </div>
                 </div>

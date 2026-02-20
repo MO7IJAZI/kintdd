@@ -5,6 +5,7 @@ import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
+import { Node } from '@tiptap/core'
 import DOMPurify from 'dompurify'
 import debounce from 'lodash.debounce'
 import './RichTextEditor.css'
@@ -27,6 +28,12 @@ interface SelectedImage {
   height: number
 }
 
+interface SelectedVideo {
+  pos: number
+  src: string
+  width: number
+  height: number
+}
 /**
  * Image Resizer Extension for Tiptap
  * Allows resizing and repositioning of images inline
@@ -60,6 +67,82 @@ const ImageResizer = Image.extend({
   },
 })
 
+const VideoNode = Node.create({
+  name: 'video',
+  group: 'block',
+  atom: true,
+  selectable: true,
+  draggable: true,
+  addAttributes() {
+    return {
+      src: { default: null },
+      type: { default: 'video' },
+      width: { default: null },
+      height: { default: null },
+      controls: { default: true },
+      dataFloat: {
+        default: 'none',
+        parseHTML: (element) => element.getAttribute('data-float'),
+        renderHTML: (attributes) => {
+          return { 'data-float': attributes.dataFloat }
+        },
+      },
+    }
+  },
+  parseHTML() {
+    return [
+      { tag: 'video' },
+      { tag: 'iframe[data-type="video"]' },
+    ]
+  },
+  renderHTML({ HTMLAttributes }) {
+    if (HTMLAttributes.type === 'iframe') {
+      return ['iframe', { ...HTMLAttributes, 'data-type': 'video', class: 'editor-video', frameborder: '0', allow: 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture', allowfullscreen: 'true' }]
+    }
+    return ['video', { ...HTMLAttributes, class: 'editor-video' }]
+  },
+})
+
+function normalizeVideoUrl(input: string): { type: 'iframe' | 'video', src: string } | null {
+  let url = input.trim()
+  if (!url) return null
+  if (!/^https?:\/\//i.test(url)) {
+    url = `https://${url}`
+  }
+  try {
+    const u = new URL(url)
+    const host = u.hostname.replace(/^www\./, '')
+    if (host === 'youtube.com' || host === 'youtu.be') {
+      let id = ''
+      if (host === 'youtu.be') {
+        id = u.pathname.split('/')[1] || ''
+      } else {
+        if (u.pathname.startsWith('/watch')) {
+          id = u.searchParams.get('v') || ''
+        } else if (u.pathname.startsWith('/shorts/')) {
+          id = u.pathname.split('/')[2] || ''
+        } else if (u.pathname.startsWith('/embed/')) {
+          id = u.pathname.split('/')[2] || ''
+        }
+      }
+      if (!id) return null
+      return { type: 'iframe', src: `https://www.youtube.com/embed/${id}` }
+    }
+    if (host === 'vimeo.com') {
+      const parts = u.pathname.split('/').filter(Boolean)
+      const id = parts[0]
+      if (!id || !/^\d+$/.test(id)) return null
+      return { type: 'iframe', src: `https://player.vimeo.com/video/${id}` }
+    }
+    if (/\.(mp4|webm|ogg)$/i.test(u.pathname)) {
+      return { type: 'video', src: u.toString() }
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
 export default function RichTextEditor({
   label,
   value = '',
@@ -69,6 +152,7 @@ export default function RichTextEditor({
 }: Props) {
   const t = useTranslations('AdminRichText')
   const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(null)
+  const [selectedVideo, setSelectedVideo] = useState<SelectedVideo | null>(null)
   /* ============================
      Auto-Save (Debounced)
    ============================ */
@@ -102,6 +186,20 @@ export default function RichTextEditor({
     return data.url as string
   }, [t])
 
+  const uploadVideo = useCallback(async (file: File): Promise<string> => {
+    const formData = new FormData()
+    formData.append('file', file)
+    const res = await fetch('/api/upload', {
+      method: 'POST',
+      body: formData,
+    })
+    if (!res.ok) {
+      throw new Error('Upload failed')
+    }
+    const data = await res.json()
+    return data.url as string
+  }, [])
+
   /* ============================
      Tiptap Editor Instance
    ============================ */
@@ -123,12 +221,15 @@ export default function RichTextEditor({
           class: 'editor-image',
         },
       }),
+      VideoNode,
     ],
     content: value || '',
     onUpdate: ({ editor }) => {
       const html = editor.getHTML()
-      const clean = DOMPurify.sanitize(html)
-      
+      const clean = DOMPurify.sanitize(html, {
+        ADD_TAGS: ['video', 'source', 'iframe'],
+        ADD_ATTR: ['controls', 'width', 'height', 'src', 'allow', 'allowfullscreen', 'frameborder', 'data-type', 'type'],
+      })
       autosave(clean)
       onChange?.(clean)
     },
@@ -155,25 +256,52 @@ export default function RichTextEditor({
 
             if (imagePos !== null) {
               const rect = img.getBoundingClientRect()
-              const container = document.querySelector('.editor-container')
+              const container = document.querySelector('.editor-container') as HTMLElement | null
               const containerRect = container?.getBoundingClientRect()
               const editorRect = document.querySelector('.rich-text-editor')?.getBoundingClientRect()
               
-              if (containerRect && editorRect) {
+              if (containerRect && editorRect && container) {
                 // Position relative to the editor wrapper
+                const cs = getComputedStyle(container)
+                const padLeft = parseFloat(cs.paddingLeft) || 0
+                const padTop = parseFloat(cs.paddingTop) || 0
                 setSelectedImage({
                   pos: imagePos,
                   src: img.src,
-                  x: editorRect.width - 8, // Right edge with small margin
-                  y: rect.top - editorRect.top + (rect.height / 2), // Vertically centered on image
+                  x: rect.left - containerRect.left - padLeft,
+                  y: rect.top - containerRect.top - padTop,
                   width: rect.width,
                   height: rect.height,
                 })
               }
               event.preventDefault()
+              return true
+            }
+          } else if (target.tagName === 'IFRAME' || target.tagName === 'VIDEO') {
+            const el = target as HTMLIFrameElement | HTMLVideoElement
+            const pos = view.posAtDOM(el, 0)
+            let videoPos: number | null = null
+            view.state.doc.nodesBetween(Math.max(0, pos - 2), pos + 2, (n, p) => {
+              if (n.type.name === 'video') {
+                videoPos = p
+                return false
+              }
+            })
+            if (videoPos !== null) {
+              const rect = el.getBoundingClientRect()
+              setSelectedVideo({
+                pos: videoPos,
+                src: (el as any).src || '',
+                width: rect.width,
+                height: rect.height,
+              })
+              setSelectedImage(null)
+              event.preventDefault()
+              return true
             }
           } else {
             setSelectedImage(null)
+            setSelectedVideo(null)
           }
           return false
         },
@@ -211,6 +339,28 @@ export default function RichTextEditor({
                   console.error('Image paste failed:', error)
                 })
 
+              return true
+            } else if (item.type.startsWith('video/')) {
+              const file = item.getAsFile()
+              if (!file) return false
+              uploadVideo(file)
+                .then((url) => {
+                  if (editor) {
+                    editor
+                      .chain()
+                      .focus()
+                      .insertContent({
+                        type: 'video',
+                        attrs: {
+                          src: url,
+                          controls: true,
+                          type: 'video',
+                        },
+                      })
+                      .run()
+                  }
+                })
+                .catch(() => {})
               return true
             }
           }
@@ -377,7 +527,7 @@ export default function RichTextEditor({
   /* ============================
       Resize Selected Image
     ============================ */
-  const handleResizeImage = useCallback((newWidth: number) => {
+  const handleResizeImage = useCallback((newWidth: number, newHeight?: number) => {
     if (!editor || !selectedImage) return
     
     const { state } = editor.view
@@ -388,14 +538,35 @@ export default function RichTextEditor({
         const isPercentage = newWidth === 100
         const tr = state.tr
           .setNodeAttribute(pos, 'width', isPercentage ? '100%' : newWidth)
-          .setNodeAttribute(pos, 'style', isPercentage ? 'width: 100%' : `width: ${newWidth}px`)
+        if (typeof newHeight === 'number') {
+          tr.setNodeAttribute(pos, 'height', newHeight)
+        }
+        const styleVal = isPercentage ? 'width: 100%' : `width: ${newWidth}px`
+        const finalStyle = typeof newHeight === 'number' ? `${styleVal}; height: ${newHeight}px` : styleVal
+        tr.setNodeAttribute(pos, 'style', finalStyle)
         editor.view.dispatch(tr)
         
-        // Update local state
         setSelectedImage(prev => prev ? { ...prev, width: isPercentage ? 100 : newWidth } : null)
         found = true
       }
     })
+    // Recompute rect to update height accurately
+    const dom = editor.view.nodeDOM(selectedImage.pos) as HTMLElement | null
+    const container = document.querySelector('.editor-container') as HTMLElement | null
+    if (dom && container) {
+      const rect = dom.getBoundingClientRect()
+      const cr = container.getBoundingClientRect()
+      const cs = getComputedStyle(container)
+      const padLeft = parseFloat(cs.paddingLeft) || 0
+      const padTop = parseFloat(cs.paddingTop) || 0
+      setSelectedImage(prev => prev ? {
+        ...prev,
+        x: rect.left - cr.left - padLeft,
+        y: rect.top - cr.top - padTop,
+        width: rect.width,
+        height: rect.height,
+      } : null)
+    }
   }, [editor, selectedImage])
 
   /* ============================
@@ -421,10 +592,119 @@ export default function RichTextEditor({
     })
   }, [editor, selectedImage])
 
+  const handleInsertVideoUrl = useCallback(() => {
+    if (!editor) return
+    const raw = prompt('Enter video URL')
+    if (!raw) return
+    const norm = normalizeVideoUrl(raw)
+    if (!norm) {
+      alert('Unsupported video URL')
+      return
+    }
+    editor
+      .chain()
+      .focus()
+      .insertContent({
+        type: 'video',
+        attrs: {
+          src: norm.src,
+          controls: norm.type === 'video' ? true : undefined,
+          type: norm.type,
+        },
+      })
+      .run()
+  }, [editor])
+
+  const handleUploadVideoFile = useCallback(() => {
+    if (!editor) return
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = 'video/*'
+    input.multiple = false
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (!file) return
+      try {
+        const url = await uploadVideo(file)
+        editor
+          .chain()
+          .focus()
+          .insertContent({
+            type: 'video',
+            attrs: {
+              src: url,
+              controls: true,
+              type: 'video',
+            },
+          })
+          .run()
+      } catch {}
+    }
+    input.click()
+  }, [editor, uploadVideo])
+
+  const handleResizeVideo = useCallback((newWidth: number) => {
+    if (!editor || !selectedVideo) return
+    const { state } = editor.view
+    let found = false
+    state.doc.nodesBetween(0, state.doc.content.size, (node, pos) => {
+      if (found) return false
+      if (node.type.name === 'video' && pos === selectedVideo.pos) {
+        const tr = state.tr.setNodeAttribute(pos, 'width', newWidth)
+        editor.view.dispatch(tr)
+        setSelectedVideo(prev => prev ? { ...prev, width: newWidth } : null)
+        found = true
+      }
+    })
+  }, [editor, selectedVideo])
+
+  const handleResetVideoSize = useCallback(() => {
+    if (!editor || !selectedVideo) return
+    const { state } = editor.view
+    let found = false
+    state.doc.nodesBetween(0, state.doc.content.size, (node, pos) => {
+      if (found) return false
+      if (node.type.name === 'video' && pos === selectedVideo.pos) {
+        const tr = state.tr.setNodeAttribute(pos, 'width', null).setNodeAttribute(pos, 'height', null)
+        editor.view.dispatch(tr)
+        setSelectedVideo(prev => prev ? { ...prev, width: prev.width, height: prev.height } : null)
+        found = true
+      }
+    })
+  }, [editor, selectedVideo])
+
+  const handleSetImageFloat = useCallback((floatVal: 'none' | 'left' | 'right') => {
+    if (!editor || !selectedImage) return
+    const { state } = editor.view
+    let found = false
+    state.doc.nodesBetween(0, state.doc.content.size, (node, pos) => {
+      if (found) return false
+      if (node.type.name === 'image' && pos === selectedImage.pos) {
+        const tr = state.tr.setNodeAttribute(pos, 'dataFloat', floatVal)
+        editor.view.dispatch(tr)
+        found = true
+      }
+    })
+  }, [editor, selectedImage])
+
+  const handleSetVideoFloat = useCallback((floatVal: 'none' | 'left' | 'right') => {
+    if (!editor || !selectedVideo) return
+    const { state } = editor.view
+    let found = false
+    state.doc.nodesBetween(0, state.doc.content.size, (node, pos) => {
+      if (found) return false
+      if (node.type.name === 'video' && pos === selectedVideo.pos) {
+        const tr = state.tr.setNodeAttribute(pos, 'dataFloat', floatVal)
+        editor.view.dispatch(tr)
+        found = true
+      }
+    })
+  }, [editor, selectedVideo])
+
+
   if (!editor) {
     return null
   }
-
   return (
     <div className="rich-text-editor">
       {label && (
@@ -579,6 +859,30 @@ export default function RichTextEditor({
           >
             🔗 {t('link')}
           </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              handleInsertVideoUrl()
+            }}
+            className="toolbar-btn"
+            title="Insert Video URL"
+          >
+            🎥 Video URL
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              handleUploadVideoFile()
+            }}
+            className="toolbar-btn"
+            title="Upload Video"
+          >
+            ⬆️ Video
+          </button>
         </div>
 
         <div className="toolbar-divider" />
@@ -686,6 +990,102 @@ export default function RichTextEditor({
                 title={t('deleteImage')}
               >
                 🗑️
+              </button>
+            </div>
+          </>
+        )}
+        {selectedVideo && (
+          <>
+            <div className="toolbar-divider" />
+            <div className="toolbar-group image-actions-group">
+              <span className="image-actions-label">Video</span>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  handleResizeVideo(Math.max(200, (selectedVideo.width || 400) - 50))
+                }}
+                className="toolbar-btn image-action-btn"
+                title="Smaller"
+              >
+                −
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  handleResizeVideo((selectedVideo.width || 400) + 50)
+                }}
+                className="toolbar-btn image-action-btn"
+                title="Larger"
+              >
+                +
+              </button>
+              <select
+                value={selectedVideo.width || ''}
+                onChange={(e) => {
+                  const val = Number(e.target.value)
+                  handleResizeVideo(val)
+                }}
+                className="toolbar-btn image-action-btn resize-select"
+                style={{ padding: '0.5rem', minWidth: '80px' }}
+              >
+                <option value="">{t('size')}</option>
+                <option value="240">240px</option>
+                <option value="320">320px</option>
+                <option value="480">480px</option>
+                <option value="640">640px</option>
+                <option value="800">800px</option>
+              </select>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  handleResetVideoSize()
+                }}
+                className="toolbar-btn image-action-btn"
+                title="Reset size"
+              >
+                ⇄
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  handleSetVideoFloat('left')
+                }}
+                className="toolbar-btn image-action-btn"
+                title="Float left"
+              >
+                ⬅️
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  handleSetVideoFloat('none')
+                }}
+                className="toolbar-btn image-action-btn"
+                title="No float"
+              >
+                ⏺
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  handleSetVideoFloat('right')
+                }}
+                className="toolbar-btn image-action-btn"
+                title="Float right"
+              >
+                ➡️
               </button>
             </div>
           </>

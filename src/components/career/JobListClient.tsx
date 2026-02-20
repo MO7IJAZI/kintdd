@@ -82,9 +82,9 @@ export default function JobListClient({ initialJobs }: JobListClientProps) {
                             const responsibilities = isRtl && job.responsibilities_ar ? job.responsibilities_ar : job.responsibilities;
                             const benefits = isRtl && job.benefits_ar ? job.benefits_ar : job.benefits;
                             const qualifications = isRtl && job.qualifications_ar ? job.qualifications_ar : job.qualifications;
-                            const safeResponsibilities = responsibilities ? stripScripts(responsibilities) : responsibilities;
-                            const safeBenefits = benefits ? stripScripts(benefits) : benefits;
-                            const safeQualifications = qualifications ? stripScripts(qualifications) : qualifications;
+                            const safeResponsibilities = responsibilities ? stripScripts(responsibilities) as unknown as TrustedHTML : '';
+                            const safeBenefits = benefits ? stripScripts(benefits) as unknown as TrustedHTML : '';
+                            const safeQualifications = qualifications ? stripScripts(qualifications) as unknown as TrustedHTML : '';
 
                             return (
                                 <div key={job.id} className="job-item" style={{ marginBottom: '2rem', borderRadius: '0.75rem', overflow: 'hidden', backgroundColor: 'white', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e5e7eb' }}>

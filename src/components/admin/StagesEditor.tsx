@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import RichTextEditor from "./RichTextEditor";
+import { useLocale } from "next-intl";
 
 interface Product {
     id: string;
@@ -25,7 +26,10 @@ interface StagesEditorProps {
 
 export default function StagesEditor({ initialData, products, onChange }: StagesEditorProps) {
     const t = useTranslations('AdminStages');
+    const locale = useLocale();
+    const isRtl = locale === 'ar';
     const [stages, setStages] = useState<Stage[]>(initialData || []);
+    // client auto-translate removed for manual bilingual entry
 
     const addStage = () => {
         const newStages = [...stages, { name: "", name_ar: "", description_ar: "", products: [] }];
@@ -83,7 +87,8 @@ export default function StagesEditor({ initialData, products, onChange }: Stages
                             style={{
                                 position: 'absolute',
                                 top: '1rem',
-                                right: '1rem',
+                                right: !isRtl ? '1rem' as any : undefined,
+                                left: isRtl ? '1rem' as any : undefined,
                                 color: '#ef4444',
                                 background: 'none',
                                 border: 'none',
@@ -117,20 +122,21 @@ export default function StagesEditor({ initialData, products, onChange }: Stages
                             </div>
                         </div>
 
-                        <div style={{ marginBottom: '1.5rem' }}>
-                            <RichTextEditor
-                                label={t('stageDescriptionEn')}
-                                value={stage.description || ''}
-                                onChange={(value) => updateStageField(index, 'description', value)}
-                            />
-                        </div>
-
-                        <div style={{ marginBottom: '1.5rem' }} dir="rtl">
-                            <RichTextEditor
-                                label={t('stageDescriptionAr')}
-                                value={stage.description_ar || ''}
-                                onChange={(value) => updateStageField(index, 'description_ar', value)}
-                            />
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+                            <div>
+                                <RichTextEditor
+                                    label={t('stageDescriptionEn')}
+                                    value={stage.description || ''}
+                                    onChange={(value) => updateStageField(index, 'description', value)}
+                                />
+                            </div>
+                            <div dir="rtl">
+                                <RichTextEditor
+                                    label={t('stageDescriptionAr')}
+                                    value={stage.description_ar || ''}
+                                    onChange={(value) => updateStageField(index, 'description_ar', value)}
+                                />
+                            </div>
                         </div>
 
                         <div>

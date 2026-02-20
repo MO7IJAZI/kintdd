@@ -212,6 +212,8 @@ model Crop {
   name        String
   name_ar     String?
   slug        String      @unique
+  category    String?     // Crop category (e.g., vegetables, fruits, grains)
+  category_ar String?     // Category in Arabic
   harvestSeason_ar String?
   image             String?
   pdfUrl            String?
@@ -226,6 +228,7 @@ model Crop {
   updatedAt   DateTime    @updatedAt
 
   @@index([slug])
+  @@index([category])
   @@map("crops")
 }
 
@@ -234,6 +237,8 @@ model CropStage {
   id             String   @id @default(cuid())
   name           String
   name_ar        String?
+  description    String?  @db.Text
+  description_ar String?  @db.Text
   order          Int      @default(0)
   cropId         String
   crop           Crop     @relation(fields: [cropId], references: [id], onDelete: Cascade)
@@ -461,3 +466,85 @@ model Document {
   @@index([isActive])
   @@map("documents")
 }
+
+// Animal Types (Livestock)
+model AnimalType {
+  id             String        @id @default(cuid())
+  name           String
+  name_ar        String?
+  slug           String        @unique
+  description    String?       @db.Text
+  description_ar String?       @db.Text
+  imageUrl       String?
+  icon           String?
+  order          Int           @default(0)
+  isActive       Boolean       @default(true)
+  issues         AnimalIssue[]
+  tabs           AnimalTypeTab[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([slug])
+  @@index([isActive])
+  @@index([order])
+  @@map("animal_types")
+}
+
+// Most Common Issues per Animal Type
+model AnimalIssue {
+  id             String     @id @default(cuid())
+  title          String
+  title_ar       String?
+  description    String?    @db.Text
+  description_ar String?    @db.Text
+  order          Int        @default(0)
+  isActive       Boolean    @default(true)
+  animalTypeId   String
+  animalType     AnimalType @relation(fields: [animalTypeId], references: [id], onDelete: Cascade)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  @@index([animalTypeId])
+  @@index([isActive])
+  @@index([order])
+  @@map("animal_issues")
+}
+
+// Tab for an Animal Type
+model AnimalTypeTab {
+  id             String               @id @default(cuid())
+  title          String
+  title_ar       String?
+  description    String?              @db.Text
+  description_ar String?              @db.Text
+  order          Int                  @default(0)
+  animalTypeId   String
+  animalType     AnimalType           @relation(fields: [animalTypeId], references: [id], onDelete: Cascade)
+  images         AnimalTypeTabImage[]
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  @@index([animalTypeId])
+  @@index([order])
+  @@map("animal_type_tabs")
+}
+
+// Image for an Animal Type Tab
+model AnimalTypeTabImage {
+  id             String        @id @default(cuid())
+  imageUrl       String
+  title          String?
+  title_ar       String?
+  description    String?       @db.Text
+  description_ar String?       @db.Text
+  order          Int           @default(0)
+  tabId          String
+  tab            AnimalTypeTab @relation(fields: [tabId], references: [id], onDelete: Cascade)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([tabId])
+  @@index([order])
+  @@map("animal_type_tab_images")
+}
+

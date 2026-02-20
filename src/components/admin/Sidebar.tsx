@@ -16,6 +16,7 @@ export default function Sidebar() {
     const menuItems = [
         { name: t('dashboard'), href: '/admin', icon: '📊' },
         { name: t('products'), href: '/admin/products', icon: '📦' },
+        { name: t('animalTypes'), href: '/admin/animal-types', icon: '🐾' },
         { name: t('cropGuides'), href: '/admin/crops', icon: '🌾' },
         { name: t('expertArticles'), href: '/admin/expert-articles', icon: '🎓' },
         { name: t('blogPosts'), href: '/admin/blog', icon: '📝' },

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations } from 'next-intl';
 import { createCrop, updateCrop } from "@/actions/cropActions";
 import { useRouter } from "next/navigation";
@@ -9,6 +9,7 @@ import ImageUpload from "./ImageUpload";
 import FileUpload from "./FileUpload";
 import StagesEditor from "./StagesEditor";
 import { generateSlug } from "@/lib/slugUtils";
+import { useLocale } from "next-intl";
 
 interface CropProduct {
     id: string;
@@ -33,6 +34,8 @@ interface CropInitialData {
     name: string;
     name_ar?: string | null;
     slug: string;
+    category?: string | null;
+    category_ar?: string | null;
     description?: string | null;
     description_ar?: string | null;
     harvestSeason_ar?: string | null;
@@ -47,6 +50,7 @@ interface CropInitialData {
 interface StageFormData {
     name: string;
     name_ar?: string;
+    description?: string;
     description_ar?: string;
     products: string[];
 }
@@ -59,6 +63,8 @@ interface CropFormProps {
 export default function CropForm({ initialData, products = [] }: CropFormProps) {
     const router = useRouter();
     const t = useTranslations('AdminCropForm');
+    const locale = useLocale();
+    const isRtl = locale === 'ar';
     const [isPending, setIsPending] = useState(false);
     const [description, setDescription] = useState(initialData?.description || "");
     const [description_ar, setDescriptionAr] = useState(initialData?.description_ar || "");
@@ -77,10 +83,62 @@ export default function CropForm({ initialData, products = [] }: CropFormProps) 
         initialData?.stages?.map((s) => ({
             name: s.name,
             name_ar: s.name_ar || "",
+            description: (s as any).description || "",
             description_ar: s.description_ar || "",
             products: s.recommendation?.products || []
         })) || []
     );
+
+    const [isTranslatingDesc, setIsTranslatingDesc] = useState(false);
+    const storageKey = `${initialData?.id ? `crop:${initialData.id}` : 'crop:new'}:${isRtl ? 'ar' : 'en'}`;
+
+    // manual bilingual entry; client auto-translate removed
+
+    // removed google translate widget
+
+    useEffect(() => {
+        try {
+            const raw = localStorage.getItem(storageKey);
+            if (!raw) return;
+            const saved = JSON.parse(raw) as {
+                description?: string;
+                description_ar?: string;
+                image?: string;
+                pdfUrl?: string;
+                slug?: string;
+                selectedProducts?: string[];
+                stages?: StageFormData[];
+            };
+            setTimeout(() => {
+                if (saved.description) setDescription(prev => prev || saved.description!);
+                if (saved.description_ar) setDescriptionAr(prev => prev || saved.description_ar!);
+                if (saved.image) setImage(prev => prev || saved.image!);
+                if (saved.pdfUrl) setPdfUrl(prev => prev || saved.pdfUrl!);
+                if (saved.slug) setSlug(prev => prev || saved.slug!);
+                if (Array.isArray(saved.selectedProducts) && saved.selectedProducts.length) {
+                    setSelectedProducts(prev => prev.length ? prev : saved.selectedProducts as string[]);
+                }
+                if (Array.isArray(saved.stages) && saved.stages.length) {
+                    setStages(prev => prev.length ? prev : saved.stages as StageFormData[]);
+                }
+            }, 0);
+        } catch {}
+    }, [storageKey]);
+
+    useEffect(() => {
+        try {
+            const payload = JSON.stringify({
+                description,
+                description_ar,
+                image,
+                pdfUrl,
+                slug,
+                selectedProducts,
+                stages,
+            });
+            localStorage.setItem(storageKey, payload);
+        } catch {}
+    }, [description, description_ar, image, pdfUrl, slug, selectedProducts, stages, storageKey]);
 
     // Auto-generate slug from name when name changes and slug hasn't been manually edited
     const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -116,6 +174,9 @@ export default function CropForm({ initialData, products = [] }: CropFormProps) 
 
         setIsPending(false);
         router.push("/admin/crops");
+        try {
+            localStorage.removeItem(storageKey);
+        } catch {}
     }
 
     const toggleProduct = (productId: string) => {
@@ -139,30 +200,25 @@ export default function CropForm({ initialData, products = [] }: CropFormProps) 
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem', marginBottom: '2rem' }}>
                 <div>
                     <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.9rem' }}>{t('slug')}</label>
                     <input value={slug} onChange={handleSlugChange} required className="input" style={{ width: '100%' }} placeholder="url-friendly-slug" />
                     <input type="hidden" name="slug" value={slug} />
                 </div>
-                <div dir="rtl">
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.9rem' }}>{t('harvestSeasonAr')}</label>
-                    <input name="harvestSeason_ar" defaultValue={initialData?.harvestSeason_ar || ''} className="input" style={{ width: '100%' }} placeholder={t('harvestSeasonArPlaceholder')} />
-                </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem', marginBottom: '2rem' }}>
                 <div>
                     <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.9rem' }}>{t('categoryEn')}</label>
-                    <select name="metaTitle" defaultValue={initialData?.metaTitle || "Arable Crops"} className="input" style={{ width: '100%' }}>
-                        <option value="Arable Crops">{t('arableCrops')}</option>
-                        <option value="Vegetable Crops">{t('vegetableCrops')}</option>
-                        <option value="Fruit Crops">{t('fruitCrops')}</option>
+                    <select name="category" defaultValue={initialData?.category || "vegetables"} className="input" style={{ width: '100%' }}>
+                        <option value="vegetables">{t('vegetables')}</option>
+                        <option value="fruits">{t('fruits')}</option>
+                        <option value="legumes">{t('legumes')}</option>
+                        <option value="cereals">{t('cereals')}</option>
+                        <option value="industrial">{t('industrial')}</option>
+                        <option value="herbs">{t('herbs')}</option>
                     </select>
-                </div>
-                <div dir="rtl">
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.9rem' }}>{t('metaTitleAr')}</label>
-                    <input name="metaTitle_ar" defaultValue={initialData?.metaTitle_ar || ''} className="input" style={{ width: '100%' }} placeholder={t('metaTitleArPlaceholder')} />
                 </div>
             </div>
 

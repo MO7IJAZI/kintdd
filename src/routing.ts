@@ -1,9 +1,9 @@
-import {defineRouting} from 'next-intl/routing';
+import { defineRouting } from 'next-intl/routing';
 
 export const routing = defineRouting({
   // A list of all locales that are supported
   locales: ['en', 'ar'],
- 
+
   // Used when no locale matches
   defaultLocale: 'en',
 
@@ -17,9 +17,77 @@ export const routing = defineRouting({
       en: '/product-category/[slug]',
       ar: '/product-category/[slug]'
     },
+    '/product-category/biostimulants': {
+      en: '/product-category/biostimulants',
+      ar: '/product-category/biostimulants'
+    },
+    '/product-category/activators': {
+      en: '/product-category/activators',
+      ar: '/product-category/activators'
+    },
+    '/product-category/bioproducts': {
+      en: '/product-category/bioproducts',
+      ar: '/product-category/bioproducts'
+    },
+    '/product-category/foliar-fertilizers': {
+      en: '/product-category/foliar-fertilizers',
+      ar: '/product-category/foliar-fertilizers'
+    },
+    '/product-category/organic-farming': {
+      en: '/product-category/organic-farming',
+      ar: '/product-category/organic-farming'
+    },
     '/products': {
       en: '/products',
       ar: '/products'
+    },
+    '/products/livestock': {
+      en: '/products/livestock',
+      ar: '/products/livestock'
+    },
+    '/products/livestock/animal-products': {
+      en: '/products/livestock/animal-products',
+      ar: '/products/livestock/animal-products'
+    },
+    '/products/livestock/by-animal-type': {
+      en: '/products/livestock/by-animal-type',
+      ar: '/products/livestock/by-animal-type'
+    },
+    '/products/livestock/[slug]': {
+      en: '/products/livestock/[slug]',
+      ar: '/products/livestock/[slug]'
+    },
+    '/products/plant-wealth': {
+      en: '/products/plant-wealth',
+      ar: '/products/plant-wealth'
+    },
+    '/products/plant-wealth/plant-products': {
+      en: '/products/plant-wealth/plant-products',
+      ar: '/products/plant-wealth/plant-products'
+    },
+    '/products/plant-wealth/crops': {
+      en: '/products/plant-wealth/crops',
+      ar: '/products/plant-wealth/crops'
+    },
+    '/products/plant-wealth/[slug]': {
+      en: '/products/plant-wealth/[slug]',
+      ar: '/products/plant-wealth/[slug]'
+    },
+    '/products-for-animals': {
+      en: '/products-for-animals',
+      ar: '/products-for-animals'
+    },
+    '/products-for-animals/poultry': {
+      en: '/products-for-animals/poultry',
+      ar: '/products-for-animals/poultry'
+    },
+    '/products-for-animals/ruminants': {
+      en: '/products-for-animals/ruminants',
+      ar: '/products-for-animals/ruminants'
+    },
+    '/products-for-animals/swine': {
+      en: '/products-for-animals/swine',
+      ar: '/products-for-animals/swine'
     },
     '/catalogs': {
       en: '/catalogs',
@@ -36,10 +104,6 @@ export const routing = defineRouting({
     '/blog/[slug]': {
       en: '/blog/[slug]',
       ar: '/blog/[slug]'
-    },
-    '/news': {
-      en: '/news',
-      ar: '/news'
     },
     '/contact': {
       en: '/contact',
@@ -117,10 +181,6 @@ export const routing = defineRouting({
     '/admin': {
       en: '/admin',
       ar: '/admin'
-    },
-    '/admin/categories': {
-      en: '/admin/categories',
-      ar: '/admin/categories'
     },
     '/admin/products': {
       en: '/admin/products',

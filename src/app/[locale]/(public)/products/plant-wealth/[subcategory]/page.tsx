@@ -3,6 +3,7 @@ import { Link } from "@/navigation";
 import { getTranslations, getLocale } from 'next-intl/server';
 import { ArrowRight, Package } from 'lucide-react';
 import { notFound } from "next/navigation";
+import Image from "next/image";
 
 export const revalidate = 300;
 
@@ -58,7 +59,7 @@ export default async function SubcategoryPage({
       notFound();
     }
 
-    category = categoryData as any;
+    category = categoryData as CategoryData;
 
     // Determine parent path based on parent slug
     if (category.parent?.slug === 'animal-production') {
@@ -71,9 +72,10 @@ export default async function SubcategoryPage({
     notFound();
   }
 
-  const categoryName = isAr ? category.name_ar || category.name : category.name;
-  const categoryDesc = isAr ? category.description_ar || category.description : category.description;
-  const parentName = isAr ? category.parent?.name_ar || category.parent?.name : category.parent?.name;
+  // At this point, category is guaranteed to be non-null due to notFound() in catch/if blocks
+  const categoryName = isAr ? category!.name_ar || category!.name : category!.name;
+  const categoryDesc = isAr ? category!.description_ar || category!.description : category!.description;
+  const parentName = isAr ? category!.parent?.name_ar || category!.parent?.name : category!.parent?.name;
 
   return (
     <div style={{ direction: isAr ? 'rtl' : 'ltr', overflowX: 'hidden' }}>
@@ -99,7 +101,7 @@ export default async function SubcategoryPage({
               {isAr ? 'المنتجات' : 'Products'}
             </Link>
             {' / '}
-            <Link href={`/products/${parentPath}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+            <Link href={`/products/${parentPath}` as '/products/livestock' | '/products/plant-wealth'} style={{ color: 'inherit', textDecoration: 'none' }}>
               {parentName}
             </Link>
             {' / '}
@@ -157,10 +159,10 @@ export default async function SubcategoryPage({
             marginBottom: '2rem',
             fontSize: '1rem'
           }}>
-            {category.products.length} {isAr ? 'منتج متاح' : 'products available'}
+            {category!.products.length} {isAr ? 'منتج متاح' : 'products available'}
           </p>
 
-          {category.products.length === 0 ? (
+          {category!.products.length === 0 ? (
             <div style={{
               textAlign: 'center',
               padding: '4rem 1rem',
@@ -180,14 +182,14 @@ export default async function SubcategoryPage({
               gap: '2rem',
               marginBottom: '2rem'
             }}>
-              {category.products.map((product) => {
+              {category!.products.map((product) => {
                 const productName = isAr ? product.name_ar || product.name : product.name;
                 const productDesc = isAr ? product.shortDesc_ar || product.shortDesc : product.shortDesc;
 
                 return (
                   <Link
                     key={product.id}
-                    href={`/product/${product.slug}`}
+                    href={{ pathname: '/product/[slug]', params: { slug: product.slug } } as any}
                     style={{ textDecoration: 'none', color: 'inherit' }}
                   >
                     <div style={{
@@ -215,11 +217,16 @@ export default async function SubcategoryPage({
                         <div style={{
                           width: '100%',
                           height: '200px',
-                          backgroundColor: '#f0f0f0',
-                          backgroundImage: `url(${product.image})`,
-                          backgroundSize: 'cover',
-                          backgroundPosition: 'center'
-                        }} />
+                          position: 'relative',
+                          backgroundColor: '#f8fafc'
+                        }}>
+                          <Image
+                            src={product.image}
+                            alt={productName}
+                            fill
+                            style={{ objectFit: 'cover' }}
+                          />
+                        </div>
                       )}
 
                       {/* Product Info */}

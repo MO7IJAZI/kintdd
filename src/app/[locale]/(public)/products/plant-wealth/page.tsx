@@ -1,7 +1,8 @@
 import prisma from "@/lib/prisma";
 import { Link } from "@/navigation";
 import { getTranslations, getLocale } from 'next-intl/server';
-import { ArrowRight, Package } from 'lucide-react';
+import { ArrowRight, Package, Leaf, Sprout } from 'lucide-react';
+import Image from 'next/image';
 
 export const revalidate = 300;
 
@@ -102,103 +103,158 @@ export default async function PlantWealthPage() {
         </div>
       </section>
 
-      {/* Subcategories Grid */}
-      <section style={{ padding: '6rem 1rem', backgroundColor: '#f8fafc' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
-            <h2 style={{
-              fontSize: 'clamp(2rem, 4vw, 3rem)',
-              fontWeight: 800,
-              color: '#142346',
-              marginBottom: '1rem',
-              lineHeight: 1.2
-            }}>
-              {isAr ? 'الأقسام الفرعية' : 'Subcategories'}
-            </h2>
-            <div style={{
-              width: '80px',
-              height: '4px',
-              background: 'linear-gradient(90deg, #e9496c, #142346)',
-              margin: '0 auto',
-              borderRadius: '2px'
-            }} />
-          </div>
-
-          {subcategories.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '4rem 1rem' }}>
-              <Package style={{ width: '64px', height: '64px', margin: '0 auto 1rem', opacity: 0.5 }} />
-              <p style={{ fontSize: '1.1rem', color: '#666' }}>
-                {isAr ? 'لا توجد فئات فرعية متاحة' : 'No subcategories available'}
-              </p>
-            </div>
-          ) : (
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-              gap: '2rem'
-            }}>
-              {subcategories.map((subcategory) => (
-                <Link
-                  key={subcategory.slug}
-                  href={`/products/plant-wealth/${subcategory.slug}`}
-                  style={{ textDecoration: 'none', color: 'inherit' }}
-                >
+      {/* Hero Cards Section */}
+      <section style={{ padding: '4rem 1rem', backgroundColor: '#f8fafc' }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+            gap: '2rem'
+          }}>
+            {/* Plant Products Card */}
+            <Link
+              href="/products/plant-wealth/plant-products"
+              style={{ textDecoration: 'none', color: 'inherit' }}
+            >
+              <div style={{
+                position: 'relative',
+                borderRadius: '20px',
+                overflow: 'hidden',
+                height: '350px',
+                cursor: 'pointer',
+                boxShadow: '0 10px 40px rgba(0,0,0,0.15)'
+              }}>
+                <Image
+                  src="/images/cat-fertilizers.png"
+                  alt={isAr ? 'المنتجات النباتية' : 'Plant Products'}
+                  fill
+                  style={{ objectFit: 'cover' }}
+                />
+                <div style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background: 'linear-gradient(to top, rgba(20, 35, 70, 0.9) 0%, rgba(20, 35, 70, 0.3) 100%)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'flex-end',
+                  padding: '2.5rem'
+                }}>
                   <div style={{
-                    background: 'white',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '12px',
-                    padding: '2rem',
-                    transition: 'all 0.3s ease',
-                    cursor: 'pointer',
-                    height: '100%',
+                    width: '60px',
+                    height: '60px',
+                    background: 'rgba(233, 73, 108, 0.9)',
+                    borderRadius: '50%',
                     display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.08)'
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 24px rgba(0,0,0,0.12)';
-                    (e.currentTarget as HTMLElement).style.borderColor = '#e9496c';
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.boxShadow = '0 1px 3px rgba(0,0,0,0.08)';
-                    (e.currentTarget as HTMLElement).style.borderColor = '#e2e8f0';
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '1rem'
                   }}>
-                    <div>
-                      <h3 style={{
-                        fontSize: '1.5rem',
-                        fontWeight: 700,
-                        color: '#142346',
-                        marginBottom: '1rem'
-                      }}>
-                        {isAr ? subcategory.name_ar : subcategory.name}
-                      </h3>
-                      <p style={{
-                        color: '#666',
-                        fontSize: '1rem',
-                        lineHeight: 1.6,
-                        marginBottom: '1.5rem'
-                      }}>
-                        {isAr ? subcategory.description_ar : subcategory.description}
-                      </p>
-                    </div>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      paddingTop: '1rem',
-                      borderTop: '1px solid #e2e8f0',
-                      color: '#e9496c',
-                      fontWeight: 600
-                    }}>
-                      <span>{subcategory.productsCount} {isAr ? 'منتج' : 'products'}</span>
-                      <ArrowRight style={{ width: '20px', height: '20px' }} />
-                    </div>
+                    <Leaf style={{ width: '30px', height: '30px', color: 'white' }} />
                   </div>
-                </Link>
-              ))}
-            </div>
-          )}
+                  <h3 style={{
+                    fontSize: '2rem',
+                    fontWeight: 800,
+                    color: 'white',
+                    marginBottom: '0.5rem'
+                  }}>
+                    {isAr ? 'المنتجات النباتية' : 'Plant Products'}
+                  </h3>
+                  <p style={{
+                    fontSize: '1rem',
+                    color: 'rgba(255,255,255,0.85)',
+                    marginBottom: '1rem'
+                  }}>
+                    {isAr 
+                      ? 'منتجات للعناية العامة بالنبات والتسميد' 
+                      : 'Products for general plant care and fertilization'}
+                  </p>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    color: '#e9496c',
+                    fontWeight: 600,
+                    fontSize: '1rem'
+                  }}>
+                    <span>{isAr ? 'تصفح المنتجات' : 'Browse Products'}</span>
+                    <ArrowRight style={{ width: '20px', height: '20px' }} />
+                  </div>
+                </div>
+              </div>
+            </Link>
+
+            {/* Crops Card */}
+            <Link
+              href="/products/plant-wealth/crops"
+              style={{ textDecoration: 'none', color: 'inherit' }}
+            >
+              <div style={{
+                position: 'relative',
+                borderRadius: '20px',
+                overflow: 'hidden',
+                height: '350px',
+                cursor: 'pointer',
+                boxShadow: '0 10px 40px rgba(0,0,0,0.15)'
+              }}>
+                <Image
+                  src="/images/cat-biostimulants.png"
+                  alt={isAr ? 'المحاصيل' : 'Crops'}
+                  fill
+                  style={{ objectFit: 'cover' }}
+                />
+                <div style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background: 'linear-gradient(to top, rgba(20, 35, 70, 0.9) 0%, rgba(20, 35, 70, 0.3) 100%)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'flex-end',
+                  padding: '2.5rem'
+                }}>
+                  <div style={{
+                    width: '60px',
+                    height: '60px',
+                    background: 'rgba(233, 73, 108, 0.9)',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '1rem'
+                  }}>
+                    <Sprout style={{ width: '30px', height: '30px', color: 'white' }} />
+                  </div>
+                  <h3 style={{
+                    fontSize: '2rem',
+                    fontWeight: 800,
+                    color: 'white',
+                    marginBottom: '0.5rem'
+                  }}>
+                    {isAr ? 'المحاصيل' : 'Crops'}
+                  </h3>
+                  <p style={{
+                    fontSize: '1rem',
+                    color: 'rgba(255,255,255,0.85)',
+                    marginBottom: '1rem'
+                  }}>
+                    {isAr 
+                      ? 'حلول متخصصة خاصة بالمحاصيل' 
+                      : 'Specialized crop-specific solutions'}
+                  </p>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    color: '#e9496c',
+                    fontWeight: 600,
+                    fontSize: '1rem'
+                  }}>
+                    <span>{isAr ? 'تصفح المنتجات' : 'Browse Products'}</span>
+                    <ArrowRight style={{ width: '20px', height: '20px' }} />
+                  </div>
+                </div>
+              </div>
+            </Link>
+          </div>
         </div>
       </section>
     </div>

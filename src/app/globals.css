@@ -1,6 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 :root {
   /* Brand Colors - Premium Agricultural Identity */
@@ -29,8 +27,8 @@
 
   /* Typography */
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-heading: 'Outfit', sans-serif;
-  --font-arabic: 'Cairo', system-ui, -apple-system, sans-serif;
+  --font-heading: 'Inter', sans-serif;
+  --font-arabic: 'Tajawal', system-ui, -apple-system, sans-serif;
 
   /* Spacing Scale - Professional 4px/8px based system */
   --space-1: 0.25rem;  /* 4px */
@@ -161,6 +159,16 @@ body.font-arabic {
   font-family: var(--font-cairo);
 }
 
+/* Ensure Arabic pages use Arabic font for headings as well */
+body.font-arabic h1,
+body.font-arabic h2,
+body.font-arabic h3,
+body.font-arabic h4,
+body.font-arabic h5,
+body.font-arabic h6 {
+  font-family: var(--font-arabic);
+  font-family: var(--font-cairo);
+}
 h1,
 h2,
 h3,
@@ -326,13 +334,6 @@ button {
   display: grid;
   grid-template-columns: 1fr;
   gap: 3rem;
-}
-
-@media (min-width: 1024px) {
-  .crop-detail-grid {
-    grid-template-columns: minmax(400px, 1fr) 260px;
-    gap: 4rem;
-  }
 }
 
 /* Article Card Enhancements */
@@ -929,6 +930,58 @@ button {
   margin-bottom: 2rem;
 }
 
+/* Styles for AnimalTypeForm Tabs and Images */
+.tabs-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.tab-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  background-color: #f8fafc;
+}
+
+.tab-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+  background-color: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  border-radius: 0.75rem 0.75rem 0 0;
+}
+
+.tab-header h4 {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.tab-toggle-icon {
+  transition: transform 0.3s ease;
+}
+
+.tab-content {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.image-card {
+  border: 1px dashed #cbd5e1;
+  padding: 1.5rem;
+  border-radius: 0.75rem;
+  background-color: #fff;
+}
+
+.image-card .form-group-grid {
+  margin-top: 1rem;
+}
+
+
 .admin-dashboard .page-header h1 {
   font-size: 1.75rem;
   color: #1e293b;
@@ -938,7 +991,90 @@ button {
 
 .admin-dashboard .page-header p {
   color: #64748b;
-  margin: 0;
+  margin-top: 0.25rem;
+}
+
+.form-grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.form-group-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-field label {
+  font-weight: 500;
+  color: #334155;
+}
+
+.form-section {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.form-section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.form-section-description {
+  color: #64748b;
+  margin-top: 0.25rem;
+}
+
+.issues-grid {
+  display: grid;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.issue-card {
+  padding: 1.5rem;
+  background: #f8fafc;
+  border-radius: 0.75rem;
+}
+
+.issue-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.issue-order-input {
+  width: 80px;
+}
+
+.checkbox-label {
+  margin-left: 0.5rem;
+}
+
+.btn-danger {
+  background-color: #ef4444;
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #dc2626;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e2e8f0;
 }
 
 .admin-dashboard .btn-view-site {
@@ -968,7 +1104,7 @@ button {
   padding: 1.25rem;
   background: white;
   border-radius: 0.75rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid black;
   text-decoration: none;
   transition: all 0.2s;
 }
@@ -1007,11 +1143,17 @@ button {
   gap: 1.5rem;
 }
 
+.input {
+  border: 1px solid black;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+}
+
 .admin-dashboard .card {
   background: white;
   border-radius: 0.75rem;
   padding: 1.5rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid black;
 }
 
 .admin-dashboard .card h3 {
@@ -1036,7 +1178,7 @@ button {
   gap: 0.5rem;
   padding: 1rem;
   background: #f8fafc;
-  border: 1px solid #e2e8f0;
+  border: 1px solid black;
   border-radius: 0.5rem;
   text-decoration: none;
   color: #475569;
@@ -1118,6 +1260,7 @@ button {
 
 .line-clamp-3 {
   display: -webkit-box;
+  line-clamp: 3;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;

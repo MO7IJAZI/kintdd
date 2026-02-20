@@ -1,16 +1,17 @@
-import { Cairo, Inter, Outfit } from 'next/font/google';
+import { Inter, Tajawal } from 'next/font/google';
 
 export const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
 });
 
-export const outfit = Outfit({
+export const outfit = Inter({
   subsets: ['latin'],
   variable: '--font-outfit',
 });
 
-export const cairo = Cairo({
-  subsets: ['arabic', 'latin'],
+export const cairo = Tajawal({
+  subsets: ['arabic'],
   variable: '--font-cairo',
+  weight: ['400', '700']
 });
