@@ -21,23 +21,27 @@ export default auth((req) => {
     const path = nextUrl.pathname;
 
     // Admin protection logic
-    // Check for admin routes (e.g. /en/admin, /ar/admin)
-    // We use a regex to ensure we match exactly the admin section and handle locales correctly
-    const isAdminRoute = /^\/(en|ar)\/admin(\/|$)/.test(path);
-    const isLoginRoute = /^\/(en|ar)\/admin\/login(\/|$)/.test(path);
+    // We check if the path contains '/admin' but exclude '/admin/login'
+    // This covers /en/admin, /ar/admin, /admin, etc.
+    const path = nextUrl.pathname;
+    const isAdminSection = path.includes('/admin');
+    const isLoginPage = path.includes('/login');
 
-    if (isAdminRoute) {
-        if (!isLoggedIn && !isLoginRoute) {
+    if (isAdminSection && !isLoginPage) {
+        if (!isLoggedIn) {
             // Redirect to login, preserving the locale
-            const locale = path.split('/')[1] || 'en';
+            // Extract locale from path (e.g., /en/...) or default to 'en'
+            const segments = path.split('/');
+            const locale = (segments.length > 1 && (segments[1] === 'en' || segments[1] === 'ar')) ? segments[1] : 'en';
             return NextResponse.redirect(new URL(`/${locale}/admin/login`, nextUrl));
         }
-        
-        if (isLoggedIn && isLoginRoute) {
-             // Redirect to admin dashboard, preserving the locale
-             const locale = path.split('/')[1] || 'en';
-             return NextResponse.redirect(new URL(`/${locale}/admin`, nextUrl));
-        }
+    }
+
+    // Redirect logged-in users away from login page
+    if (isLoginPage && isLoggedIn) {
+         const segments = path.split('/');
+         const locale = (segments.length > 1 && (segments[1] === 'en' || segments[1] === 'ar')) ? segments[1] : 'en';
+         return NextResponse.redirect(new URL(`/${locale}/admin`, nextUrl));
     }
 
     return intlMiddleware(req);
@@ -45,5 +49,6 @@ export default auth((req) => {
 
 export const config = {
     // Matcher ignoring internal Next.js paths, static files, and vercel internals
-    matcher: ['/@vite/client', '/((?!api|_next|_vercel|.*\\..*).*)']
+    // We want to match /en/admin, /admin, etc.
+    matcher: ['/((?!api|_next|_vercel|.*\\..*).*)']
 };
