@@ -157,7 +157,10 @@ export default function Sidebar() {
                     <span>🏠</span> {t('backToSite')}
                 </Link>
                 <button
-                    onClick={() => logout()}
+                    onClick={async () => {
+                        await logout();
+                        window.location.href = '/';
+                    }}
                     style={{
                         width: '100%',
                         textAlign: 'left',
