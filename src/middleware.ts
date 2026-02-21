@@ -23,7 +23,6 @@ export default auth((req) => {
     // Admin protection logic
     // We check if the path contains '/admin' but exclude '/admin/login'
     // This covers /en/admin, /ar/admin, /admin, etc.
-    const path = nextUrl.pathname;
     const isAdminSection = path.includes('/admin');
     const isLoginPage = path.includes('/login');
 
