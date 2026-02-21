@@ -50,13 +50,22 @@ export default function AdminLayout({
          return null; 
     }
     
-    // REMOVED THE BLOCKING LOGIC FOR LOGIN PAGE
-    // if (status === 'unauthenticated' && isLoginPage) {
-    //    // Allow rendering login page
-    // } else if (status === 'unauthenticated') {
-    //    // Should be caught by above, but safe guard
-    //    return null;
-    // }
+    // For login page, if user is already authenticated, don't render content (redirect happens in useEffect)
+    // But show loading spinner instead of flashing login form
+    if (isLoginPage && status === 'authenticated') {
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#f3f4f6' }}>
+                <div style={{ width: '40px', height: '40px', border: '3px solid #e2e8f0', borderTopColor: 'var(--primary)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+                <style jsx>{`
+                    @keyframes spin {
+                        to { transform: rotate(360deg); }
+                    }
+                `}</style>
+            </div>
+        );
+    }
+    
+
 
     if (isLoginPage) {
         return (
