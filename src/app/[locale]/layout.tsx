@@ -5,6 +5,7 @@ import { routing } from '@/routing';
 import { inter, outfit, cairo } from '@/app/fonts';
 import '@/app/globals.css';
 import { Metadata } from 'next';
+import { Providers } from '@/components/Providers';
 
 export async function generateMetadata({
   params
@@ -46,7 +47,9 @@ export default async function LocaleLayout({
     <html lang={locale} dir={direction} className={`${inter.variable} ${outfit.variable} ${cairo.variable}`}>
       <body className={locale === 'ar' ? 'font-arabic' : 'font-latin'}>
         <NextIntlClientProvider messages={messages}>
-          {children}
+          <Providers>
+            {children}
+          </Providers>
         </NextIntlClientProvider>
       </body>
     </html>
