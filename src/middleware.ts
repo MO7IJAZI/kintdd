@@ -1,37 +1,49 @@
-import NextAuth from "next-auth";
-import { authConfig } from "./auth.config";
 import createMiddleware from 'next-intl/middleware';
 import { routing } from './routing';
-
-const { auth } = NextAuth(authConfig);
+import NextAuth from 'next-auth';
+import { authConfig } from './auth.config';
+import { NextResponse } from 'next/server';
 
 const intlMiddleware = createMiddleware(routing);
+const { auth } = NextAuth(authConfig);
 
 export default auth((req) => {
-  const { nextUrl } = req;
-  const isLoggedIn = !!req.auth;
+    // Legacy Vite check from original proxy configuration
+    if (req.nextUrl.pathname === '/@vite/client') {
+        return new NextResponse('export {};', {
+            status: 200,
+            headers: { 'Content-Type': 'application/javascript; charset=utf-8' }
+        });
+    }
 
-  // Define paths that require authentication
-  // We check if the path starts with /admin but exclude the login page itself
-  const isAdminPath = nextUrl.pathname.includes('/admin');
-  const isLoginPage = nextUrl.pathname.includes('/admin/login');
+    const { nextUrl } = req;
+    const isLoggedIn = !!req.auth;
+    const path = nextUrl.pathname;
 
-  if (isAdminPath && !isLoginPage && !isLoggedIn) {
-    // Redirect unauthenticated users to login page
-    // next-intl will handle the locale prefix if needed, but for safety we can construct absolute URL
-    return Response.redirect(new URL('/admin/login', nextUrl));
-  }
+    // Admin protection logic
+    // Check for admin routes (e.g. /en/admin, /ar/admin)
+    // We use a regex to ensure we match exactly the admin section and handle locales correctly
+    const isAdminRoute = /^\/(en|ar)\/admin(\/|$)/.test(path);
+    const isLoginRoute = /^\/(en|ar)\/admin\/login(\/|$)/.test(path);
 
-  // If authenticated and on login page, redirect to admin dashboard
-  if (isLoginPage && isLoggedIn) {
-    return Response.redirect(new URL('/admin', nextUrl));
-  }
+    if (isAdminRoute) {
+        if (!isLoggedIn && !isLoginRoute) {
+            // Redirect to login, preserving the locale
+            const locale = path.split('/')[1] || 'en';
+            return NextResponse.redirect(new URL(`/${locale}/admin/login`, nextUrl));
+        }
+        
+        if (isLoggedIn && isLoginRoute) {
+             // Redirect to admin dashboard, preserving the locale
+             const locale = path.split('/')[1] || 'en';
+             return NextResponse.redirect(new URL(`/${locale}/admin`, nextUrl));
+        }
+    }
 
-  // Allow next-intl to handle localization for all other requests
-  return intlMiddleware(req);
+    return intlMiddleware(req);
 });
 
 export const config = {
-  // Matcher ignoring internal Next.js paths and static files
-  matcher: ['/((?!api|_next|.*\\..*).*)']
+    // Matcher ignoring internal Next.js paths, static files, and vercel internals
+    matcher: ['/@vite/client', '/((?!api|_next|_vercel|.*\\..*).*)']
 };
