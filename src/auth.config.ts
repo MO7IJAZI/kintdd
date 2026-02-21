@@ -4,6 +4,10 @@ export const authConfig = {
     pages: {
         signIn: "/admin/login",
     },
+    session: {
+        strategy: "jwt",
+    },
+    trustHost: true,
     callbacks: {
         async jwt({ token, user }) {
             if (user) {
@@ -31,12 +35,6 @@ export const authConfig = {
             return session;
         },
         authorized({ auth, request: { nextUrl } }) {
-            // This is the built-in middleware logic from NextAuth
-            // We can return true/false here to allow/deny access
-            // But we are handling redirects manually in our custom middleware wrapper
-            // So we can just return true here and let our middleware handle logic?
-            // Or use this?
-            // Since we are combining with next-intl, manual handling in middleware.ts is often clearer.
             return true;
         },
     },
