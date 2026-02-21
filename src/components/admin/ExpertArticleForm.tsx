@@ -24,6 +24,7 @@ interface ExpertArticle {
     metaDesc?: string | null;
     metaDesc_ar?: string | null;
     isPublished?: boolean;
+    publishedAt?: string | Date | null;
 }
 
 export default function ExpertArticleForm({ initialData }: { initialData?: Partial<ExpertArticle> }) {
@@ -32,9 +33,11 @@ export default function ExpertArticleForm({ initialData }: { initialData?: Parti
     const [isPending, setIsPending] = useState(false);
     const [content, setContent] = useState(initialData?.content || "");
     const [contentAr, setContentAr] = useState(initialData?.content_ar || "");
+    const [contentTab, setContentTab] = useState<'en' | 'ar'>('en');
     const [image, setImage] = useState(initialData?.image || "");
     const [slug, setSlug] = useState(initialData?.slug || "");
     const [currentLang, setCurrentLang] = useState<'en' | 'ar'>('en');
+    const [publishedAt, setPublishedAt] = useState(initialData?.publishedAt ? new Date(initialData.publishedAt).toISOString().split('T')[0] : '');
 
     const generateSlug = (text: string) => {
         return text
@@ -138,8 +141,15 @@ export default function ExpertArticleForm({ initialData }: { initialData?: Parti
                     </select>
                 </div>
                 <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>{t('order')}</label>
-                    <input type="number" name="order" defaultValue={initialData?.order || 0} className="input" style={{ width: '100%' }} />
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Publish Date</label>
+                    <input 
+                        type="date" 
+                        name="publishedAt" 
+                        value={publishedAt} 
+                        onChange={(e) => setPublishedAt(e.target.value)}
+                        className="input" 
+                        style={{ width: '100%' }} 
+                    />
                 </div>
             </div>
 
@@ -158,20 +168,61 @@ export default function ExpertArticleForm({ initialData }: { initialData?: Parti
                 <textarea name="excerpt_ar" defaultValue={initialData?.excerpt_ar || ""} rows={3} className="input" style={{ width: '100%', fontFamily: 'inherit' }} />
             </div>
 
-            <div style={{ marginBottom: '2rem', display: currentLang === 'en' ? 'block' : 'none' }}>
-                <RichTextEditor 
-                    label={t('contentEn')}
-                    value={content || ""}
-                    onChange={setContent}
-                />
-            </div>
-            <div style={{ marginBottom: '2rem', display: currentLang === 'ar' ? 'block' : 'none' }} dir="rtl">
-                <RichTextEditor 
-                    label={t('contentAr')}
-                    value={contentAr || ""}
-                    onChange={setContentAr}
-                    dir="rtl"
-                />
+            <div style={{ marginBottom: '2rem' }}>
+                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                    <button
+                        type="button"
+                        onClick={() => setContentTab('en')}
+                        style={{
+                            padding: '0.75rem 1.5rem',
+                            border: 'none',
+                            background: contentTab === 'en' ? '#3b82f6' : 'transparent',
+                            color: contentTab === 'en' ? 'white' : '#374151',
+                            fontWeight: '600',
+                            fontSize: '0.875rem',
+                            cursor: 'pointer',
+                            borderRadius: '8px 8px 0 0',
+                            transition: 'all 0.2s',
+                        }}
+                    >
+                        {t('english')} 🇬🇧
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setContentTab('ar')}
+                        style={{
+                            padding: '0.75rem 1.5rem',
+                            border: 'none',
+                            background: contentTab === 'ar' ? '#3b82f6' : 'transparent',
+                            color: contentTab === 'ar' ? 'white' : '#374151',
+                            fontWeight: '600',
+                            fontSize: '0.875rem',
+                            cursor: 'pointer',
+                            borderRadius: '8px 8px 0 0',
+                            transition: 'all 0.2s',
+                        }}
+                    >
+                        {t('arabic')} 🇸🇦
+                    </button>
+                </div>
+                
+                {/* RichTextEditor based on active tab */}
+                {contentTab === 'en' ? (
+                    <RichTextEditor 
+                        label={t('contentEn')}
+                        value={content || ""}
+                        onChange={setContent}
+                    />
+                ) : (
+                    <div dir="rtl">
+                        <RichTextEditor 
+                            label={t('contentAr')}
+                            value={contentAr || ""}
+                            onChange={setContentAr}
+                            dir="rtl"
+                        />
+                    </div>
+                )}
             </div>
 
             <div style={{ borderTop: '1px solid var(--border)', paddingTop: '1.5rem', marginBottom: '1.5rem' }}>

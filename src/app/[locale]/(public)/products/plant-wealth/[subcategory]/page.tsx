@@ -62,9 +62,9 @@ export default async function SubcategoryPage({
     category = categoryData as CategoryData;
 
     // Determine parent path based on parent slug
-    if (category.parent?.slug === 'animal-production') {
+    if (category.parent?.slug === 'livestock') {
       parentPath = 'livestock';
-    } else if (category.parent?.slug === 'plant-production') {
+    } else if (category.parent?.slug === 'plant-wealth') {
       parentPath = 'plant-wealth';
     }
   } catch (error) {

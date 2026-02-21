@@ -10,6 +10,7 @@ const getAdminDashboardStats = unstable_cache(
         const rows = await prisma.$queryRaw<Array<{
             products: bigint | number;
             categories: bigint | number;
+            animalTypes: bigint | number;
             blogs: bigint | number;
             inquiries: bigint | number;
             crops: bigint | number;
@@ -19,10 +20,12 @@ const getAdminDashboardStats = unstable_cache(
             certificates: bigint | number;
             awards: bigint | number;
             headquarter: bigint | number;
+            catalogs: bigint | number;
         }>>`
             SELECT
                 (SELECT COUNT(*) FROM \`products\`) AS products,
                 (SELECT COUNT(*) FROM \`categories\`) AS categories,
+                (SELECT COUNT(*) FROM \`animal_types\`) AS animalTypes,
                 (SELECT COUNT(*) FROM \`blog_posts\`) AS blogs,
                 (SELECT COUNT(*) FROM \`contact_submissions\` WHERE \`isRead\` = 0) AS inquiries,
                 (SELECT COUNT(*) FROM \`crops\`) AS crops,
@@ -31,13 +34,15 @@ const getAdminDashboardStats = unstable_cache(
                 (SELECT COUNT(*) FROM \`job_applications\` WHERE \`status\` = 'pending') AS jobApplications,
                 (SELECT COUNT(*) FROM \`certificates\`) AS certificates,
                 (SELECT COUNT(*) FROM \`awards\`) AS awards,
-                (SELECT COUNT(*) FROM \`headquarters\`) AS headquarter
+                (SELECT COUNT(*) FROM \`headquarters\`) AS headquarter,
+                (SELECT COUNT(*) FROM \`catalogs\`) AS catalogs
         `;
 
         const row = rows[0];
         return {
             products: Number(row?.products ?? 0),
             categories: Number(row?.categories ?? 0),
+            animalTypes: Number(row?.animalTypes ?? 0),
             blogs: Number(row?.blogs ?? 0),
             inquiries: Number(row?.inquiries ?? 0),
             crops: Number(row?.crops ?? 0),
@@ -47,6 +52,7 @@ const getAdminDashboardStats = unstable_cache(
             certificates: Number(row?.certificates ?? 0),
             awards: Number(row?.awards ?? 0),
             headquarter: Number(row?.headquarter ?? 0),
+            catalogs: Number(row?.catalogs ?? 0),
         };
     },
     ["admin-dashboard-stats"],
@@ -59,6 +65,7 @@ export default async function AdminDashboard() {
     let stats = {
         products: 0,
         categories: 0,
+        animalTypes: 0,
         blogs: 0,
         inquiries: 0,
         crops: 0,
@@ -68,6 +75,7 @@ export default async function AdminDashboard() {
         certificates: 0,
         awards: 0,
         headquarter: 0,
+        catalogs: 0,
     };
 
     try {
@@ -78,9 +86,11 @@ export default async function AdminDashboard() {
 
     const statCards = [
         { label: t('totalProducts'), value: stats.products, icon: '📦', color: '#10b981', href: '/admin/products' },
+        { label: t('animalTypes'), value: stats.animalTypes, icon: '🐾', color: '#6366f1', href: '/admin/animal-types' },
         { label: t('cropGuides'), value: stats.crops, icon: '🌾', color: '#22c55e', href: '/admin/crops' },
         { label: t('expertArticles'), value: stats.expertArticles, icon: '🎓', color: '#8b5cf6', href: '/admin/expert-articles' },
         { label: t('blogPosts'), value: stats.blogs, icon: '📝', color: '#f59e0b', href: '/admin/blog' },
+        { label: t('catalogs'), value: stats.catalogs, icon: '📚', color: '#3b82f6', href: '/admin/catalogs' },
         { label: t('jobOffers'), value: stats.jobOffers, icon: '💼', color: '#ec4899', href: '/admin/career' },
         { label: t('newApplications'), value: stats.jobApplications, icon: '📬', color: '#ef4444', href: '/admin/applications' },
         { label: t('certificates'), value: stats.certificates, icon: '🏆', color: '#f97316', href: '/admin/certificates' },
@@ -93,7 +103,7 @@ export default async function AdminDashboard() {
         <div className="admin-dashboard">
             <div className="page-header">
                 <div>
-                    <h1>{t('overview')}</h1>
+                    <h1 style={{ marginBottom: '0.5rem' }}>{t('overview')}</h1>
                     <p>{t('welcome')}</p>
                 </div>
                 <div className="header-actions">
@@ -149,36 +159,46 @@ export default async function AdminDashboard() {
                             <span className="action-icon">📑</span>
                             <span>{t('manageMixingTablePdf')}</span>
                         </Link>
+                        <Link href="/admin/catalogs/new" className="action-btn">
+                            <span className="action-icon">📚</span>
+                            <span>{t('addCatalog')}</span>
+                        </Link>
+                        <Link href="/admin/animal-types/new" className="action-btn">
+                            <span className="action-icon">🐾</span>
+                            <span>{t('addAnimalType')}</span>
+                        </Link>
                     </div>
                 </div>
 
-                <div className="card">
-                    <h3>{t('recentInquiries')}</h3>
-                    <div className="inquiries-list">
-                        {stats.inquiries > 0 ? (
-                            <Link href="/admin/inquiries" className="inquiry-item">
-                                <span className="inquiry-count">{stats.inquiries}</span>
-                                <span>{t('unreadInquiries')}</span>
-                                <span className="arrow">→</span>
-                            </Link>
-                        ) : (
-                            <p className="empty-message">{t('noInquiries')}</p>
-                        )}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                    <div className="card">
+                        <h3>{t('recentInquiries')}</h3>
+                        <div className="inquiries-list">
+                            {stats.inquiries > 0 ? (
+                                <Link href="/admin/inquiries" className="inquiry-item">
+                                    <span className="inquiry-count">{stats.inquiries}</span>
+                                    <span>{t('unreadInquiries')}</span>
+                                    <span className="arrow">→</span>
+                                </Link>
+                            ) : (
+                                <p className="empty-message">{t('noInquiries')}</p>
+                            )}
+                        </div>
                     </div>
-                </div>
 
-                <div className="card">
-                    <h3>{t('jobApplications')}</h3>
-                    <div className="inquiries-list">
-                        {stats.jobApplications > 0 ? (
-                            <Link href="/admin/applications" className="inquiry-item">
-                                <span className="inquiry-count">{stats.jobApplications}</span>
-                                <span>{t('newApps')}</span>
-                                <span className="arrow">→</span>
-                            </Link>
-                        ) : (
-                            <p className="empty-message">{t('noApps')}</p>
-                        )}
+                    <div className="card">
+                        <h3>{t('jobApplications')}</h3>
+                        <div className="inquiries-list">
+                            {stats.jobApplications > 0 ? (
+                                <Link href="/admin/applications" className="inquiry-item">
+                                    <span className="inquiry-count">{stats.jobApplications}</span>
+                                    <span>{t('newApps')}</span>
+                                    <span className="arrow">→</span>
+                                </Link>
+                            ) : (
+                                <p className="empty-message">{t('noApps')}</p>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

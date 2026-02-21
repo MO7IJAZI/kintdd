@@ -23,6 +23,7 @@ interface BlogPostFormData {
     metaTitle?: string | null;
     metaDesc?: string | null;
     isPublished?: boolean;
+    publishedAt?: string | Date | null;
 }
 
 export default function BlogForm({ initialData }: { initialData?: Partial<BlogPostFormData> }) {
@@ -35,6 +36,7 @@ export default function BlogForm({ initialData }: { initialData?: Partial<BlogPo
     const [slug, setSlug] = useState(initialData?.slug || "");
     const [slugEdited, setSlugEdited] = useState(false);
     const [currentLang, setCurrentLang] = useState<'en' | 'ar'>('en');
+    const [publishedAt, setPublishedAt] = useState(initialData?.publishedAt ? new Date(initialData.publishedAt).toISOString().split('T')[0] : '');
 
     // Parse initial tags if they exist
     const defaultTags = initialData?.tags 
@@ -142,9 +144,21 @@ export default function BlogForm({ initialData }: { initialData?: Partial<BlogPo
                     <input name="author" defaultValue={initialData?.author} required className="input" style={{ width: '100%' }} />
                 </div>
                 <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>{t('tags')}</label>
-                    <input name="tags" defaultValue={defaultTags} className="input" style={{ width: '100%' }} placeholder={t('tagsPlaceholder')} />
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Publish Date</label>
+                    <input 
+                        type="date" 
+                        name="publishedAt" 
+                        value={publishedAt} 
+                        onChange={(e) => setPublishedAt(e.target.value)}
+                        className="input" 
+                        style={{ width: '100%' }} 
+                    />
                 </div>
+            </div>
+
+            <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>{t('tags')}</label>
+                <input name="tags" defaultValue={defaultTags} className="input" style={{ width: '100%' }} placeholder={t('tagsPlaceholder')} />
             </div>
 
             <ImageUpload 

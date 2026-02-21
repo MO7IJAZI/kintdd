@@ -13,8 +13,10 @@ interface TableRow {
 export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const t = await getTranslations('AdminProductForm');
-    const [categories, product, sections] = await Promise.all([
-        getCategories(),
+    const allCategories = await getCategories();
+    // Only show subcategories (categories with parent)
+    const categories = allCategories.filter((c: any) => c.parentId);
+    const [product, sections] = await Promise.all([
         getProductById(id),
         getProductSections(id)
     ]);
@@ -35,12 +37,7 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
     };
 
     return (
-        <div>
-            <div style={{ marginBottom: '2.5rem' }}>
-                <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{t('editProductTitle')}</h1>
-                <p style={{ color: 'var(--muted-foreground)' }}>{t('editProductDesc')}</p>
-            </div>
-
+        <div className="bg-slate-50/50 min-h-screen">
             <ProductForm 
                 categories={categories} 
                 initialData={transformedProduct} 

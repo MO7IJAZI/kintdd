@@ -5,6 +5,10 @@ import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Image from '@tiptap/extension-image'
 import Link from '@tiptap/extension-link'
+import TextAlign from '@tiptap/extension-text-align'
+import { TextStyle } from '@tiptap/extension-text-style'
+import { Color } from '@tiptap/extension-color'
+import { Table, TableRow, TableCell, TableHeader } from '@tiptap/extension-table'
 import { Node } from '@tiptap/core'
 import DOMPurify from 'dompurify'
 import debounce from 'lodash.debounce'
@@ -39,6 +43,9 @@ interface SelectedVideo {
  * Allows resizing and repositioning of images inline
  */
 const ImageResizer = Image.extend({
+  group: 'inline',
+  inline: true,
+  atom: true,
   addAttributes() {
     return {
       ...this.parent?.(),
@@ -63,13 +70,24 @@ const ImageResizer = Image.extend({
           return { 'data-align': attributes.dataAlign }
         },
       },
+      dataFloat: {
+        default: 'none',
+        parseHTML: (element) => element.getAttribute('data-float'),
+        renderHTML: (attributes) => {
+          return { 'data-float': attributes.dataFloat }
+        },
+      },
     }
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ['img', { ...HTMLAttributes, class: 'editor-image' }]
   },
 })
 
 const VideoNode = Node.create({
   name: 'video',
-  group: 'block',
+  group: 'inline',
+  inline: true,
   atom: true,
   selectable: true,
   draggable: true,
@@ -153,6 +171,7 @@ export default function RichTextEditor({
   const t = useTranslations('AdminRichText')
   const [selectedImage, setSelectedImage] = useState<SelectedImage | null>(null)
   const [selectedVideo, setSelectedVideo] = useState<SelectedVideo | null>(null)
+  const [customWidth, setCustomWidth] = useState<string>('')
   /* ============================
      Auto-Save (Debounced)
    ============================ */
@@ -208,9 +227,20 @@ export default function RichTextEditor({
     extensions: [
       StarterKit.configure({
         heading: {
-          levels: [1, 2, 3],
+          levels: [1, 2, 3, 4, 5, 6],
         },
       }),
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+      }),
+      TextStyle.configure({}),
+      Color.configure({}),
+      Table.configure({
+        resizable: true,
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
       Link.configure({
         openOnClick: true,
         autolink: true,
@@ -227,15 +257,15 @@ export default function RichTextEditor({
     onUpdate: ({ editor }) => {
       const html = editor.getHTML()
       const clean = DOMPurify.sanitize(html, {
-        ADD_TAGS: ['video', 'source', 'iframe'],
-        ADD_ATTR: ['controls', 'width', 'height', 'src', 'allow', 'allowfullscreen', 'frameborder', 'data-type', 'type'],
+        ADD_TAGS: ['video', 'source', 'iframe', 'table', 'thead', 'tbody', 'tr', 'td', 'th', 'colgroup', 'col'],
+        ADD_ATTR: ['controls', 'width', 'height', 'src', 'allow', 'allowfullscreen', 'frameborder', 'data-type', 'type', 'style', 'colspan', 'rowspan', 'data-float'],
       })
       autosave(clean)
       onChange?.(clean)
     },
     editorProps: {
       attributes: {
-        class: 'prose prose-sm max-w-none focus:outline-none',
+        class: 'max-w-none focus:outline-none',
         dir: dir,
       },
       handleDOMEvents: {
@@ -325,12 +355,15 @@ export default function RichTextEditor({
                       .chain()
                       .focus()
                       .insertContent({
-                        type: 'image',
-                        attrs: {
-                          src: url,
-                          alt: file.name,
-                          title: file.name,
-                        },
+                        type: 'paragraph',
+                        content: [{
+                          type: 'image',
+                          attrs: {
+                            src: url,
+                            alt: file.name,
+                            title: file.name,
+                          },
+                        }],
                       })
                       .run()
                   }
@@ -350,12 +383,15 @@ export default function RichTextEditor({
                       .chain()
                       .focus()
                       .insertContent({
-                        type: 'video',
-                        attrs: {
-                          src: url,
-                          controls: true,
+                        type: 'paragraph',
+                        content: [{
                           type: 'video',
-                        },
+                          attrs: {
+                            src: url,
+                            controls: true,
+                            type: 'video',
+                          },
+                        }],
                       })
                       .run()
                   }
@@ -393,12 +429,15 @@ export default function RichTextEditor({
                         .chain()
                         .setTextSelection(coords.pos)
                         .insertContent({
-                          type: 'image',
-                          attrs: {
-                            src: url,
-                            alt: file.name,
-                            title: file.name,
-                          },
+                          type: 'paragraph',
+                          content: [{
+                            type: 'image',
+                            attrs: {
+                              src: url,
+                              alt: file.name,
+                              title: file.name,
+                            },
+                          }],
                         })
                         .run()
                     }
@@ -446,12 +485,15 @@ export default function RichTextEditor({
           .chain()
           .focus()
           .insertContent({
-            type: 'image',
-            attrs: {
-              src: url,
-              alt: file.name,
-              title: file.name,
-            },
+            type: 'paragraph',
+            content: [{
+              type: 'image',
+              attrs: {
+                src: url,
+                alt: file.name,
+                title: file.name,
+              },
+            }],
           })
           .run()
       } catch (error) {
@@ -605,12 +647,15 @@ export default function RichTextEditor({
       .chain()
       .focus()
       .insertContent({
-        type: 'video',
-        attrs: {
-          src: norm.src,
-          controls: norm.type === 'video' ? true : undefined,
-          type: norm.type,
-        },
+        type: 'paragraph',
+        content: [{
+          type: 'video',
+          attrs: {
+            src: norm.src,
+            controls: norm.type === 'video' ? true : undefined,
+            type: norm.type,
+          },
+        }],
       })
       .run()
   }, [editor])
@@ -630,12 +675,15 @@ export default function RichTextEditor({
           .chain()
           .focus()
           .insertContent({
-            type: 'video',
-            attrs: {
-              src: url,
-              controls: true,
+            type: 'paragraph',
+            content: [{
               type: 'video',
-            },
+              attrs: {
+                src: url,
+                controls: true,
+                type: 'video',
+              },
+            }],
           })
           .run()
       } catch {}
@@ -701,9 +749,103 @@ export default function RichTextEditor({
     })
   }, [editor, selectedVideo])
 
+  /* ============================
+     Delete Selected Video
+  ============================ */
+  const handleDeleteVideo = useCallback(() => {
+    if (!editor || !selectedVideo) return
+    
+    // Find and delete the video node directly
+    const { state } = editor.view
+    let found = false
+    state.doc.nodesBetween(0, state.doc.content.size, (node, pos) => {
+      if (found) return false
+      if (node.type.name === 'video' && pos === selectedVideo.pos) {
+        const tr = state.tr.delete(pos, pos + node.nodeSize)
+        editor.view.dispatch(tr)
+        found = true
+      }
+    })
+    
+    setSelectedVideo(null)
+  }, [editor, selectedVideo])
+
 
   if (!editor) {
     return null
+  }
+  // Helper to apply editor commands without causing page scroll
+  const applyFormat = (callback: (chain: any) => any) => {
+    // Store current scroll position
+    const scrollPos = window.scrollY
+    
+    // Apply the format command
+    callback(editor.chain())
+    
+    // Restore scroll position after a small delay to let the browser settle
+    setTimeout(() => {
+      window.scrollTo(window.scrollX, scrollPos)
+    }, 0)
+  }
+  
+  // Helper to apply mark without scrolling
+  const applyMark = (markName: string, attrs?: Record<string, any>) => {
+    const scrollPos = window.scrollY
+    if (attrs) {
+      editor.chain().focus().setMark(markName, attrs).run()
+    } else {
+      editor.chain().focus().unsetMark(markName).run()
+    }
+    setTimeout(() => {
+      window.scrollTo(window.scrollX, scrollPos)
+    }, 0)
+  }
+  
+  const applyFontSize = (size: string) => {
+    if (!editor) return
+    
+    // Get current textStyle attributes
+    const currentAttrs = editor.getAttributes('textStyle')
+    const currentStyle = currentAttrs.style || ''
+    
+    // Parse existing styles
+    const styles: Record<string, string> = {}
+    if (currentStyle) {
+      currentStyle.split(';').forEach((rule: string) => {
+        const [key, value] = rule.split(':').map((x: string) => x.trim())
+        if (key && value) {
+          styles[key] = value
+        }
+      })
+    }
+    
+    // Update font-size
+    if (size) {
+      styles['font-size'] = size
+    } else {
+      delete styles['font-size']
+    }
+    
+    // Build new style string
+    const newStyle = Object.entries(styles)
+      .map(([k, v]) => `${k}: ${v}`)
+      .join('; ')
+    
+    // Store scroll position
+    const scrollPos = window.scrollY
+    
+    // Apply the mark
+    if (newStyle) {
+      editor.chain().focus().setMark('textStyle', { style: newStyle }).run()
+    } else {
+      // If no styles left, unset the mark
+      editor.chain().focus().unsetMark('textStyle').run()
+    }
+    
+    // Restore scroll position
+    setTimeout(() => {
+      window.scrollTo(window.scrollX, scrollPos)
+    }, 0)
   }
   return (
     <div className="rich-text-editor">
@@ -762,6 +904,241 @@ export default function RichTextEditor({
             onClick={(e) => {
               e.preventDefault()
               e.stopPropagation()
+              editor.chain().focus().toggleHeading({ level: 4 }).run()
+            }}
+            className={`toolbar-btn ${editor.isActive('heading', { level: 4 }) ? 'active' : ''}`}
+            title={t('h4')}
+          >
+            H4
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              editor.chain().focus().toggleHeading({ level: 5 }).run()
+            }}
+            className={`toolbar-btn ${editor.isActive('heading', { level: 5 }) ? 'active' : ''}`}
+            title={t('h5')}
+          >
+            H5
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              editor.chain().focus().toggleHeading({ level: 6 }).run()
+            }}
+            className={`toolbar-btn ${editor.isActive('heading', { level: 6 }) ? 'active' : ''}`}
+            title={t('h6')}
+          >
+            H6
+          </button>
+        </div>
+
+        <div className="toolbar-divider" />
+
+        <div className="toolbar-group">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()
+            }}
+            className="toolbar-btn"
+            title="إدراج جدول"
+          >
+            ⇱ جدول
+          </button>
+          {editor.isActive('table') && (
+            <>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  editor.chain().focus().addRowBefore().run()
+                }}
+                className="toolbar-btn"
+                title="إضافة صف قبل"
+              >
+                ⤴ صف
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  editor.chain().focus().addRowAfter().run()
+                }}
+                className="toolbar-btn"
+                title="إضافة صف بعد"
+              >
+                ⤵ صف
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  editor.chain().focus().addColumnBefore().run()
+                }}
+                className="toolbar-btn"
+                title="إضافة عمود قبل"
+              >
+                ⬅ عمود
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  editor.chain().focus().addColumnAfter().run()
+                }}
+                className="toolbar-btn"
+                title="إضافة عمود بعد"
+              >
+                ➡ عمود
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  editor.chain().focus().deleteRow().run()
+                }}
+                className="toolbar-btn"
+                title="حذف صف"
+              >
+                ⓧ صف
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  editor.chain().focus().deleteColumn().run()
+                }}
+                className="toolbar-btn"
+                title="حذف عمود"
+              >
+                ⓧ عمود
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  editor.chain().focus().mergeCells().run()
+                }}
+                className="toolbar-btn"
+                title="دمج الخلايا"
+              >
+                ⇔ دمج
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  editor.chain().focus().splitCell().run()
+                }}
+                className="toolbar-btn"
+                title="فصل الخلايا"
+              >
+                ⇍ فصل
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  editor.chain().focus().toggleHeaderRow().run()
+                }}
+                className="toolbar-btn"
+                title="تبديل صف عناوين"
+              >
+                ⓗ عناوين
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  editor.chain().focus().deleteTable().run()
+                }}
+                className="toolbar-btn delete-btn"
+                title="حذف الجدول"
+              >
+                🗑 جدول
+              </button>
+            </>
+          )}
+        </div>
+
+        <div className="toolbar-divider" />
+
+        <div className="toolbar-group">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              editor.chain().focus().setTextAlign('left').run()
+            }}
+            className={`toolbar-btn ${editor.isActive({ textAlign: 'left' }) ? 'active' : ''}`}
+            title="محاذاة يسار"
+          >
+            ⬅️
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              editor.chain().focus().setTextAlign('center').run()
+            }}
+            className={`toolbar-btn ${editor.isActive({ textAlign: 'center' }) ? 'active' : ''}`}
+            title="محاذاة وسط"
+          >
+            ⏺
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              editor.chain().focus().setTextAlign('right').run()
+            }}
+            className={`toolbar-btn ${editor.isActive({ textAlign: 'right' }) ? 'active' : ''}`}
+            title="محاذاة يمين"
+          >
+            ➡️
+          </button>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              editor.chain().focus().setTextAlign('justify').run()
+            }}
+            className={`toolbar-btn ${editor.isActive({ textAlign: 'justify' }) ? 'active' : ''}`}
+            title="ضبط النص"
+          >
+            ☰
+          </button>
+        </div>
+
+        <div className="toolbar-divider" />
+
+        <div className="toolbar-group">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
               editor.chain().focus().toggleBold().run()
             }}
             className={`toolbar-btn ${editor.isActive('bold') ? 'active' : ''}`}
@@ -793,6 +1170,17 @@ export default function RichTextEditor({
           >
             <s>S</s>
           </button>
+          <input
+            type="color"
+            onChange={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              editor.chain().focus().setColor(e.target.value).run()
+            }}
+            className="toolbar-btn"
+            title="لون النص"
+            style={{ padding: '0.45rem', width: '38px', minWidth: '38px' }}
+          />
         </div>
 
         <div className="toolbar-divider" />
@@ -955,6 +1343,47 @@ export default function RichTextEditor({
                 <option value="800">800px</option>
                 <option value="100%">100%</option>
               </select>
+              <input
+                type="number"
+                min="50"
+                max="2000"
+                placeholder="px"
+                value={customWidth}
+                onChange={(e) => setCustomWidth(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && customWidth) {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    const width = Number(customWidth)
+                    if (width >= 50 && width <= 2000) {
+                      handleResizeImage(width)
+                      setCustomWidth('')
+                    }
+                  }
+                }}
+                className="toolbar-btn image-action-btn"
+                style={{ padding: '0.5rem', width: '70px', minWidth: '70px' }}
+                title={t('customWidth') || 'Custom width (px)'}
+              />
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  if (customWidth) {
+                    const width = Number(customWidth)
+                    if (width >= 50 && width <= 2000) {
+                      handleResizeImage(width)
+                      setCustomWidth('')
+                    }
+                  }
+                }}
+                className="toolbar-btn image-action-btn"
+                title={t('applyWidth') || 'Apply'}
+                disabled={!customWidth}
+              >
+                ✓
+              </button>
               <button
                 type="button"
                 onClick={(e) => {
@@ -966,6 +1395,42 @@ export default function RichTextEditor({
                 title={t('resetSize')}
               >
                 ⇄
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  handleSetImageFloat('left')
+                }}
+                className="toolbar-btn image-action-btn"
+                title={t('floatLeft') || 'Float left'}
+              >
+                ⬅️
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  handleSetImageFloat('none')
+                }}
+                className="toolbar-btn image-action-btn"
+                title={t('floatCenter') || 'Center'}
+              >
+                ⏺
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  handleSetImageFloat('right')
+                }}
+                className="toolbar-btn image-action-btn"
+                title={t('floatRight') || 'Float right'}
+              >
+                ➡️
               </button>
               <button
                 type="button"
@@ -1086,6 +1551,18 @@ export default function RichTextEditor({
                 title="Float right"
               >
                 ➡️
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  handleDeleteVideo()
+                }}
+                className="toolbar-btn image-action-btn delete-btn"
+                title="Delete Video"
+              >
+                🗑️
               </button>
             </div>
           </>

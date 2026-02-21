@@ -4,13 +4,10 @@ import { generateOrganizationSchema } from "@/lib/seoUtils";
 import Hero from "@/components/home/Hero";
 import FeaturesSection from "@/components/home/FeaturesSection";
 import CategoriesSection from "@/components/home/CategoriesSection";
-import FeaturedProductsSection from "@/components/home/FeaturedProductsSection";
-import StatsSection from "@/components/home/StatsSection";
 import MissionSection from "@/components/home/MissionSection";
 import AgentsMarquee from "@/components/home/AgentsMarquee";
 import ArticlesSection from "@/components/home/ArticlesSection";
 import WhyUsSection from "@/components/home/WhyUsSection";
-import TeamSection from "@/components/home/TeamSection";
 
 export const revalidate = 300;
 
@@ -73,14 +70,10 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
       {/* 2. Features Section */}
       <FeaturesSection />
 
-      {/* 3. Products Categories - Modern Grid */}
-      <CategoriesSection />
+      {/* 3. Products Categories & Slider */}
+      <CategoriesSection products={featuredProducts} />
 
-      {/* 4. Featured Products Section */}
-      <FeaturedProductsSection products={featuredProducts} />
-
-      {/* 6. Stats Section */}
-      <StatsSection />
+      {/* 6. Stats Section Removed */}
 
       {/* 7. Mission / Video */}
       <MissionSection />
@@ -90,9 +83,6 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
 
       {/* 9. Why Us Section */}
       <WhyUsSection />
-
-      {/* 10. Team Section */}
-      <TeamSection />
 
       {/* 11. Agents Section */}
       <AgentsMarquee />

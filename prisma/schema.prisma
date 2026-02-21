@@ -158,14 +158,12 @@ model Catalog {
   description_ar String? @db.Text
   fileUrl     String
   category    String   // agricultural | animal
-  locale      String   @default("en") // en | ar
   order       Int      @default(0)
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   @@index([category])
-  @@index([locale])
   @@index([isActive])
   @@index([order])
   @@map("catalogs")

@@ -1,12 +1,11 @@
 import prisma from "@/lib/prisma";
-import Tabs from "@/components/ui/Tabs";
 import DynamicSectionsRenderer from "@/components/DynamicSectionsRenderer";
 import { generateProductSchema, createProductMetadata } from "@/lib/seoUtils";
 import { stripScripts } from "@/lib/sanitizeHtml";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getTranslations, getLocale } from 'next-intl/server';
+import { getTranslations } from 'next-intl/server';
 import { Metadata } from "next";
 
 export const revalidate = 300;
@@ -67,6 +66,7 @@ interface ProductDetailData {
     name: string;
     name_ar?: string | null;
     slug: string;
+    sku?: string | null;
     image?: string | null;
     shortDesc?: string | null;
     shortDesc_ar?: string | null;
@@ -84,10 +84,20 @@ interface ProductDetailData {
     categoryId?: string | null;
     category?: { slug: string; name: string; name_ar?: string | null } | null;
     downloads?: DownloadItem[] | null;
-    tabs?: { id: string; title: string; content: string }[] | null;
-    tabs_ar?: { id: string; title: string; content: string }[] | null;
+    tabs?: { id: string; title: string; content: string; color?: string }[] | null;
+    tabs_ar?: { id: string; title: string; content: string; color?: string }[] | null;
     sections?: { id: string; productId: string; title: string; title_ar?: string | null; content: string; content_ar?: string | null; colorTheme?: string | null; order: number }[] | null;
+    colorTheme?: string | null;
 }
+
+const colorThemes: Record<string, { primary: string; secondary: string; light: string; gradient: string }> = {
+    blue: { primary: '#2563eb', secondary: '#1e40af', light: '#eff6ff', gradient: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)' },
+    green: { primary: '#16a34a', secondary: '#15803d', light: '#f0fdf4', gradient: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)' },
+    purple: { primary: '#9333ea', secondary: '#7e22ce', light: '#faf5ff', gradient: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)' },
+    orange: { primary: '#ea580c', secondary: '#c2410c', light: '#fff7ed', gradient: 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)' },
+    pink: { primary: '#db2777', secondary: '#be185d', light: '#fdf2f8', gradient: 'linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%)' },
+    slate: { primary: '#475569', secondary: '#334155', light: '#f8fafc', gradient: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)' },
+};
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string, locale: string }> }) {
     const { slug, locale } = await params;
@@ -120,11 +130,14 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     const usage = (isAr && product.usage_ar) ? product.usage_ar : product.usage;
     const compTable = (isAr && product.compTable_ar) ? product.compTable_ar : product.compTable;
     const usageTable = (isAr && product.usageTable_ar) ? product.usageTable_ar : product.usageTable;
-    const productTabs = (isAr && product.tabs_ar) ? product.tabs_ar : product.tabs;
+    const productTabs = (isAr && product.tabs_ar && product.tabs_ar.length > 0) ? product.tabs_ar : (product.tabs && product.tabs.length > 0 ? product.tabs : []);
     const categoryName = (isAr && product.category?.name_ar) ? product.category?.name_ar : product.category?.name;
     const safeDescription = stripScripts(description || "");
     const safeBenefits = stripScripts(benefits || "");
     const safeUsage = stripScripts(usage || "");
+
+    const themeKey = (product.colorTheme || 'blue') as keyof typeof colorThemes;
+    const theme = colorThemes[themeKey] || colorThemes.blue;
 
     // Fetch related products (same category, excluding current)
     const relatedProductsRaw = product.categoryId ? await prisma.product.findMany({
@@ -166,6 +179,17 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         });
     }
 
+    // Prepare Tabs as Sections for DynamicSectionsRenderer
+    // We convert tabs to the Section interface so we can reuse the accordion component
+    const tabsAsSections = productTabs ? productTabs.map((tab, index) => ({
+        id: tab.id || `tab-${index}`,
+        title: tab.title,
+        content: tab.content,
+        colorTheme: themeKey, // Keep themeKey as fallback
+        color: tab.color, // Pass the specific tab color
+        order: index
+    })) : [];
+
     return (
         <div style={{ backgroundColor: '#ffffff', minHeight: '100vh', direction: isAr ? 'rtl' : 'ltr' }}>
             {/* JSON-LD Product Schema */}
@@ -180,7 +204,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             <section style={{ 
                 position: 'relative', 
                 padding: '6rem 0', 
-                backgroundColor: '#f8fafc', 
+                background: theme.gradient, 
                 overflow: 'hidden',
                 borderBottom: '1px solid #e2e8f0'
             }}>
@@ -192,7 +216,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                     left: isAr ? '-5%' : 'auto',
                     width: '40%', 
                     height: '120%', 
-                    background: `linear-gradient(${isAr ? '270deg' : '90deg'}, rgba(233, 73, 108, 0.03) 0%, transparent 100%)`,
+                    background: `linear-gradient(${isAr ? '270deg' : '90deg'}, rgba(255, 255, 255, 0.4) 0%, transparent 100%)`,
                     zIndex: 0,
                     borderRadius: '50%'
                 }} />
@@ -206,26 +230,42 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                                 <span>/</span>
                                 <Link href="/products" style={{ color: 'inherit', textDecoration: 'none' }}>{tNav('products')}</Link>
                                 <span>/</span>
-                                <span style={{ color: 'var(--primary)' }}>{name}</span>
+                                <span style={{ color: theme.primary }}>{name}</span>
                             </nav>
 
                             <h1 style={{ 
                                 fontSize: 'clamp(2.5rem, 5vw, 4rem)', 
                                 fontWeight: 900, 
                                 lineHeight: 1.1, 
-                                marginBottom: '1.5rem',
+                                marginBottom: '1rem',
                                 color: '#0f172a'
                             }}>
                                 {name}
                             </h1>
+
+                            {product.sku && (
+                                <div style={{ 
+                                    marginBottom: '1.5rem', 
+                                    fontSize: '0.9rem', 
+                                    fontWeight: 700, 
+                                    color: '#64748b',
+                                    display: 'inline-block',
+                                    padding: '0.25rem 0.75rem',
+                                    backgroundColor: 'rgba(255,255,255,0.5)',
+                                    borderRadius: '4px',
+                                    border: '1px solid rgba(0,0,0,0.05)'
+                                }}>
+                                    SKU: {product.sku}
+                                </div>
+                            )}
 
                             <div style={{ 
                                 fontSize: '1.25rem', 
                                 lineHeight: 1.6, 
                                 color: '#475569', 
                                 marginBottom: '2.5rem',
-                                borderLeft: isAr ? 'none' : '4px solid var(--primary)',
-                                borderRight: isAr ? '4px solid var(--primary)' : 'none',
+                                borderLeft: isAr ? 'none' : `4px solid ${theme.primary}`,
+                                borderRight: isAr ? `4px solid ${theme.primary}` : 'none',
                                 paddingLeft: isAr ? 0 : '1.5rem',
                                 paddingRight: isAr ? '1.5rem' : 0
                             }}>
@@ -233,7 +273,17 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                             </div>
 
                             <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-                                <Link href="/contact" className="btn btn-primary" style={{ padding: '1rem 2.5rem', borderRadius: '50px', fontSize: '1.1rem' }}>
+                                <Link href="/contact" className="btn" style={{ 
+                                    padding: '1rem 2.5rem', 
+                                    borderRadius: '50px', 
+                                    fontSize: '1.1rem',
+                                    backgroundColor: theme.primary,
+                                    color: 'white',
+                                    border: 'none',
+                                    fontWeight: 700,
+                                    boxShadow: '0 10px 20px -5px rgba(0,0,0,0.15)',
+                                    textDecoration: 'none'
+                                }}>
                                     {t('orderInquiry')}
                                 </Link>
                                 {product.isOrganic && (
@@ -242,12 +292,12 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                                         alignItems: 'center',
                                         gap: '0.5rem',
                                         padding: '0.75rem 1.5rem',
-                                        backgroundColor: 'var(--primary-light)',
-                                        color: 'var(--primary-hover)',
+                                        backgroundColor: '#f0fdf4',
+                                        color: '#15803d',
                                         borderRadius: '50px',
                                         fontWeight: 700,
                                         fontSize: '0.9rem',
-                                        border: '1px solid var(--primary)'
+                                        border: '1px solid #bbf7d0'
                                     }}>
                                         <span style={{ fontSize: '1.2rem' }}>🌿</span> {t('certifiedOrganic').toUpperCase()}
                                     </div>
@@ -279,7 +329,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 </div>
             </section>
 
-            {/* 2. STRUCTURED INFO BLOCK (Replacement for Tabs) */}
+            {/* 2. STRUCTURED INFO BLOCK (Legacy Fields + Tabs + Sections) */}
             <section style={{ padding: '6rem 0' }}>
                 <div className="container">
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '4rem' }}>
@@ -287,13 +337,13 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                         <div style={{ gridColumn: 'span 2' }}>
                             {description && (
                                 <div style={{ marginBottom: '4rem' }}>
-                                    <h2 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                        <span style={{ width: '8px', height: '24px', backgroundColor: 'var(--primary)', borderRadius: '4px' }}></span>
+                                    <h2 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#0f172a' }}>
+                                        <span style={{ width: '8px', height: '24px', backgroundColor: theme.primary, borderRadius: '4px' }}></span>
                                         {t('Description').toUpperCase()}
                                     </h2>
                                     <div 
                                         className="prose prose-lg" 
-                                        style={{ color: 'var(--secondary-light)', lineHeight: 1.8, fontSize: '1.1rem' }}
+                                        style={{ color: '#334155', lineHeight: 1.8, fontSize: '1.1rem' }}
                                         dangerouslySetInnerHTML={{ __html: safeDescription }}
                                     />
                                 </div>
@@ -301,13 +351,13 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
                             {benefits && (
                                 <div style={{ marginBottom: '4rem' }}>
-                                    <h2 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                        <span style={{ width: '8px', height: '24px', backgroundColor: 'var(--secondary)', borderRadius: '4px' }}></span>
+                                    <h2 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#0f172a' }}>
+                                        <span style={{ width: '8px', height: '24px', backgroundColor: theme.secondary, borderRadius: '4px' }}></span>
                                         {t('benefits').toUpperCase()}
                                     </h2>
                                     <div 
                                         className="prose prose-lg" 
-                                        style={{ color: 'var(--secondary-light)', lineHeight: 1.8, fontSize: '1.1rem' }}
+                                        style={{ color: '#334155', lineHeight: 1.8, fontSize: '1.1rem' }}
                                         dangerouslySetInnerHTML={{ __html: safeBenefits }}
                                     />
                                 </div>
@@ -315,15 +365,29 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
                             {usage && (
                                 <div style={{ marginBottom: '4rem' }}>
-                                    <h2 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                    <h2 style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#0f172a' }}>
                                         <span style={{ width: '8px', height: '24px', backgroundColor: '#6366f1', borderRadius: '4px' }}></span>
                                         {t('application').toUpperCase()}
                                     </h2>
                                     <div 
                                         className="prose prose-lg" 
-                                        style={{ color: 'var(--secondary-light)', lineHeight: 1.8, fontSize: '1.1rem' }}
+                                        style={{ color: '#334155', lineHeight: 1.8, fontSize: '1.1rem' }}
                                         dangerouslySetInnerHTML={{ __html: safeUsage }}
                                     />
+                                </div>
+                            )}
+
+                            {/* Render Tabs as Accordions */}
+                            {tabsAsSections.length > 0 && (
+                                <div style={{ marginTop: '2rem' }}>
+                                    <DynamicSectionsRenderer sections={tabsAsSections} isRtl={isAr} />
+                                </div>
+                            )}
+
+                            {/* Render Dynamic Sections as Accordions */}
+                            {product.sections && product.sections.length > 0 && (
+                                <div style={{ marginTop: '2rem' }}>
+                                    <DynamicSectionsRenderer sections={product.sections} isRtl={isAr} />
                                 </div>
                             )}
                         </div>
@@ -356,7 +420,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                                                     backgroundColor: '#f8fafc',
                                                     borderRadius: '1rem',
                                                     textDecoration: 'none',
-                                                    color: 'var(--secondary-light)',
+                                                    color: '#475569',
                                                     fontWeight: 700,
                                                     fontSize: '0.9rem',
                                                     transition: 'all 0.2s ease',
@@ -370,12 +434,6 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                                         )) : (
                                             <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>{t('noDocuments')}</p>
                                         )}
-                                    </div>
-
-                                    <div style={{ marginTop: '3rem', padding: '2rem', backgroundColor: '#f1f5f9', borderRadius: '1rem', textAlign: 'center' }}>
-                                        <p style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '0.5rem' }}>{t('needSupport')}</p>
-                                        <p style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0f172a', marginBottom: '0.25rem' }}>+48 796 106 899</p>
-                                        <p style={{ fontSize: '0.9rem', color: 'var(--primary)', fontWeight: 600 }}>kint@kafri-intl.com</p>
                                     </div>
                                 </div>
                             </div>
@@ -418,7 +476,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                                                         {(table.data as CompositionRow[]).map((row, i) => (
                                                             <tr key={i} style={{ borderBottom: '1px solid #f1f5f9', transition: 'background-color 0.2s' }} className="hover:bg-slate-50">
                                                                 <td style={{ padding: '1.5rem 3rem', fontWeight: 700, color: 'var(--secondary)' }}>{row.name}</td>
-                                                                <td style={{ padding: '1.5rem 3rem', color: 'var(--primary)', fontWeight: 800 }}>{row.value}</td>
+                                                                <td style={{ padding: '1.5rem 3rem', color: theme.primary, fontWeight: 800 }}>{row.value}</td>
                                                             </tr>
                                                         ))}
                                                     </tbody>
@@ -437,7 +495,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                                                             <tr key={i} style={{ borderBottom: '1px solid #f1f5f9' }}>
                                                                 <td style={{ padding: '1.5rem 3rem', fontWeight: 800, color: 'var(--secondary)' }}>{row.crop}</td>
                                                                 <td style={{ padding: '1.5rem 3rem', color: '#64748b', fontWeight: 500 }}>{row.stage}</td>
-                                                                <td style={{ padding: '1.5rem 3rem', color: 'var(--primary)', fontWeight: 800 }}>{row.dosage}</td>
+                                                                <td style={{ padding: '1.5rem 3rem', color: theme.primary, fontWeight: 800 }}>{row.dosage}</td>
                                                             </tr>
                                                         ))}
                                                     </tbody>
@@ -452,22 +510,17 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 </section>
             )}
 
-            {/* 4. DYNAMIC SECTIONS SYSTEM */}
-            {product.sections && product.sections.length > 0 && (
-                <DynamicSectionsRenderer sections={product.sections} isRtl={isAr} />
-            )}
-
             {/* Related Products Section */}
             {relatedProducts.length > 0 && (
                 <section className="section" style={{ backgroundColor: '#ffffff', borderTop: '1px solid #e2e8f0', padding: '6rem 0' }}>
                     <div className="container">
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '4rem' }}>
                             <div>
-                                <span style={{ color: 'var(--primary)', fontWeight: '800', fontSize: '0.9rem', marginBottom: '1rem', letterSpacing: '0.2em', display: 'block' }}>{t('discoverMore').toUpperCase()}</span>
+                                <span style={{ color: theme.primary, fontWeight: '800', fontSize: '0.9rem', marginBottom: '1rem', letterSpacing: '0.2em', display: 'block' }}>{t('discoverMore').toUpperCase()}</span>
                                 <h2 style={{ fontSize: '2.5rem', fontWeight: 900, color: '#0f172a', margin: 0 }}>{t('relatedProducts').toUpperCase()}</h2>
                             </div>
                             <Link href={`/product-category/${product.category?.slug}`} style={{ 
-                                color: 'var(--primary)', 
+                                color: theme.primary, 
                                 fontWeight: '700', 
                                 fontSize: '1rem', 
                                 display: 'flex', 
@@ -511,7 +564,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                                         <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: '1.6', marginBottom: '1.5rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                                             {related.shortDesc || (related.description ? related.description.replace(/<[^>]*>?/gm, '').substring(0, 100) + "..." : "Learn more about this product.")}
                                         </p>
-                                        <div style={{ color: 'var(--primary)', fontWeight: '700', fontSize: '0.85rem', letterSpacing: '0.05em' }}>
+                                        <div style={{ color: theme.primary, fontWeight: '700', fontSize: '0.85rem', letterSpacing: '0.05em' }}>
                                             {t('viewDetails').toUpperCase()} {isAr ? '←' : '→'}
                                         </div>
                                     </div>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
+import { Upload, X, Image as ImageIcon } from "lucide-react";
 
 interface ImageUploadProps {
     value?: string;
@@ -31,8 +32,9 @@ export default function ImageUpload({ value, onChange, label }: ImageUploadProps
 
             const data = await response.json();
             if (data.url) {
-                onChange(data.url);
-                setPreview(data.url);
+                const fullUrl = data.url;
+                onChange(fullUrl);
+                setPreview(fullUrl);
             }
         } catch (error) {
             console.error("Upload failed:", error);
@@ -43,87 +45,81 @@ export default function ImageUpload({ value, onChange, label }: ImageUploadProps
     }
 
     return (
-        <div style={{ marginBottom: '1.5rem' }}>
-            {label && <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.85rem' }}>{label}</label>}
+        <div className="space-y-2">
+            {label && (
+                <label className="block text-sm font-bold text-slate-700">
+                    {label}
+                </label>
+            )}
 
-            <div className="image-upload-row" style={{
-                display: 'flex',
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                gap: '2rem',
-                padding: '1.5rem',
-                backgroundColor: '#f8fafc',
-                borderRadius: '0.75rem',
-                border: '1px solid var(--border)'
-            }}>
-                <div style={{
-                    position: 'relative',
-                    width: '120px',
-                    height: '120px',
-                    backgroundColor: 'white',
-                    borderRadius: '0.5rem',
-                    overflow: 'hidden',
-                    border: '1px solid var(--border)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                }}>
-                    {preview ? (
-                        <Image src={preview} alt="Preview" fill style={{ objectFit: 'cover' }} />
-                    ) : (
-                        <span style={{ fontSize: '2rem', opacity: 0.2 }}>🖼️</span>
-                    )}
-                </div>
-
-                <div style={{ flex: 1 }}>
-                    <div style={{ position: 'relative' }}>
+            <div className="flex flex-col gap-4">
+                {preview ? (
+                    <div className="relative group rounded-lg overflow-hidden border border-slate-200 shadow-sm aspect-video bg-slate-50">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img 
+                            src={preview} 
+                            alt="Preview" 
+                            className="w-full h-full object-contain" 
+                        />
+                        <button
+                            type="button"
+                            onClick={() => { onChange(""); setPreview(""); }}
+                            className="absolute top-2 right-2 p-2 bg-white rounded-full text-slate-500 hover:text-red-600 hover:bg-red-50 shadow-sm border border-slate-200 transition-colors"
+                            title={t('deleteImage')}
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
+                ) : (
+                    <div className="relative border-2 border-dashed border-slate-300 rounded-lg p-8 text-center hover:bg-slate-50 hover:border-blue-400 transition-colors cursor-pointer flex flex-col items-center justify-center gap-3">
+                        <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
+                            <ImageIcon className="w-6 h-6" />
+                        </div>
+                        <div className="space-y-1">
+                            <p className="text-sm font-bold text-slate-700">
+                                {isUploading ? t('uploading') : t('chooseImage')}
+                            </p>
+                            <p className="text-xs text-slate-400">
+                                {t('recommendedSize') || "Click or drag to upload"}
+                            </p>
+                        </div>
                         <input
                             type="file"
                             accept="image/*"
                             onChange={handleFileChange}
-                            style={{
-                                position: 'absolute',
-                                top: 0,
-                                left: 0,
-                                width: '100%',
-                                height: '100%',
-                                opacity: 0,
-                                cursor: 'pointer'
-                            }}
-                        />
-                        <button
-                            type="button"
                             disabled={isUploading}
-                            className="btn btn-outline"
-                            style={{ width: '100%', pointerEvents: 'none' }}
-                        >
-                            {isUploading ? t('uploading') : t('chooseImage')}
-                        </button>
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        />
+                        {isUploading && (
+                            <div className="absolute inset-0 bg-white/80 flex items-center justify-center rounded-lg">
+                                <div className="flex flex-col items-center gap-2">
+                                    <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                                    <span className="text-xs font-bold text-blue-600">Uploading...</span>
+                                </div>
+                            </div>
+                        )}
                     </div>
-                    <p style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'var(--muted-foreground)' }}>
-                        {t('recommendedSize')}
-                    </p>
-                </div>
+                )}
 
                 {preview && (
-                    <button
-                        type="button"
-                        onClick={() => { onChange(""); setPreview(""); }}
-                        style={{ padding: '0.5rem', color: '#ef4444', fontSize: '1.25rem', background: 'none', border: 'none', cursor: 'pointer' }}
-                        title={t('deleteImage')}
-                    >
-                        🗑️
-                    </button>
+                    <div className="relative">
+                        <button
+                            type="button"
+                            className="w-full py-2 px-4 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm flex items-center justify-center gap-2"
+                        >
+                            <Upload className="w-4 h-4" />
+                            {t('changeImage') || "Change Image"}
+                        </button>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleFileChange}
+                            disabled={isUploading}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        />
+                    </div>
                 )}
             </div>
-            <style>{`
-              @media (max-width: 520px) {
-                .image-upload-row {
-                  gap: 1rem !important;
-                  padding: 1rem !important;
-                }
-              }
-            `}</style>
         </div>
     );
 }

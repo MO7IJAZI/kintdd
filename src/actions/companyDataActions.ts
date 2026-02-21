@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
+import { auth } from "@/auth";
 
 const getCompanyDataCached = unstable_cache(
     async () => {
@@ -48,6 +49,11 @@ export async function updateCompanyData(data: {
     capital?: string | null;
     capital_ar?: string | null;
 }) {
+    const session = await auth();
+    if (!session) {
+        throw new Error("Unauthorized");
+    }
+
     try {
         const { id, ...updateData } = data;
         

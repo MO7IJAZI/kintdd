@@ -245,7 +245,7 @@ export default async function CropsPage() {
                           src={crop.image}
                           alt={cropName}
                           fill
-                          style={{ objectFit: 'cover' }}
+                          style={{ objectFit: 'contain', padding: '1rem' }}
                         />
                       ) : (
                         <div style={{

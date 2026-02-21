@@ -1,18 +1,32 @@
 "use client";
 
-import { useRef, useState, lazy, Suspense } from "react";
+import { useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { createProduct, updateProduct } from "@/actions/productActions";
 import { useRouter } from "next/navigation";
 import { generateSlug, generateAutoSlug } from "@/lib/slugUtils";
 import { useLocale, useTranslations } from 'next-intl';
+import { 
+    Save, 
+    X, 
+    Globe, 
+    LayoutGrid, 
+    FileText, 
+    Image as ImageIcon, 
+    Settings, 
+    Search,
+    Languages,
+    ArrowRightLeft,
+    CheckCircle2,
+    Leaf
+} from "lucide-react";
 
 // Dynamic imports for heavy components
 const ImageUpload = dynamic(() => import("./ImageUpload"), { ssr: false });
 const RichTextEditor = dynamic(() => import("./RichTextEditor"), { ssr: false });
 const DownloadsManager = dynamic(() => import("./DownloadsManager"), { ssr: false });
 const TabsManager = dynamic(() => import("./TabsManager"), { ssr: false });
-const ProductSectionsManager = dynamic(() => import("./ProductSectionsManager"), { ssr: false });
+
 
 import type { Tab } from "./TabsManager";
 
@@ -30,6 +44,12 @@ interface Category {
     id: string;
     name: string;
     name_ar?: string | null;
+    slug: string;
+    parent?: {
+        slug: string;
+        name: string;
+        name_ar?: string | null;
+    } | null;
 }
 
 interface DownloadItem {
@@ -77,14 +97,9 @@ export default function ProductForm({
     const locale = useLocale();
     const t = useTranslations('AdminProductForm');
     const tCommon = useTranslations('AdminCommon');
-    const tErrors = useTranslations('AdminErrors');
-    const [isPending, setIsPending] = useState(false);
-    const [isTranslating, setIsTranslating] = useState(false);
-    const [activeLang, setActiveLang] = useState<'en' | 'ar'>('en');
-    const [tabsSyncKey, setTabsSyncKey] = useState(0);
     const isArLocale = locale === "ar";
 
-    const nameEnRef = useRef<HTMLInputElement | null>(null);
+    const [isPending, setIsPending] = useState(false);
     
     // English State
     const [nameEn, setNameEn] = useState(initialData?.name || "");
@@ -114,24 +129,29 @@ export default function ProductForm({
     const [isFeatured, setIsFeatured] = useState(initialData?.isFeatured || false);
     const [isOrganic, setIsOrganic] = useState(initialData?.isOrganic || false);
     const [order, setOrder] = useState(initialData?.order || 0);
+    const [categoryId, setCategoryId] = useState(initialData?.categoryId || "");
+    const [sku, setSku] = useState(initialData?.sku || "");
     const [colorTheme, setColorTheme] = useState(initialData?.colorTheme || "blue");
+
+    // Tab states for Description and Tabs
+    const [descTab, setDescTab] = useState<'en' | 'ar'>('en');
+    const [tabsTab, setTabsTab] = useState<'en' | 'ar'>('en');
 
     // Auto-generate slug from name when name changes and slug hasn't been manually edited
     const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const nameValue = e.target.value;
         setNameEn(nameValue);
         if (!slugEdited && !initialData?.id) {
-            setSlug(generateAutoSlug(nameValue, nameAr, activeLang));
+            setSlug(generateAutoSlug(nameValue, nameAr, 'en'));
         }
     };
 
-    // Auto-generate slug from Arabic name when Arabic name changes and slug hasn't been manually edited
     const handleNameArChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newNameAr = e.target.value;
         setNameAr(newNameAr);
-        if (!slugEdited && !initialData?.id && activeLang === 'ar') {
+        if (!slugEdited && !initialData?.id && locale === 'ar') {
             const nameValue = nameEn;
-            setSlug(generateAutoSlug(nameValue, newNameAr, activeLang));
+            setSlug(generateAutoSlug(nameValue, newNameAr, 'ar'));
         }
     };
 
@@ -141,77 +161,30 @@ export default function ProductForm({
         setSlug(generateSlug(e.target.value));
     };
 
-    async function translateToEnglish() {
-        const fetchTranslate = async (q: string | string[], format: "text" | "html") => {
-            const res = await fetch("/api/translate", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ q, source: "ar", target: "en", format }),
-            });
-            const data = (await res.json().catch(() => null)) as { translatedText?: string | string[]; error?: string } | null;
-            if (!res.ok) {
-                throw new Error(data?.error || tErrors('translationFailed'));
-            }
-            return data?.translatedText;
-        };
-
-        setIsTranslating(true);
-        try {
-            const name = nameAr?.trim() ? await fetchTranslate(nameAr, "text") : null;
-            const shortDesc = shortDescAr?.trim() ? await fetchTranslate(shortDescAr, "text") : null;
-            const metaTitle = metaTitleAr?.trim() ? await fetchTranslate(metaTitleAr, "text") : null;
-            const metaDesc = metaDescAr?.trim() ? await fetchTranslate(metaDescAr, "text") : null;
-            const desc = descriptionAr?.trim() ? await fetchTranslate(descriptionAr, "html") : null;
-
-            if (typeof name === "string") setNameEn(name);
-            if (typeof shortDesc === "string") setShortDescEn(shortDesc);
-            if (typeof metaTitle === "string") setMetaTitleEn(metaTitle);
-            if (typeof metaDesc === "string") setMetaDescEn(metaDesc);
-            if (typeof desc === "string") setDescription(desc);
-
-            if (Array.isArray(tabsAr) && tabsAr.length > 0) {
-                const titles = tabsAr.map((tab) => tab.title || "");
-                const contents = tabsAr.map((tab) => tab.content || "");
-
-                const [translatedTitlesRaw, translatedContentsRaw] = await Promise.all([
-                    fetchTranslate(titles, "text"),
-                    fetchTranslate(contents, "html"),
-                ]);
-
-                const translatedTitles = Array.isArray(translatedTitlesRaw) ? translatedTitlesRaw : [];
-                const translatedContents = Array.isArray(translatedContentsRaw) ? translatedContentsRaw : [];
-
-                const nextTabs: Tab[] = tabsAr.map((tab, i) => ({
-                    id: tab.id,
-                    title: translatedTitles[i] || tab.title,
-                    content: translatedContents[i] || tab.content,
-                }));
-                setTabs(nextTabs);
-                setTabsSyncKey((v) => v + 1);
-            }
-
-            setActiveLang("en");
-        } catch (error) {
-            console.error("Translation failed:", error);
-            alert(error instanceof Error ? error.message : tErrors('translationFailed'));
-        } finally {
-            setIsTranslating(false);
-        }
-    }
-
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
         setIsPending(true);
 
         const formData = new FormData(e.currentTarget);
+        // Explicitly set controlled values
+        formData.set("name", nameEn);
+        formData.set("name_ar", nameAr);
+        formData.set("shortDesc", shortDescEn);
+        formData.set("shortDesc_ar", shortDescAr);
         formData.set("description", description);
         formData.set("description_ar", descriptionAr);
         formData.set("image", image);
         formData.set("slug", slug);
+        formData.set("categoryId", categoryId);
+        formData.set("sku", sku);
         formData.set("isFeatured", String(isFeatured));
         formData.set("isOrganic", String(isOrganic));
         formData.set("order", String(order));
         formData.set("colorTheme", colorTheme);
+        formData.set("metaTitle", metaTitleEn);
+        formData.set("metaTitle_ar", metaTitleAr);
+        formData.set("metaDesc", metaDescEn);
+        formData.set("metaDesc_ar", metaDescAr);
         
         // Serialize complex data
         formData.set("downloads", JSON.stringify(downloads));
@@ -229,294 +202,347 @@ export default function ProductForm({
     }
 
     return (
-        <form onSubmit={handleSubmit} className="card" style={{ padding: '2.5rem', maxWidth: '1000px', backgroundColor: 'white' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2.5rem', marginBottom: '2.5rem' }}>
-                <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.85rem' }}>{t('productName')}</label>
-                    <input ref={nameEnRef} name="name" value={nameEn} onChange={handleNameChange} required className="input" style={{ width: '100%' }} />
-                </div>
-                <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.85rem' }}>{t('slug')}</label>
-                    <input value={slug} onChange={handleSlugChange} required className="input" style={{ width: '100%' }} placeholder="url-friendly-slug" />
-                    <input type="hidden" name="slug" value={slug} />
+        <form onSubmit={handleSubmit} className="card" style={{ padding: '2.5rem', maxWidth: '1200px', backgroundColor: 'white', margin: '0 auto' }}>
+            <div className="flex justify-between items-center mb-8 border-b border-slate-200 pb-4">
+                <h1 className="text-2xl font-bold text-slate-900">
+                    {initialData?.id ? t('update') : t('create')}
+                </h1>
+                <div className="flex gap-2">
+                    <button type="submit" disabled={isPending} className="btn btn-primary px-6">
+                        {isPending ? t('processing') : t('saveChanges')}
+                    </button>
+                    <button type="button" onClick={() => router.back()} className="btn btn-outline px-6">
+                        {tCommon('cancel')}
+                    </button>
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2.5rem', marginBottom: '2.5rem' }}>
-                <ImageUpload
-                    label={t('image')}
-                    value={image}
-                    onChange={setImage}
-                />
-                
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                 <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.85rem' }}>{t('category')}</label>
-                    <select name="categoryId" defaultValue={initialData?.categoryId || ""} required className="input" style={{ width: '100%' }}>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">
+                        {t('productName')} (EN) <span className="text-red-500">*</span>
+                    </label>
+                    <input 
+                        name="name" 
+                        value={nameEn} 
+                        onChange={handleNameChange} 
+                        required 
+                        className="input w-full"
+                        placeholder="e.g., Premium Tomato Seeds"
+                    />
+                </div>
+                <div dir="rtl">
+                    <label className="block text-sm font-bold text-slate-700 mb-2">
+                        {t('productName')} (AR)
+                    </label>
+                    <input 
+                        name="name_ar" 
+                        value={nameAr} 
+                        onChange={handleNameArChange} 
+                        className="input w-full"
+                        placeholder="اسم المنتج بالعربية"
+                    />
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">
+                        {t('slug')}
+                    </label>
+                    <input 
+                        value={slug} 
+                        onChange={handleSlugChange} 
+                        className="input w-full font-mono text-sm"
+                        placeholder="url-friendly-slug" 
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">
+                        {t('category')} <span className="text-red-500">*</span>
+                    </label>
+                    <select 
+                        name="categoryId" 
+                        value={categoryId} 
+                        onChange={(e) => setCategoryId(e.target.value)}
+                        required 
+                        className="input w-full"
+                    >
                         <option value="">{t('selectCategory')}</option>
                         {categories.map((c) => {
                             const label = isArLocale ? (c.name_ar || c.name) : c.name;
+                            let fullPath = label;
+                            if (c.parent) {
+                                const parentLabel = isArLocale ? (c.parent.name_ar || c.parent.name) : c.parent.name;
+                                fullPath = `${parentLabel} / ${label}`;
+                            }
                             return (
                                 <option key={c.id} value={c.id}>
-                                    {label}
+                                    {fullPath}
                                 </option>
                             );
                         })}
                     </select>
-                    
-                    <div style={{ marginTop: '1.5rem' }}>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.85rem' }}>{t('sku')}</label>
-                        <input name="sku" defaultValue={initialData?.sku || ""} className="input" style={{ width: '100%' }} />
-                    </div>
                 </div>
             </div>
 
-            {/* Product Options & Settings */}
-            <div style={{ 
-                display: 'grid', 
-                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
-                gap: '2rem', 
-                marginBottom: '2.5rem', 
-                backgroundColor: '#f8fafc', 
-                padding: '2rem', 
-                borderRadius: '1.5rem',
-                border: '1px solid #e2e8f0'
-            }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    <label style={{ fontWeight: '800', fontSize: '0.85rem', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                        {t('visibility')}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">
+                        {t('sku')}
                     </label>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem' }}>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', padding: '0.75rem 1rem', backgroundColor: isFeatured ? 'var(--primary-light)' : 'white', borderRadius: '0.75rem', border: `1px solid ${isFeatured ? 'var(--primary)' : '#e2e8f0'}`, transition: 'all 0.2s' }}>
-                            <input 
-                                type="checkbox" 
-                                checked={isFeatured} 
-                                onChange={(e) => setIsFeatured(e.target.checked)}
-                                style={{ width: '18px', height: '18px', accentColor: 'var(--primary)' }}
-                            />
-                            <span style={{ fontWeight: 700, fontSize: '0.9rem', color: isFeatured ? 'var(--primary)' : '#1e293b' }}>{t('showOnHomepage')}</span>
-                        </label>
-
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', padding: '0.75rem 1rem', backgroundColor: isOrganic ? '#ecfdf5' : 'white', borderRadius: '0.75rem', border: `1px solid ${isOrganic ? '#10b981' : '#e2e8f0'}`, transition: 'all 0.2s' }}>
-                            <input 
-                                type="checkbox" 
-                                checked={isOrganic} 
-                                onChange={(e) => setIsOrganic(e.target.checked)}
-                                style={{ width: '18px', height: '18px', accentColor: '#10b981' }}
-                            />
-                            <span style={{ fontWeight: 700, fontSize: '0.9rem', color: isOrganic ? '#059669' : '#1e293b' }}>{t('certifiedOrganic')}</span>
-                        </label>
-                    </div>
+                    <input 
+                        name="sku" 
+                        value={sku} 
+                        onChange={(e) => setSku(e.target.value)}
+                        className="input w-full"
+                        placeholder="PROD-001"
+                    />
                 </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    <label style={{ fontWeight: '800', fontSize: '0.85rem', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">
                         {t('displayOrder')}
                     </label>
                     <input 
                         type="number" 
                         value={order} 
                         onChange={(e) => setOrder(parseInt(e.target.value) || 0)} 
-                        className="input" 
-                        style={{ width: '100%', height: '48px', fontWeight: 700 }} 
+                        className="input w-full"
                         placeholder="0"
                     />
                 </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    <label style={{ fontWeight: '800', fontSize: '0.85rem', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">
                         {t('colorTheme')}
                     </label>
-                    <select 
-                        value={colorTheme} 
-                        onChange={(e) => setColorTheme(e.target.value)} 
-                        className="input" 
-                        style={{ width: '100%', height: '48px', fontWeight: 700 }}
+                    <select
+                        value={colorTheme}
+                        onChange={(e) => setColorTheme(e.target.value)}
+                        className="input w-full"
                     >
-                        <option value="blue">Blue (Default)</option>
-                        <option value="green">Green (Bio)</option>
-                        <option value="purple">Purple (Specialty)</option>
-                        <option value="orange">Orange (Fertilizers)</option>
-                        <option value="pink">Pink (Growth)</option>
-                        <option value="slate">Slate (Industrial)</option>
+                        <option value="blue">Blue</option>
+                        <option value="green">Green</option>
+                        <option value="purple">Purple</option>
+                        <option value="orange">Orange</option>
+                        <option value="pink">Pink</option>
+                        <option value="slate">Slate</option>
                     </select>
                 </div>
             </div>
 
-            <div style={{ marginBottom: '2rem', borderBottom: '1px solid var(--border)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
-                    <div style={{ display: 'flex', gap: '1rem' }}>
-                        <button
-                            type="button"
-                            onClick={() => setActiveLang('en')}
-                            style={{
-                                padding: '0.75rem 1.5rem',
-                                borderBottom: activeLang === 'en' ? '2px solid var(--primary)' : '2px solid transparent',
-                                fontWeight: activeLang === 'en' ? '700' : '400',
-                                color: activeLang === 'en' ? 'var(--primary)' : 'var(--muted-foreground)',
-                                backgroundColor: 'transparent',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            {t('tabEnglish')}
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setActiveLang('ar')}
-                            style={{
-                                padding: '0.75rem 1.5rem',
-                                borderBottom: activeLang === 'ar' ? '2px solid var(--primary)' : '2px solid transparent',
-                                fontWeight: activeLang === 'ar' ? '700' : '400',
-                                color: activeLang === 'ar' ? 'var(--primary)' : 'var(--muted-foreground)',
-                                backgroundColor: 'transparent',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            {t('tabArabic')}
-                        </button>
-                    </div>
-
-                    <button type="button" className="btn btn-outline" onClick={translateToEnglish} disabled={isPending || isTranslating}>
-                        {isTranslating ? t('translating') : t('translateToEnglish')}
-                    </button>
-                </div>
-            </div>
-
-            <div style={{ display: activeLang === 'en' ? 'block' : 'none' }}>
-                <div style={{ marginBottom: '2.5rem' }}>
-                    <label style={{ display: 'block', marginBottom: '1rem', fontWeight: '700', fontSize: '0.85rem' }}>{t('summary')}</label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                 <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">
+                        {t('summary')} (EN)
+                    </label>
                     <textarea
                         name="shortDesc"
                         value={shortDescEn}
                         onChange={(e) => setShortDescEn(e.target.value)}
                         rows={3}
-                        className="input"
-                        style={{ width: '100%', fontFamily: 'inherit' }}
-                        placeholder="Briefly describe the product's primary purpose..."
+                        className="input w-full resize-none"
+                        placeholder="Brief summary..."
                     />
                 </div>
-
-                <div style={{ marginBottom: '2.5rem' }}>
-                    <RichTextEditor
-                        label={t('description')}
-                        value={description}
-                        onChange={setDescription}
-                    />
-                </div>
-
-                <div style={{ marginBottom: '2.5rem' }}>
-                    <TabsManager key={`en-${tabsSyncKey}`} initialData={tabs} onChange={setTabs} />
-                </div>
-
-                <div style={{ borderTop: '1px solid var(--border)', paddingTop: '1.5rem', marginBottom: '2.5rem' }}>
-                    <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>{t('seo')}</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.875rem' }}>{t('metaTitle')}</label>
-                            <input name="metaTitle" value={metaTitleEn} onChange={(e) => setMetaTitleEn(e.target.value)} className="input" style={{ width: '100%' }} placeholder="SEO Title (optional)" />
-                        </div>
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.875rem' }}>{t('metaDesc')}</label>
-                            <textarea name="metaDesc" value={metaDescEn} onChange={(e) => setMetaDescEn(e.target.value)} rows={2} className="input" style={{ width: '100%', fontFamily: 'inherit' }} placeholder="SEO Description (optional)" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div style={{ display: activeLang === 'ar' ? 'block' : 'none' }}>
-                <div style={{ marginBottom: '2.5rem' }}>
-                    <label style={{ display: 'block', marginBottom: '1rem', fontWeight: '700', fontSize: '0.85rem' }}>{t('productName')}</label>
-                    <input name="name_ar" value={nameAr} onChange={handleNameArChange} className="input" style={{ width: '100%' }} dir="rtl" />
-                </div>
-
-                <div style={{ marginBottom: '2.5rem' }}>
-                    <label style={{ display: 'block', marginBottom: '1rem', fontWeight: '700', fontSize: '0.85rem' }}>{t('summary')}</label>
+                <div dir="rtl">
+                    <label className="block text-sm font-bold text-slate-700 mb-2">
+                        {t('summary')} (AR)
+                    </label>
                     <textarea
                         name="shortDesc_ar"
                         value={shortDescAr}
                         onChange={(e) => setShortDescAr(e.target.value)}
                         rows={3}
-                        className="input"
-                        style={{ width: '100%', fontFamily: 'inherit' }}
-                        dir="rtl"
+                        className="input w-full resize-none"
+                        placeholder="وصف مختصر..."
                     />
                 </div>
+            </div>
 
-                <div style={{ marginBottom: '2.5rem' }}>
+            <div className="mb-8">
+                <ImageUpload
+                    label={t('image')}
+                    value={image}
+                    onChange={setImage}
+                />
+            </div>
+
+            <div className="flex gap-8 mb-8 p-4 bg-slate-50 rounded-lg border border-slate-200">
+                <label className="flex items-center gap-2 cursor-pointer">
+                    <input 
+                        type="checkbox" 
+                        checked={isFeatured} 
+                        onChange={(e) => setIsFeatured(e.target.checked)}
+                        className="w-5 h-5 accent-primary"
+                    />
+                    <span className="font-bold text-slate-700">{t('showOnHomepage')}</span>
+                </label>
+
+                <label className="flex items-center gap-2 cursor-pointer">
+                    <input 
+                        type="checkbox" 
+                        checked={isOrganic} 
+                        onChange={(e) => setIsOrganic(e.target.checked)}
+                        className="w-5 h-5 accent-green-600"
+                    />
+                    <span className="font-bold text-slate-700">{t('certifiedOrganic')}</span>
+                </label>
+            </div>
+
+            {/* Description Section with Tabs */}
+            <div className="mb-8">
+                <div className="flex gap-1 mb-2 border-b border-slate-200">
+                    <button
+                        type="button"
+                        onClick={() => setDescTab('en')}
+                        className={`px-4 py-2 font-bold text-sm rounded-t-lg transition-colors ${
+                            descTab === 'en' 
+                                ? 'bg-slate-100 text-slate-900 border-t border-x border-slate-200' 
+                                : 'text-slate-500 hover:bg-slate-50'
+                        }`}
+                    >
+                        {t('descriptionEn')}
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setDescTab('ar')}
+                        className={`px-4 py-2 font-bold text-sm rounded-t-lg transition-colors ${
+                            descTab === 'ar' 
+                                ? 'bg-slate-100 text-slate-900 border-t border-x border-slate-200' 
+                                : 'text-slate-500 hover:bg-slate-50'
+                        }`}
+                    >
+                        {t('descriptionAr')}
+                    </button>
+                </div>
+                
+                <div className={descTab === 'en' ? 'block' : 'hidden'}>
                     <RichTextEditor
-                        label={t('description')}
+                        label=""
+                        value={description}
+                        onChange={setDescription}
+                    />
+                </div>
+                <div className={descTab === 'ar' ? 'block' : 'hidden'} dir="rtl">
+                    <RichTextEditor
+                        label=""
                         value={descriptionAr}
                         onChange={setDescriptionAr}
                         dir="rtl"
                     />
                 </div>
+            </div>
 
-                <div style={{ marginBottom: '2.5rem' }}>
-                    <TabsManager initialData={tabsAr} onChange={setTabsAr} dir="rtl" />
+            {/* Tabs Manager Section with Tabs */}
+            <div className="mb-8">
+                <div className="flex gap-1 mb-2 border-b border-slate-200">
+                    <button
+                        type="button"
+                        onClick={() => setTabsTab('en')}
+                        className={`px-4 py-2 font-bold text-sm rounded-t-lg transition-colors ${
+                            tabsTab === 'en' 
+                                ? 'bg-slate-100 text-slate-900 border-t border-x border-slate-200' 
+                                : 'text-slate-500 hover:bg-slate-50'
+                        }`}
+                    >
+                        Additional Tabs (EN)
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setTabsTab('ar')}
+                        className={`px-4 py-2 font-bold text-sm rounded-t-lg transition-colors ${
+                            tabsTab === 'ar' 
+                                ? 'bg-slate-100 text-slate-900 border-t border-x border-slate-200' 
+                                : 'text-slate-500 hover:bg-slate-50'
+                        }`}
+                    >
+                        Additional Tabs (AR)
+                    </button>
                 </div>
-
-                <div style={{ borderTop: '1px solid var(--border)', paddingTop: '1.5rem', marginBottom: '2.5rem' }}>
-                    <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>{t('seo')}</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.875rem' }}>{t('metaTitle')}</label>
-                            <input name="metaTitle_ar" value={metaTitleAr} onChange={(e) => setMetaTitleAr(e.target.value)} className="input" style={{ width: '100%' }} dir="rtl" />
-                        </div>
-                        <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.875rem' }}>{t('metaDesc')}</label>
-                            <textarea name="metaDesc_ar" value={metaDescAr} onChange={(e) => setMetaDescAr(e.target.value)} rows={2} className="input" style={{ width: '100%', fontFamily: 'inherit' }} dir="rtl" />
-                        </div>
-                    </div>
+                
+                <div className={tabsTab === 'en' ? 'block' : 'hidden'}>
+                    <TabsManager initialData={tabs} onChange={setTabs} />
+                </div>
+                <div className={tabsTab === 'ar' ? 'block' : 'hidden'} dir="rtl">
+                    <TabsManager initialData={tabsAr} onChange={setTabsAr} dir="rtl" />
                 </div>
             </div>
 
-            <div style={{ marginBottom: '2.5rem' }}>
+            <div className="mb-8 border-t border-slate-200 pt-8">
                 <DownloadsManager 
                     initialData={downloads}
                     onChange={setDownloads}
                 />
             </div>
 
-            {initialData?.id && (
-                <div style={{ marginBottom: '2.5rem', borderTop: '1px solid var(--border)', paddingTop: '2rem' }}>
-                    <ProductSectionsManager 
-                        productId={initialData.id} 
-                        initialSections={initialSections} 
-                    />
-                </div>
-            )}
-            
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2.5rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem', border: '1px solid var(--border)', borderRadius: '0.5rem' }}>
-                    <input 
-                        type="checkbox" 
-                        name="isFeatured" 
-                        id="isFeatured"
-                        defaultChecked={initialData?.isFeatured}
-                        value="true"
-                        style={{ width: '1.25rem', height: '1.25rem' }}
-                    />
-                    <label htmlFor="isFeatured" style={{ fontWeight: '600', cursor: 'pointer' }}>{t('featured')}</label>
-                </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem', border: '1px solid var(--border)', borderRadius: '0.5rem' }}>
-                    <input 
-                        type="checkbox" 
-                        name="isOrganic" 
-                        id="isOrganic"
-                        defaultChecked={initialData?.isOrganic}
-                        value="true"
-                        style={{ width: '1.25rem', height: '1.25rem' }}
-                    />
-                    <label htmlFor="isOrganic" style={{ fontWeight: '600', cursor: 'pointer' }}>{t('organic')}</label>
+
+            <div className="mb-8 border-t border-slate-200 pt-8">
+                <h3 className="text-lg font-bold text-slate-900 mb-4">{t('seo')}</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-bold text-slate-700 mb-2">
+                                {t('metaTitle')} (EN)
+                            </label>
+                            <input 
+                                name="metaTitle" 
+                                value={metaTitleEn} 
+                                onChange={(e) => setMetaTitleEn(e.target.value)} 
+                                className="input w-full"
+                                placeholder="SEO Title"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-bold text-slate-700 mb-2">
+                                {t('metaDesc')} (EN)
+                            </label>
+                            <textarea 
+                                name="metaDesc" 
+                                value={metaDescEn} 
+                                onChange={(e) => setMetaDescEn(e.target.value)} 
+                                rows={3} 
+                                className="input w-full resize-none"
+                                placeholder="SEO Description"
+                            />
+                        </div>
+                    </div>
+                    <div className="space-y-4" dir="rtl">
+                        <div>
+                            <label className="block text-sm font-bold text-slate-700 mb-2">
+                                {t('metaTitle')} (AR)
+                            </label>
+                            <input 
+                                name="metaTitle_ar" 
+                                value={metaTitleAr} 
+                                onChange={(e) => setMetaTitleAr(e.target.value)} 
+                                className="input w-full"
+                                placeholder="عنوان SEO"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-bold text-slate-700 mb-2">
+                                {t('metaDesc')} (AR)
+                            </label>
+                            <textarea 
+                                name="metaDesc_ar" 
+                                value={metaDescAr} 
+                                onChange={(e) => setMetaDescAr(e.target.value)} 
+                                rows={3} 
+                                className="input w-full resize-none"
+                                placeholder="وصف SEO"
+                            />
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', borderTop: '1px solid var(--border)', paddingTop: '2rem' }}>
-                <button type="button" onClick={() => router.back()} className="btn btn-outline" disabled={isPending}>
+            <div className="flex justify-end gap-4 border-t border-slate-200 pt-8">
+                <button type="button" onClick={() => router.back()} className="btn btn-outline px-8 py-3">
                     {tCommon('cancel')}
                 </button>
-                <button type="submit" disabled={isPending} className="btn btn-primary" style={{ padding: '1rem 3rem' }}>
-                    {isPending ? t('processing') : initialData ? t('update') : t('create')}
+                <button type="submit" disabled={isPending} className="btn btn-primary px-8 py-3">
+                    {isPending ? t('processing') : t('saveChanges')}
                 </button>
             </div>
         </form>

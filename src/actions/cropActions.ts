@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { generateUniqueSlug } from "@/lib/slugUtils";
+import { auth } from "@/auth";
 
 const MAX_QUERY_CHARS = 450;
 
@@ -100,6 +101,11 @@ interface StageInput {
 }
 
 export async function createCrop(formData: FormData) {
+    const session = await auth();
+    if (!session) {
+        throw new Error("Unauthorized");
+    }
+
     const rawName = formData.get("name");
     const rawNameAr = formData.get("name_ar");
     const rawSlug = formData.get("slug");
@@ -313,6 +319,11 @@ export async function getCropById(id: string) {
 }
 
 export async function updateCrop(id: string, formData: FormData) {
+    const session = await auth();
+    if (!session) {
+        throw new Error("Unauthorized");
+    }
+
     const rawName = formData.get("name");
     const rawNameAr = formData.get("name_ar");
     const rawSlug = formData.get("slug");
@@ -417,6 +428,11 @@ export async function updateCrop(id: string, formData: FormData) {
 }
 
 export async function deleteCrop(id: string) {
+    const session = await auth();
+    if (!session) {
+        throw new Error("Unauthorized");
+    }
+
     await prisma.crop.delete({
         where: { id },
     });

@@ -4,7 +4,7 @@ import { useState } from "react";
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { createProductSection, updateProductSection, deleteProductSection, getProductSections } from "@/actions/productSectionActions";
-import { Plus, Trash2, Edit2 } from "lucide-react";
+import { Plus, Trash2, Edit2, Layers, GripVertical } from "lucide-react";
 
 const RichTextEditor = dynamic(() => import("./RichTextEditor"), { ssr: false });
 
@@ -28,6 +28,7 @@ export default function ProductSectionsManager({
     const t = useTranslations('AdminProductSections');
     const [sections, setSections] = useState<Section[]>(initialSections);
     const [editingId, setEditingId] = useState<string | null>(null);
+    const [contentTab, setContentTab] = useState<'en' | 'ar'>('en');
     const [formData, setFormData] = useState({
         title: "",
         title_ar: "",
@@ -46,7 +47,18 @@ export default function ProductSectionsManager({
         }));
     };
 
-    const handleAddSection = async (e: React.FormEvent) => {
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (editingId) {
+                handleUpdateSection(e as any);
+            } else {
+                handleAddSection(e as any);
+            }
+        }
+    };
+
+    const handleAddSection = async (e: React.FormEvent | React.MouseEvent) => {
         e.preventDefault();
         setIsLoading(true);
 
@@ -72,7 +84,7 @@ export default function ProductSectionsManager({
         setIsLoading(false);
     };
 
-    const handleUpdateSection = async (e: React.FormEvent) => {
+    const handleUpdateSection = async (e: React.FormEvent | React.MouseEvent) => {
         if (!editingId) return;
         e.preventDefault();
         setIsLoading(true);
@@ -125,130 +137,206 @@ export default function ProductSectionsManager({
     };
 
     return (
-        <div className="mt-8">
-            <h3 className="text-2xl font-bold mb-6">
-                {t('title')}
-            </h3>
+        <div className="mt-12">
+            <div className="flex items-center gap-4 mb-8 border-b border-slate-200 pb-4">
+                <Layers className="w-6 h-6 text-slate-700" />
+                <h3 className="text-xl font-bold text-slate-800">
+                    {t('title')}
+                </h3>
+            </div>
 
-            {/* Form */}
-            <form onSubmit={editingId ? handleUpdateSection : handleAddSection} className="mb-8 p-8 bg-muted rounded-2xl">
-                <div className="grid grid-cols-1 sm:grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-4 mb-4">
-                    <input
-                        type="text"
-                        name="title"
-                        placeholder={t('sectionTitleEn')}
-                        value={formData.title}
-                        onChange={handleInputChange}
-                        required
-                        className="p-3 border border-border rounded-lg text-base w-full"
-                    />
-                    <input
-                        type="text"
-                        name="title_ar"
-                        placeholder={t('sectionTitleAr')}
-                        value={formData.title_ar}
-                        onChange={handleInputChange}
-                        className="p-3 border border-border rounded-lg text-base w-full"
-                    />
-                    <input
-                        type="number"
-                        name="order"
-                        placeholder={t('order')}
-                        value={formData.order}
-                        onChange={handleInputChange}
-                        min="0"
-                        className="p-3 border border-border rounded-lg text-base w-full"
-                    />
-                    <select
-                        name="colorTheme"
-                        value={formData.colorTheme}
-                        onChange={handleInputChange}
-                        className="p-3 border border-border rounded-lg text-base w-full"
-                    >
-                        <option value="blue">Blue</option>
-                        <option value="green">Green</option>
-                        <option value="purple">Purple</option>
-                        <option value="orange">Orange</option>
-                    </select>
+            {/* Form Replacement */}
+            <div className="mb-10 p-6 bg-slate-50 border border-slate-200 rounded-lg">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                    <div className="lg:col-span-2 space-y-2">
+                        <label className="block text-sm font-bold text-slate-700">
+                            {t('sectionTitleEn')}
+                        </label>
+                        <input
+                            type="text"
+                            name="title"
+                            value={formData.title}
+                            onChange={handleInputChange}
+                            required
+                            className="input w-full"
+                            placeholder="e.g. Specifications"
+                        />
+                    </div>
+                    <div className="lg:col-span-2 space-y-2">
+                        <label className="block text-sm font-bold text-slate-700">
+                            {t('sectionTitleAr')}
+                        </label>
+                        <input
+                            type="text"
+                            name="title_ar"
+                            value={formData.title_ar}
+                            onChange={handleInputChange}
+                            className="input w-full"
+                            placeholder="العنوان بالعربية"
+                            dir="rtl"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="block text-sm font-bold text-slate-700">
+                            {t('order')}
+                        </label>
+                        <input
+                            type="number"
+                            name="order"
+                            value={formData.order}
+                            onChange={handleInputChange}
+                            min="0"
+                            className="input w-full"
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="block text-sm font-bold text-slate-700">
+                            Color Theme
+                        </label>
+                        <div className="relative">
+                            <select
+                                name="colorTheme"
+                                value={formData.colorTheme}
+                                onChange={handleInputChange}
+                                className="input w-full"
+                            >
+                                <option value="blue">Blue</option>
+                                <option value="green">Green</option>
+                                <option value="purple">Purple</option>
+                                <option value="orange">Orange</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
-                <div className="mb-6">
-                    <RichTextEditor
-                        label={t('contentEn')}
-                        value={formData.content}
-                        onChange={(html) => setFormData(prev => ({ ...prev, content: html }))}
-                    />
-                </div>
-                <div className="mb-6">
-                    <RichTextEditor
-                        label={t('contentAr')}
-                        value={formData.content_ar}
-                        onChange={(html) => setFormData(prev => ({ ...prev, content_ar: html }))}
-                        dir="rtl"
-                    />
+                <div className="mb-6 bg-white rounded-lg border border-slate-200 overflow-hidden">
+                    <div className="flex border-b border-slate-200 bg-slate-50 p-1 gap-1">
+                        <button
+                            type="button"
+                            onClick={() => setContentTab('en')}
+                            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium transition-colors rounded-md ${
+                                contentTab === 'en' 
+                                    ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200' 
+                                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200'
+                            }`}
+                        >
+                            <span>English Content</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setContentTab('ar')}
+                            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium transition-colors rounded-md ${
+                                contentTab === 'ar' 
+                                    ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200' 
+                                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200'
+                            }`}
+                        >
+                            <span>Arabic Content</span>
+                        </button>
+                    </div>
+                    
+                    <div className="p-4">
+                        {contentTab === 'en' ? (
+                            <RichTextEditor
+                                label=""
+                                value={formData.content}
+                                onChange={(html) => setFormData(prev => ({ ...prev, content: html }))}
+                            />
+                        ) : (
+                            <RichTextEditor
+                                label=""
+                                value={formData.content_ar}
+                                onChange={(html) => setFormData(prev => ({ ...prev, content_ar: html }))}
+                                dir="rtl"
+                            />
+                        )}
+                    </div>
                 </div>
 
-                <button
-                    type="submit"
-                    disabled={isLoading}
-                    className={`inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg font-semibold transition-opacity ${isLoading ? 'opacity-60 cursor-not-allowed' : 'hover:bg-primary-hover'}`}
-                >
-                    <Plus size={18} />
-                    {editingId ? t('updateSection') : t('addSection')}
-                </button>
-                {editingId && (
+                <div className="flex items-center gap-4 pt-2">
                     <button
                         type="button"
-                        onClick={() => {
-                            setEditingId(null);
-                            setFormData({
-                                title: "",
-                                title_ar: "",
-                                content: "",
-                                content_ar: "",
-                                order: 0,
-                                colorTheme: "blue",
-                            });
-                        }}
-                        className="ml-2 px-6 py-3 bg-slate-400 text-white rounded-lg font-semibold hover:bg-slate-500"
+                        onClick={editingId ? handleUpdateSection : handleAddSection}
+                        disabled={isLoading}
+                        className="btn btn-primary"
                     >
-                        Cancel
+                        {editingId ? <Edit2 className="w-4 h-4 mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
+                        {editingId ? t('updateSection') : t('addSection')}
                     </button>
-                )}
-            </form>
+                    {editingId && (
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setEditingId(null);
+                                setFormData({
+                                    title: "",
+                                    title_ar: "",
+                                    content: "",
+                                    content_ar: "",
+                                    order: 0,
+                                    colorTheme: "blue",
+                                });
+                            }}
+                            className="btn btn-outline"
+                        >
+                            Cancel
+                        </button>
+                    )}
+                </div>
+            </div>
 
             {/* Sections List */}
-            <div className="grid gap-4">
+            <div className="space-y-4">
                 {sections.length === 0 ? (
-                    <p className="text-muted-foreground text-center p-8">No sections yet</p>
+                    <div className="text-center py-12 px-4 bg-slate-50 rounded-lg border border-dashed border-slate-300">
+                        <p className="text-slate-600 font-medium mb-2">No sections added yet</p>
+                        <p className="text-slate-400 text-sm">Add custom sections like "Specifications", "Usage", etc.</p>
+                    </div>
                 ) : (
                     sections.map((section) => (
                         <div
                             key={section.id}
-                            className="p-6 border border-border rounded-xl bg-background flex justify-between items-center"
+                            className="group p-4 bg-white border border-slate-200 rounded-lg shadow-sm hover:border-slate-300 transition-colors flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
                         >
-                            <div>
-                                <h4 className="m-0 text-lg font-bold">{section.title}</h4>
-                                {section.title_ar && (
-                                    <p className="mt-1 text-slate-500">{section.title_ar}</p>
-                                )}
-                                <p className="mt-2 text-sm text-muted-foreground">
-                                    Order: {section.order} | Color: {section.colorTheme}
-                                </p>
+                            <div className="flex items-center gap-4 w-full sm:w-auto">
+                                <div className="p-2 bg-slate-50 rounded-md text-slate-400 cursor-move hover:text-slate-600 hover:bg-slate-100 transition-colors">
+                                    <GripVertical size={20} />
+                                </div>
+                                <div>
+                                    <h4 className="text-base font-bold text-slate-900">{section.title}</h4>
+                                    {section.title_ar && (
+                                        <p className="text-sm text-slate-500 font-arabic mt-0.5">{section.title_ar}</p>
+                                    )}
+                                    <div className="flex flex-wrap items-center gap-2 mt-2 text-xs font-bold uppercase tracking-wider">
+                                        <span className="bg-slate-100 text-slate-500 px-2 py-1 rounded border border-slate-200">Order: {section.order}</span>
+                                        <span className={`px-2 py-1 rounded flex items-center gap-1 border ${
+                                            section.colorTheme === 'blue' ? 'bg-blue-50 text-blue-700 border-blue-100' :
+                                            section.colorTheme === 'green' ? 'bg-green-50 text-green-700 border-green-100' :
+                                            section.colorTheme === 'purple' ? 'bg-purple-50 text-purple-700 border-purple-100' :
+                                            'bg-orange-50 text-orange-700 border-orange-100'
+                                        }`}>
+                                            <span className={`w-1.5 h-1.5 rounded-full bg-current`}></span>
+                                            {section.colorTheme}
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="flex gap-2">
+                            
+                            <div className="flex items-center gap-2 w-full sm:w-auto justify-end border-t sm:border-t-0 border-slate-50 pt-3 sm:pt-0">
                                 <button
                                     onClick={() => handleEditSection(section)}
-                                    className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center gap-2"
+                                    className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                                    title="Edit"
                                 >
-                                    <Edit2 size={16} />
+                                    <Edit2 size={18} />
                                 </button>
                                 <button
                                     onClick={() => handleDeleteSection(section.id)}
                                     disabled={isLoading}
-                                    className={`p-2 bg-red-500 text-white rounded-lg flex items-center gap-2 transition-opacity ${isLoading ? 'opacity-60 cursor-not-allowed' : 'hover:bg-red-600'}`}
+                                    className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                                    title="Delete"
                                 >
-                                    <Trash2 size={16} />
+                                    <Trash2 size={18} />
                                 </button>
                             </div>
                         </div>

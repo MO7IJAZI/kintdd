@@ -45,12 +45,16 @@ export default function JobOfferForm({ jobOffer }: JobOfferFormProps) {
     // State for controlled rich text fields
     const [companyIntro, setCompanyIntro] = useState(jobOffer?.companyIntro || "");
     const [companyIntroAr, setCompanyIntroAr] = useState(jobOffer?.companyIntro_ar || "");
+    const [companyIntroTab, setCompanyIntroTab] = useState<'en' | 'ar'>('en');
     const [responsibilities, setResponsibilities] = useState(jobOffer?.responsibilities || "");
     const [responsibilitiesAr, setResponsibilitiesAr] = useState(jobOffer?.responsibilities_ar || "");
+    const [responsibilitiesTab, setResponsibilitiesTab] = useState<'en' | 'ar'>('en');
     const [benefits, setBenefits] = useState(jobOffer?.benefits || "");
     const [benefitsAr, setBenefitsAr] = useState(jobOffer?.benefits_ar || "");
+    const [benefitsTab, setBenefitsTab] = useState<'en' | 'ar'>('en');
     const [qualifications, setQualifications] = useState(jobOffer?.qualifications || "");
     const [qualificationsAr, setQualificationsAr] = useState(jobOffer?.qualifications_ar || "");
+    const [qualificationsTab, setQualificationsTab] = useState<'en' | 'ar'>('en');
 
     // Format date for input type="date" (YYYY-MM-DD)
     const formattedDate = jobOffer?.expiresAt 
@@ -285,81 +289,245 @@ export default function JobOfferForm({ jobOffer }: JobOfferFormProps) {
                 <h3 className="section-title">Job Details</h3>
                 
                 <div className="form-group">
-                    <div style={{ display: currentLang === 'en' ? 'block' : 'none' }}>
-                        <label>{t('companyIntroEn')}</label>
-                        <RichTextEditor
-                            value={companyIntro}
-                            onChange={setCompanyIntro}
-                        />
+                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                        <button
+                            type="button"
+                            onClick={() => setCompanyIntroTab('en')}
+                            style={{
+                                padding: '0.75rem 1.5rem',
+                                border: 'none',
+                                background: companyIntroTab === 'en' ? '#3b82f6' : 'transparent',
+                                color: companyIntroTab === 'en' ? 'white' : '#374151',
+                                fontWeight: '600',
+                                fontSize: '0.875rem',
+                                cursor: 'pointer',
+                                borderRadius: '8px 8px 0 0',
+                                transition: 'all 0.2s',
+                            }}
+                        >
+                            {t('english')} 🇬🇧
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setCompanyIntroTab('ar')}
+                            style={{
+                                padding: '0.75rem 1.5rem',
+                                border: 'none',
+                                background: companyIntroTab === 'ar' ? '#3b82f6' : 'transparent',
+                                color: companyIntroTab === 'ar' ? 'white' : '#374151',
+                                fontWeight: '600',
+                                fontSize: '0.875rem',
+                                cursor: 'pointer',
+                                borderRadius: '8px 8px 0 0',
+                                transition: 'all 0.2s',
+                            }}
+                        >
+                            {t('arabic')} 🇸🇦
+                        </button>
                     </div>
-                    <div style={{ display: currentLang === 'ar' ? 'block' : 'none' }} dir="rtl">
-                        <label>{t('companyIntroAr')}</label>
-                        <RichTextEditor
-                            value={companyIntroAr}
-                            onChange={setCompanyIntroAr}
-                            dir="rtl"
-                        />
-                    </div>
+                    
+                    {/* RichTextEditor based on active tab */}
+                    {companyIntroTab === 'en' ? (
+                        <div>
+                            <label>{t('companyIntroEn')}</label>
+                            <RichTextEditor
+                                value={companyIntro}
+                                onChange={setCompanyIntro}
+                            />
+                        </div>
+                    ) : (
+                        <div dir="rtl">
+                            <label>{t('companyIntroAr')}</label>
+                            <RichTextEditor
+                                value={companyIntroAr}
+                                onChange={setCompanyIntroAr}
+                                dir="rtl"
+                            />
+                        </div>
+                    )}
                     <input type="hidden" name="companyIntro" value={companyIntro} />
                     <input type="hidden" name="companyIntro_ar" value={companyIntroAr} />
                 </div>
 
                 <div className="form-group">
-                    <div style={{ display: currentLang === 'en' ? 'block' : 'none' }}>
-                        <label>{t('responsibilitiesEn')}</label>
-                        <RichTextEditor
-                            value={responsibilities}
-                            onChange={setResponsibilities}
-                        />
+                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                        <button
+                            type="button"
+                            onClick={() => setResponsibilitiesTab('en')}
+                            style={{
+                                padding: '0.75rem 1.5rem',
+                                border: 'none',
+                                background: responsibilitiesTab === 'en' ? '#3b82f6' : 'transparent',
+                                color: responsibilitiesTab === 'en' ? 'white' : '#374151',
+                                fontWeight: '600',
+                                fontSize: '0.875rem',
+                                cursor: 'pointer',
+                                borderRadius: '8px 8px 0 0',
+                                transition: 'all 0.2s',
+                            }}
+                        >
+                            {t('english')} 🇬🇧
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setResponsibilitiesTab('ar')}
+                            style={{
+                                padding: '0.75rem 1.5rem',
+                                border: 'none',
+                                background: responsibilitiesTab === 'ar' ? '#3b82f6' : 'transparent',
+                                color: responsibilitiesTab === 'ar' ? 'white' : '#374151',
+                                fontWeight: '600',
+                                fontSize: '0.875rem',
+                                cursor: 'pointer',
+                                borderRadius: '8px 8px 0 0',
+                                transition: 'all 0.2s',
+                            }}
+                        >
+                            {t('arabic')} 🇸🇦
+                        </button>
                     </div>
-                    <div style={{ display: currentLang === 'ar' ? 'block' : 'none' }} dir="rtl">
-                        <label>{t('responsibilitiesAr')}</label>
-                        <RichTextEditor
-                            value={responsibilitiesAr}
-                            onChange={setResponsibilitiesAr}
-                            dir="rtl"
-                        />
-                    </div>
+                    
+                    {/* RichTextEditor based on active tab */}
+                    {responsibilitiesTab === 'en' ? (
+                        <div>
+                            <label>{t('responsibilitiesEn')}</label>
+                            <RichTextEditor
+                                value={responsibilities}
+                                onChange={setResponsibilities}
+                            />
+                        </div>
+                    ) : (
+                        <div dir="rtl">
+                            <label>{t('responsibilitiesAr')}</label>
+                            <RichTextEditor
+                                value={responsibilitiesAr}
+                                onChange={setResponsibilitiesAr}
+                                dir="rtl"
+                            />
+                        </div>
+                    )}
                     <input type="hidden" name="responsibilities" value={responsibilities} />
                     <input type="hidden" name="responsibilities_ar" value={responsibilitiesAr} />
                 </div>
 
                 <div className="form-group">
-                    <div style={{ display: currentLang === 'en' ? 'block' : 'none' }}>
-                        <label>{t('benefitsEn')}</label>
-                        <RichTextEditor
-                            value={benefits}
-                            onChange={setBenefits}
-                        />
+                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                        <button
+                            type="button"
+                            onClick={() => setBenefitsTab('en')}
+                            style={{
+                                padding: '0.75rem 1.5rem',
+                                border: 'none',
+                                background: benefitsTab === 'en' ? '#3b82f6' : 'transparent',
+                                color: benefitsTab === 'en' ? 'white' : '#374151',
+                                fontWeight: '600',
+                                fontSize: '0.875rem',
+                                cursor: 'pointer',
+                                borderRadius: '8px 8px 0 0',
+                                transition: 'all 0.2s',
+                            }}
+                        >
+                            {t('english')} 🇬🇧
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setBenefitsTab('ar')}
+                            style={{
+                                padding: '0.75rem 1.5rem',
+                                border: 'none',
+                                background: benefitsTab === 'ar' ? '#3b82f6' : 'transparent',
+                                color: benefitsTab === 'ar' ? 'white' : '#374151',
+                                fontWeight: '600',
+                                fontSize: '0.875rem',
+                                cursor: 'pointer',
+                                borderRadius: '8px 8px 0 0',
+                                transition: 'all 0.2s',
+                            }}
+                        >
+                            {t('arabic')} 🇸🇦
+                        </button>
                     </div>
-                    <div style={{ display: currentLang === 'ar' ? 'block' : 'none' }} dir="rtl">
-                        <label>{t('benefitsAr')}</label>
-                        <RichTextEditor
-                            value={benefitsAr}
-                            onChange={setBenefitsAr}
-                            dir="rtl"
-                        />
-                    </div>
+                    
+                    {/* RichTextEditor based on active tab */}
+                    {benefitsTab === 'en' ? (
+                        <div>
+                            <label>{t('benefitsEn')}</label>
+                            <RichTextEditor
+                                value={benefits}
+                                onChange={setBenefits}
+                            />
+                        </div>
+                    ) : (
+                        <div dir="rtl">
+                            <label>{t('benefitsAr')}</label>
+                            <RichTextEditor
+                                value={benefitsAr}
+                                onChange={setBenefitsAr}
+                                dir="rtl"
+                            />
+                        </div>
+                    )}
                     <input type="hidden" name="benefits" value={benefits} />
                     <input type="hidden" name="benefits_ar" value={benefitsAr} />
                 </div>
 
                 <div className="form-group">
-                    <div style={{ display: currentLang === 'en' ? 'block' : 'none' }}>
-                        <label>{t('qualificationsEn')}</label>
-                        <RichTextEditor
-                            value={qualifications}
-                            onChange={setQualifications}
-                        />
+                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                        <button
+                            type="button"
+                            onClick={() => setQualificationsTab('en')}
+                            style={{
+                                padding: '0.75rem 1.5rem',
+                                border: 'none',
+                                background: qualificationsTab === 'en' ? '#3b82f6' : 'transparent',
+                                color: qualificationsTab === 'en' ? 'white' : '#374151',
+                                fontWeight: '600',
+                                fontSize: '0.875rem',
+                                cursor: 'pointer',
+                                borderRadius: '8px 8px 0 0',
+                                transition: 'all 0.2s',
+                            }}
+                        >
+                            {t('english')} 🇬🇧
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setQualificationsTab('ar')}
+                            style={{
+                                padding: '0.75rem 1.5rem',
+                                border: 'none',
+                                background: qualificationsTab === 'ar' ? '#3b82f6' : 'transparent',
+                                color: qualificationsTab === 'ar' ? 'white' : '#374151',
+                                fontWeight: '600',
+                                fontSize: '0.875rem',
+                                cursor: 'pointer',
+                                borderRadius: '8px 8px 0 0',
+                                transition: 'all 0.2s',
+                            }}
+                        >
+                            {t('arabic')} 🇸🇦
+                        </button>
                     </div>
-                    <div style={{ display: currentLang === 'ar' ? 'block' : 'none' }} dir="rtl">
-                        <label>{t('qualificationsAr')}</label>
-                        <RichTextEditor
-                            value={qualificationsAr}
-                            onChange={setQualificationsAr}
-                            dir="rtl"
-                        />
-                    </div>
+                    
+                    {/* RichTextEditor based on active tab */}
+                    {qualificationsTab === 'en' ? (
+                        <div>
+                            <label>{t('qualificationsEn')}</label>
+                            <RichTextEditor
+                                value={qualifications}
+                                onChange={setQualifications}
+                            />
+                        </div>
+                    ) : (
+                        <div dir="rtl">
+                            <label>{t('qualificationsAr')}</label>
+                            <RichTextEditor
+                                value={qualificationsAr}
+                                onChange={setQualificationsAr}
+                                dir="rtl"
+                            />
+                        </div>
+                    )}
                     <input type="hidden" name="qualifications" value={qualifications} />
                     <input type="hidden" name="qualifications_ar" value={qualificationsAr} />
                 </div>

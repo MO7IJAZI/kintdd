@@ -5,16 +5,13 @@ import { getTranslations } from 'next-intl/server';
 export const dynamic = 'force-dynamic';
 
 export default async function NewProductPage() {
-    const categories = await getCategories();
+    const allCategories = await getCategories();
+    // Only show subcategories (categories with parent)
+    const categories = allCategories.filter((c: any) => c.parentId);
     const t = await getTranslations('AdminProductForm');
 
     return (
-        <div>
-            <div style={{ marginBottom: '2.5rem' }}>
-                <h1 style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{t('newProductTitle')}</h1>
-                <p style={{ color: 'var(--muted-foreground)' }}>{t('newProductDesc')}</p>
-            </div>
-
+        <div className="bg-slate-50/50 min-h-screen">
             <ProductForm categories={categories} />
         </div>
     );

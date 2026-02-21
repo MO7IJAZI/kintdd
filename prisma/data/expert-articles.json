@@ -1,0 +1,15 @@
+[
+  {
+    "title": "aaa",
+    "slug": "aaa",
+    "excerpt": "asdwqdasdwqd",
+    "content": "<p dir=\"auto\">asdasdwfa</p>",
+    "image": "/uploads/products-1-1771636153289.webp",
+    "category": "fruit",
+    "order": 0,
+    "isPublished": true,
+    "metaTitle": "",
+    "metaDesc": "",
+    "publishedAt": "2026-02-20T00:00:00.000Z"
+  }
+]

@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { syncArticleToSeeder, removeArticleFromSeeder, formatRichText } from "@/lib/seed-utils";
+import { auth } from "@/auth";
 
 function sanitizeSlug(text: string) {
     return text
@@ -15,6 +16,11 @@ function sanitizeSlug(text: string) {
 }
 
 export async function createExpertArticle(formData: FormData) {
+    const session = await auth();
+    if (!session) {
+        throw new Error("Unauthorized");
+    }
+
     const title = formData.get("title") as string;
     const title_ar = formData.get("title_ar") as string;
     const rawSlug = formData.get("slug") as string;
@@ -33,6 +39,7 @@ export async function createExpertArticle(formData: FormData) {
     const metaDesc_ar = formData.get("metaDesc_ar") as string;
     const isPublished = formData.get("isPublished") === "true";
     const order = parseInt(formData.get("order") as string || "0");
+    const publishedAtDate = formData.get("publishedAt") as string;
 
     const article = await prisma.expertArticle.create({
         data: {
@@ -51,7 +58,7 @@ export async function createExpertArticle(formData: FormData) {
             metaDesc,
             metaDesc_ar,
             isPublished,
-            publishedAt: isPublished ? new Date() : null,
+            publishedAt: publishedAtDate ? new Date(publishedAtDate) : (isPublished ? new Date() : null),
         },
     });
 
@@ -76,6 +83,11 @@ export async function createExpertArticle(formData: FormData) {
 }
 
 export async function updateExpertArticle(id: string, formData: FormData) {
+    const session = await auth();
+    if (!session) {
+        throw new Error("Unauthorized");
+    }
+
     const title = formData.get("title") as string;
     const title_ar = formData.get("title_ar") as string;
     const rawSlug = formData.get("slug") as string;
@@ -94,6 +106,7 @@ export async function updateExpertArticle(id: string, formData: FormData) {
     const metaDesc_ar = formData.get("metaDesc_ar") as string;
     const isPublished = formData.get("isPublished") === "true";
     const order = parseInt(formData.get("order") as string || "0");
+    const publishedAtDate = formData.get("publishedAt") as string;
 
     const article = await prisma.expertArticle.findUnique({ where: { id } });
 
@@ -115,7 +128,7 @@ export async function updateExpertArticle(id: string, formData: FormData) {
             metaDesc,
             metaDesc_ar,
             isPublished,
-            publishedAt: isPublished && !article?.publishedAt ? new Date() : article?.publishedAt,
+            publishedAt: publishedAtDate ? new Date(publishedAtDate) : (isPublished && !article?.publishedAt ? new Date() : article?.publishedAt),
         },
     });
 
@@ -141,6 +154,11 @@ export async function updateExpertArticle(id: string, formData: FormData) {
 }
 
 export async function deleteExpertArticle(id: string) {
+    const session = await auth();
+    if (!session) {
+        throw new Error("Unauthorized");
+    }
+
     const article = await prisma.expertArticle.findUnique({ where: { id } });
     if (article) {
         await removeArticleFromSeeder(article.slug);

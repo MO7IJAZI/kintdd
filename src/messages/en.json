@@ -8,6 +8,13 @@
     "subtitle": "Download our latest product guides and technical brochures.",
     "agricultural": "Agricultural Production",
     "animal": "Animal Production",
+    "mixingTable": "Mixing Table",
+    "categories": {
+        "optimum-conditions": "Optimum Conditions",
+        "technical-guides": "Technical Guides",
+        "product-catalogs": "Additional Product Catalogs",
+        "other": "Other Documents"
+    },
     "download": "Download PDF",
     "noCatalogs": "No catalogs available at the moment.",
     "lastUpdated": "Last updated"
@@ -64,6 +71,7 @@
   },
   "Product": {
     "description": "Description",
+    "Description": "Description",
     "benefits": "Benefits",
     "usage": "Usage",
     "composition": "Composition",
@@ -138,7 +146,8 @@
     "uploading": "Uploading...",
     "uploadError": "Upload failed. Please try again.",
     "recommendedSize": "Recommended size: 800x600px. Formats: JPG, PNG, WEBP.",
-    "deleteImage": "Delete Image"
+    "deleteImage": "Delete Image",
+    "changeImage": "Change Image"
   },
   "Admin": {
     "dashboard": "Dashboard",
@@ -147,6 +156,7 @@
     "cropGuides": "Crop Guides",
     "expertArticles": "Expert Articles",
     "blogPosts": "Blog Posts",
+    "catalogs": "Catalogs",
     "career": "Career",
     "applications": "Applications",
     "certificates": "Certificates",
@@ -156,7 +166,13 @@
     "settings": "Settings",
     "backToSite": "Back to Site",
     "logout": "Logout",
-    "title": "KINT ADMIN"
+    "title": "KINT ADMIN",
+    "loginTitle": "Sign In",
+    "loginSubtitle": "Access the admin dashboard",
+    "email": "Email",
+    "password": "Password",
+    "loggingIn": "Signing in",
+    "loginButton": "Sign In"
   },
   "Contact": {
     "letsGrowTogether": "Let's Grow Together",
@@ -520,6 +536,8 @@
     "categoryEn": "Category",
     "categoryAr": "Category (Arabic)",
     "categoryArPlaceholder": "الفئة بالعربية",
+    "english": "English",
+    "arabic": "Arabic",
     "arableCrops": "Arable Crops",
     "vegetableCrops": "Vegetable Crops",
     "fruitCrops": "Fruit Crops",
@@ -565,6 +583,10 @@
     "translating": "Translating...",
     "summary": "Mission / Summary",
     "description": "Description",
+    "descriptionEn": "Description (English)",
+    "descriptionAr": "Description (Arabic)",
+    "english": "English",
+    "arabic": "Arabic",
     "benefits": "Benefits (Bulleted List)",
     "howItWorks": "How It Works / Mechanism",
     "composition": "Composition (Nutrients)",
@@ -582,7 +604,8 @@
     "organic": "Organic Certified",
     "create": "Create Product",
     "update": "Update Product",
-    "processing": "Processing..."
+    "processing": "Processing...",
+    "saveChanges": "Save Changes"
   },
   "AdminDownloads": {
     "title": "Product Downloads (SDS, Labels, Brochures)",
@@ -591,6 +614,7 @@
     "file": "PDF File",
     "remove": "Remove",
     "add": "Add Download",
+    "emptyState": "No downloads added yet",
     "placeholder": "e.g. Safety Data Sheet 2025",
     "types": {
       "Label": "Label",
@@ -607,6 +631,7 @@
     "untitled": "Untitled Tab",
     "emptyState": "No tabs added. Click \"Add Tab\" to start adding custom product information sections.",
     "tabTitle": "Tab Title",
+    "tabColor": "Tab Color",
     "tabContent": "Tab Content",
     "placeholder": "e.g., Specifications, Warranty, etc.",
     "remove": "Remove Tab"
@@ -621,6 +646,9 @@
     "h1": "Heading 1",
     "h2": "Heading 2",
     "h3": "Heading 3",
+    "h4": "Heading 4",
+    "h5": "Heading 5",
+    "h6": "Heading 6",
     "bold": "Bold",
     "italic": "Italic",
     "strike": "Strike",
@@ -642,7 +670,12 @@
     "deleteImage": "Delete Image",
     "uploadError": "Failed to upload image. Please try again.",
     "replaceError": "Failed to replace image. Please try again.",
-    "tip": "Tip: You can paste images directly into the editor or drag and drop them!"
+    "tip": "Tip: You can paste images directly into the editor or drag and drop them!",
+    "floatLeft": "Float Left",
+    "floatCenter": "Center",
+    "floatRight": "Float Right",
+    "customWidth": "Custom width (px)",
+    "applyWidth": "Apply"
   },
   "AdminFileUpload": {
     "uploading": "Uploading...",
@@ -658,6 +691,8 @@
     "stageNameAr": "Stage Name (Arabic)",
     "stageDescriptionEn": "Stage Description (English)",
     "stageDescriptionAr": "Stage Description (Arabic)",
+    "english": "English",
+    "arabic": "Arabic",
     "recommendedProducts": "Recommended Products for This Stage",
     "addProductToStage": "+ Add Product to Stage",
     "addGrowthStage": "+ Add Growth Stage"
@@ -679,6 +714,8 @@
     "order": "Order",
     "contentEn": "Content (English)",
     "contentAr": "Content (Arabic)",
+    "english": "English",
+    "arabic": "Arabic",
     "addSection": "Add Section",
     "updateSection": "Update Section",
     "deleteConfirm": "Are you sure you want to delete this section?",
@@ -771,6 +808,8 @@
       "templateSidebar": "With Sidebar",
       "contentEn": "Page Content (English)",
       "contentAr": "Page Content (Arabic)",
+      "english": "English",
+      "arabic": "Arabic",
       "isActive": "Page is Active",
       "save": "Save",
       "saving": "Saving...",
@@ -962,6 +1001,8 @@
     "viewWebsite": "View Website",
     "totalProducts": "Total Products",
     "categories": "Categories",
+    "animalTypes": "Animal Types",
+    "catalogs": "Catalogs",
     "cropGuides": "Crop Guides",
     "expertArticles": "Expert Articles",
     "blogPosts": "Blog Posts",
@@ -973,6 +1014,8 @@
     "contactInquiries": "Contact Inquiries",
     "quickActions": "Quick Actions",
     "addProduct": "Add Product",
+    "addAnimalType": "Add Animal Type",
+    "addCatalog": "Add Catalog",
     "addCropGuide": "Add Crop Guide",
     "addArticle": "Add Article",
     "writeBlogPost": "Write Blog Post",
@@ -1087,6 +1130,7 @@
   "Blog": {
     "title": "Knowledge Centre",
     "subtitle": "Latest insights, agricultural research, and company news from KINT.",
+    "blogPosts": "Blog Posts",
     "readMore": "Read Full Article",
     "noArticles": "No articles found in our knowledge centre yet. Stay tuned!",
     "by": "By",
@@ -1096,6 +1140,11 @@
     "related": "Want to learn more about our solutions?",
     "relatedDesc": "Our experts are always available to discuss the latest agricultural research and how it applies to your crops.",
     "contactExpert": "Contact an Expert"
+  },
+  "ExpertArticles": {
+    "title": "Expert Articles",
+    "badge": "Expert Article",
+    "readMore": "Read Full Article"
   },
   "ExpertsForum": {
     "title": "Experts' Forum",
@@ -1277,8 +1326,8 @@
     "globalDesc": "Trusted by farmers in over 50 countries worldwide.",
     "ourProducts": "Our Products",
     "whatWeOffer": "What We Offer",
-    "prodPlant": "Plant Production",
-    "prodAnimal": "Animal Production",
+    "prodPlant": "Plant Wealth",
+    "prodAnimal": "Livestock",
     "viewProducts": "View Products",
     "heroCta": "Contact Us",
     "discoverMore": "Discover More",

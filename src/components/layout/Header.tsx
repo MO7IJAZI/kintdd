@@ -107,28 +107,28 @@ export default function Header({ productCategories }: HeaderProps) {
   };
 
   // Fallback static categories if database is empty
-  const fallbackCategories = [
-    {
-      id: 'animal-production',
-      name: 'Livestock',
-      name_ar: 'الثروة الحيوانية',
-      slug: 'animal-production',
-      description: 'Veterinary products and animal nutrition solutions',
-      description_ar: 'منتجات الثروة الحيوانية وحلول تغذية الحيوان',
-    },
-    {
-      id: 'plant-production',
-      name: 'Plant Wealth',
-      name_ar: 'الثروة النباتية',
-      slug: 'plant-production',
-      description: 'Agricultural products for crop nutrition and protection',
-      description_ar: 'منتجات الثروة النباتية لتغذية وحماية المحاصيل',
-    },
+  const fallbackCategories: ProductCategoryNav[] = [
+    // {
+    //   id: 'animal-production',
+    //   name: 'Livestock',
+    //   name_ar: 'الثروة الحيوانية',
+    //   slug: 'animal-production',
+    //   description: 'Veterinary products and animal nutrition solutions',
+    //   description_ar: 'منتجات الثروة الحيوانية وحلول تغذية الحيوان',
+    // },
+    // {
+    //   id: 'plant-production',
+    //   name: 'Plant Wealth',
+    //   name_ar: 'الثروة النباتية',
+    //   slug: 'plant-production',
+    //   description: 'Agricultural products for crop nutrition and protection',
+    //   description_ar: 'منتجات الثروة النباتية لتغذية وحماية المحاصيل',
+    // },
   ];
 
   // Use database categories if available, otherwise use fallback
   const categories = (productCategories && productCategories.length > 0)
-    ? productCategories
+    ? productCategories.filter(c => c.slug !== 'animal-production' && c.slug !== 'plant-production')
     : fallbackCategories;
 
   const productSubItems: NavSubItem[] = (categories).map((category) => {
@@ -136,14 +136,7 @@ export default function Header({ productCategories }: HeaderProps) {
     const description = getLocalized(category as any, "description");
 
     // Map to fixed routes based on slug
-    let href = "/products";
-    if (category.slug === "animal-production") {
-      href = "/products/livestock";
-    } else if (category.slug === "plant-production") {
-      href = "/products/plant-wealth";
-    } else {
-      href = `/product-category/${category.slug}`;
-    }
+    let href = `/products/${category.slug}`;
 
     return {
       name,

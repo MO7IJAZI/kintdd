@@ -29,6 +29,17 @@ export default function StagesEditor({ initialData, products, onChange }: Stages
     const locale = useLocale();
     const isRtl = locale === 'ar';
     const [stages, setStages] = useState<Stage[]>(initialData || []);
+    const [activeStageTab, setActiveStageTab] = useState<Record<number, 'en' | 'ar'>>({});
+
+    // Helper to get the active tab for a stage (default to 'en')
+    const getStageTab = (index: number): 'en' | 'ar' => {
+        return activeStageTab[index] || 'en';
+    };
+
+    // Helper to set the active tab for a stage
+    const setStageTab = (index: number, tab: 'en' | 'ar') => {
+        setActiveStageTab(prev => ({ ...prev, [index]: tab }));
+    };
     // client auto-translate removed for manual bilingual entry
 
     const addStage = () => {
@@ -86,14 +97,15 @@ export default function StagesEditor({ initialData, products, onChange }: Stages
                             onClick={() => removeStage(index)}
                             style={{
                                 position: 'absolute',
-                                top: '1rem',
+                                top: '0.5rem',
                                 right: !isRtl ? '1rem' as any : undefined,
                                 left: isRtl ? '1rem' as any : undefined,
                                 color: '#ef4444',
                                 background: 'none',
                                 border: 'none',
                                 cursor: 'pointer',
-                                fontWeight: 'bold'
+                                fontWeight: 'bold',
+                                zIndex: 10
                             }}
                         >
                             {t('remove')}
@@ -122,21 +134,60 @@ export default function StagesEditor({ initialData, products, onChange }: Stages
                             </div>
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
-                            <div>
+                        <div style={{ marginBottom: '1.5rem' }}>
+                            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                                <button
+                                    type="button"
+                                    onClick={() => setStageTab(index, 'en')}
+                                    style={{
+                                        padding: '0.5rem 1rem',
+                                        border: 'none',
+                                        background: getStageTab(index) === 'en' ? '#3b82f6' : 'transparent',
+                                        color: getStageTab(index) === 'en' ? 'white' : '#374151',
+                                        fontWeight: '600',
+                                        fontSize: '0.75rem',
+                                        cursor: 'pointer',
+                                        borderRadius: '6px 6px 0 0',
+                                        transition: 'all 0.2s',
+                                    }}
+                                >
+                                    {t('english')} 🇬🇧
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setStageTab(index, 'ar')}
+                                    style={{
+                                        padding: '0.5rem 1rem',
+                                        border: 'none',
+                                        background: getStageTab(index) === 'ar' ? '#3b82f6' : 'transparent',
+                                        color: getStageTab(index) === 'ar' ? 'white' : '#374151',
+                                        fontWeight: '600',
+                                        fontSize: '0.75rem',
+                                        cursor: 'pointer',
+                                        borderRadius: '6px 6px 0 0',
+                                        transition: 'all 0.2s',
+                                    }}
+                                >
+                                    {t('arabic')} 🇸🇦
+                                </button>
+                            </div>
+                            
+                            {/* RichTextEditor based on active tab */}
+                            {getStageTab(index) === 'en' ? (
                                 <RichTextEditor
                                     label={t('stageDescriptionEn')}
                                     value={stage.description || ''}
                                     onChange={(value) => updateStageField(index, 'description', value)}
                                 />
-                            </div>
-                            <div dir="rtl">
-                                <RichTextEditor
-                                    label={t('stageDescriptionAr')}
-                                    value={stage.description_ar || ''}
-                                    onChange={(value) => updateStageField(index, 'description_ar', value)}
-                                />
-                            </div>
+                            ) : (
+                                <div dir="rtl">
+                                    <RichTextEditor
+                                        label={t('stageDescriptionAr')}
+                                        value={stage.description_ar || ''}
+                                        onChange={(value) => updateStageField(index, 'description_ar', value)}
+                                    />
+                                </div>
+                            )}
                         </div>
 
                         <div>

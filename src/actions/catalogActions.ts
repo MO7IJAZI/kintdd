@@ -10,7 +10,6 @@ export async function createCatalog(formData: FormData) {
     const description_ar = formData.get("description_ar") as string;
     const fileUrl = formData.get("fileUrl") as string;
     const category = formData.get("category") as string;
-    const locale = formData.get("locale") as string;
     const order = parseInt(formData.get("order") as string) || 0;
 
     const catalog = await prisma.catalog.create({
@@ -21,7 +20,6 @@ export async function createCatalog(formData: FormData) {
             description_ar,
             fileUrl,
             category,
-            locale,
             order,
             isActive: true,
         },
@@ -39,7 +37,6 @@ export async function updateCatalog(id: string, formData: FormData) {
     const description_ar = formData.get("description_ar") as string;
     const fileUrl = formData.get("fileUrl") as string;
     const category = formData.get("category") as string;
-    const locale = formData.get("locale") as string;
     const order = parseInt(formData.get("order") as string) || 0;
     const isActive = formData.get("isActive") === "true";
 
@@ -52,7 +49,6 @@ export async function updateCatalog(id: string, formData: FormData) {
             description_ar,
             fileUrl,
             category,
-            locale,
             order,
             isActive,
         },

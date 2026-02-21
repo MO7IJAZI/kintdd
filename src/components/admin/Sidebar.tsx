@@ -2,6 +2,7 @@
 
 import { Link, usePathname, useRouter } from '@/navigation';
 import { useLocale, useTranslations } from 'next-intl';
+import { logout } from '@/actions/authActions';
 
 export default function Sidebar() {
     const pathname = usePathname();
@@ -10,7 +11,12 @@ export default function Sidebar() {
     const t = useTranslations('Admin');
 
     const switchLocale = (nextLocale: string) => {
-        router.replace(pathname as any, {locale: nextLocale});
+        // Get the current path from the browser URL
+        const currentPath = window.location.pathname;
+        // Replace the current locale in the pathname with the new locale
+        // pathname is like '/ar/admin/products' - we replace 'ar' or 'en' at the start
+        const newPath = currentPath.replace(/^\/[^\/]+/, '/' + nextLocale);
+        window.location.href = newPath;
     };
 
     const menuItems = [
@@ -20,6 +26,7 @@ export default function Sidebar() {
         { name: t('cropGuides'), href: '/admin/crops', icon: '🌾' },
         { name: t('expertArticles'), href: '/admin/expert-articles', icon: '🎓' },
         { name: t('blogPosts'), href: '/admin/blog', icon: '📝' },
+        { name: t('catalogs'), href: '/admin/catalogs', icon: '📚' },
         { name: t('career'), href: '/admin/career', icon: '💼' },
         { name: t('applications'), href: '/admin/applications', icon: '📬' },
         { name: t('certificates'), href: '/admin/certificates', icon: '🏆' },
@@ -31,27 +38,23 @@ export default function Sidebar() {
 
     return (
         <aside style={{
-            width: '280px',
+            width: '100%',
+            height: '100%',
             backgroundColor: '#0f172a', // Deep Slate instead of pure black
             color: 'white',
-            height: '100vh',
-            position: 'fixed',
-            left: 0,
-            top: 0,
             display: 'flex',
             flexDirection: 'column',
-            boxShadow: '4px 0 24px rgba(0,0,0,0.1)',
-            zIndex: 100
+            overflowY: 'auto'
         }}>
-            <div style={{ padding: '2.5rem 1.5rem 0.5rem', borderBottom: '1px solid rgba(255,255,1,0.1)', marginBottom: '1rem' }}>
-                <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
+            <div style={{ padding: '2.5rem 1.5rem 0.5rem', borderBottom: '1px solid rgba(255,255,255,0.1)', marginBottom: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
                     <div style={{
                         width: '40px', height: '40px', backgroundColor: 'var(--primary)',
                         borderRadius: '10px', display: 'flex', alignItems: 'center',
                         justifyContent: 'center', fontWeight: 900, color: 'white'
                     }}>K</div>
                     <span style={{ fontSize: '1.25rem', fontWeight: 800, letterSpacing: '1px' }}>{t('title')}</span>
-                </Link>
+                </div>
 
                 <div style={{ 
                     display: 'flex', 
@@ -94,40 +97,43 @@ export default function Sidebar() {
 
             <div style={{ 
                 flex: 1, 
-                overflowY: 'auto', 
                 padding: '0 1.5rem 1.5rem',
-                scrollbarWidth: 'thin',
-                scrollbarColor: 'rgba(255,255,255,0.1) transparent'
             }}>
                 <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     {menuItems.map((item) => {
-                    const isActive = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href));
-                    return (
-                        <Link
-                            key={item.href}
-                            href={item.href as any}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '1.25rem',
-                                padding: '1rem 1.25rem',
-                                borderRadius: '0.75rem',
-                                backgroundColor: isActive ? 'rgba(26, 92, 55, 0.2)' : 'transparent',
-                                border: isActive ? '1px solid var(--primary)' : '1px solid transparent',
-                                color: isActive ? 'white' : '#94a3b8',
-                                fontWeight: isActive ? '700' : '500',
-                                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                textTransform: 'uppercase',
-                                fontSize: '0.75rem',
-                                letterSpacing: '0.05em'
-                            }}
-                            className="sidebar-link"
-                        >
-                            <span style={{ fontSize: '1.25rem', opacity: isActive ? 1 : 0.6 }}>{item.icon}</span>
-                            {item.name}
-                        </Link>
-                    );
-                })}
+                        // Fix: Ensure we correctly identify active links
+                        // Dashboard is exact match, others are prefix matches
+                        const isActive = item.href === '/admin' 
+                            ? pathname === '/admin'
+                            : pathname.startsWith(item.href);
+                        
+                        return (
+                            <Link
+                                key={item.href}
+                                href={item.href as any}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '1.25rem',
+                                    padding: '1rem 1.25rem',
+                                    borderRadius: '0.75rem',
+                                    backgroundColor: isActive ? 'rgba(233, 73, 108, 0.15)' : 'transparent', // Use primary color with opacity
+                                    border: isActive ? '1px solid var(--primary)' : '1px solid transparent',
+                                    color: isActive ? 'white' : '#94a3b8',
+                                    fontWeight: isActive ? '700' : '500',
+                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                    textTransform: 'uppercase',
+                                    fontSize: '0.75rem',
+                                    letterSpacing: '0.05em',
+                                    textDecoration: 'none'
+                                }}
+                                className="sidebar-link"
+                            >
+                                <span style={{ fontSize: '1.25rem', opacity: isActive ? 1 : 0.6 }}>{item.icon}</span>
+                                {item.name}
+                            </Link>
+                        );
+                    })}
                 </nav>
             </div>
 
@@ -144,13 +150,14 @@ export default function Sidebar() {
                         padding: '1rem 1.25rem',
                         fontWeight: 700,
                         fontSize: '0.8rem',
-                        textTransform: 'uppercase'
+                        textTransform: 'uppercase',
+                        textDecoration: 'none'
                     }}
                 >
                     <span>🏠</span> {t('backToSite')}
                 </Link>
                 <button
-                    onClick={() => { }}
+                    onClick={() => logout()}
                     style={{
                         width: '100%',
                         textAlign: 'left',
@@ -161,8 +168,12 @@ export default function Sidebar() {
                         padding: '1rem 1.25rem',
                         fontWeight: 500,
                         fontSize: '0.8rem',
-                        textTransform: 'uppercase'
+                        textTransform: 'uppercase',
+                        background: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer'
                     }}
+                    className="sidebar-link"
                 >
                     <span>🚪</span> {t('logout')}
                 </button>
@@ -170,8 +181,8 @@ export default function Sidebar() {
 
             <style jsx>{`
                 .sidebar-link:hover {
-                    background-color: rgba(255,255,255,0.05);
-                    color: white;
+                    background-color: rgba(255,255,255,0.05) !important;
+                    color: white !important;
                     transform: translateX(5px);
                 }
             `}</style>

@@ -12,7 +12,6 @@ interface Catalog {
     description_ar?: string | null;
     fileUrl: string;
     category: string;
-    locale: string;
     order: number;
     isActive: boolean;
 }
@@ -31,7 +30,6 @@ export default function CatalogsManager({
         description_ar: "",
         fileUrl: "",
         category: "agricultural",
-        locale: "en",
         order: 0,
         isActive: true,
     });
@@ -83,7 +81,9 @@ export default function CatalogsManager({
                 formDataObj.append(key, String(value));
             });
 
-            await createCatalog(formDataObj);
+            const newCatalog = await createCatalog(formDataObj);
+            // Add the new catalog to the local state for live refresh
+            setCatalogs(prev => [...prev, { ...newCatalog, isActive: true }]);
             setFormData({
                 title: "",
                 title_ar: "",
@@ -91,8 +91,7 @@ export default function CatalogsManager({
                 description_ar: "",
                 fileUrl: "",
                 category: "agricultural",
-                locale: "en",
-                order: catalogs.length,
+                order: catalogs.length + 1,
                 isActive: true,
             });
         } catch (error) {
@@ -113,7 +112,9 @@ export default function CatalogsManager({
                 formDataObj.append(key, String(value));
             });
 
-            await updateCatalog(editingId, formDataObj);
+            const updatedCatalog = await updateCatalog(editingId, formDataObj);
+            // Update the catalog in local state for live refresh
+            setCatalogs(prev => prev.map(c => c.id === editingId ? updatedCatalog : c));
             setEditingId(null);
             setFormData({
                 title: "",
@@ -122,7 +123,6 @@ export default function CatalogsManager({
                 description_ar: "",
                 fileUrl: "",
                 category: "agricultural",
-                locale: "en",
                 order: 0,
                 isActive: true,
             });
@@ -142,7 +142,6 @@ export default function CatalogsManager({
             description_ar: catalog.description_ar || "",
             fileUrl: catalog.fileUrl,
             category: catalog.category,
-            locale: catalog.locale,
             order: catalog.order,
             isActive: catalog.isActive,
         });
@@ -154,6 +153,8 @@ export default function CatalogsManager({
 
         try {
             await deleteCatalog(id);
+            // Remove the catalog from local state for live refresh
+            setCatalogs(prev => prev.filter(c => c.id !== id));
         } catch (error) {
             console.error("Error deleting catalog:", error);
         } finally {
@@ -195,15 +196,6 @@ export default function CatalogsManager({
                     >
                         <option value="agricultural">Agricultural</option>
                         <option value="animal">Animal / Veterinary</option>
-                    </select>
-                    <select
-                        name="locale"
-                        value={formData.locale}
-                        onChange={handleInputChange}
-                        style={{ padding: "0.75rem", border: "1px solid #e2e8f0", borderRadius: "0.5rem" }}
-                    >
-                        <option value="en">English</option>
-                        <option value="ar">Arabic</option>
                     </select>
                     <input
                         type="number"
@@ -302,7 +294,6 @@ export default function CatalogsManager({
                                     description_ar: "",
                                     fileUrl: "",
                                     category: "agricultural",
-                                    locale: "en",
                                     order: 0,
                                     isActive: true,
                                 });
@@ -330,7 +321,6 @@ export default function CatalogsManager({
                         <tr style={{ backgroundColor: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
                             <th style={{ padding: "1rem", textAlign: "left", fontWeight: 700 }}>Title</th>
                             <th style={{ padding: "1rem", textAlign: "left", fontWeight: 700 }}>Category</th>
-                            <th style={{ padding: "1rem", textAlign: "left", fontWeight: 700 }}>Language</th>
                             <th style={{ padding: "1rem", textAlign: "left", fontWeight: 700 }}>Order</th>
                             <th style={{ padding: "1rem", textAlign: "left", fontWeight: 700 }}>Actions</th>
                         </tr>
@@ -338,7 +328,7 @@ export default function CatalogsManager({
                     <tbody>
                         {catalogs.length === 0 ? (
                             <tr>
-                                <td colSpan={5} style={{ padding: "2rem", textAlign: "center", color: "#94a3b8" }}>
+                                <td colSpan={4} style={{ padding: "2rem", textAlign: "center", color: "#94a3b8" }}>
                                     No catalogs found
                                 </td>
                             </tr>
@@ -359,11 +349,6 @@ export default function CatalogsManager({
                                             fontWeight: 600,
                                         }}>
                                             {catalog.category}
-                                        </span>
-                                    </td>
-                                    <td style={{ padding: "1rem" }}>
-                                        <span style={{ textTransform: "uppercase", fontSize: "0.85rem", fontWeight: 600 }}>
-                                            {catalog.locale}
                                         </span>
                                     </td>
                                     <td style={{ padding: "1rem" }}>{catalog.order}</td>

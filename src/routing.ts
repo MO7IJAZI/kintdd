@@ -266,6 +266,30 @@ export const routing = defineRouting({
       en: '/admin/inquiries',
       ar: '/admin/inquiries'
     },
+    '/admin/login': {
+      en: '/admin/login',
+      ar: '/admin/login'
+    },
+    '/admin/catalogs': {
+      en: '/admin/catalogs',
+      ar: '/admin/catalogs'
+    },
+    '/admin/catalogs/new': {
+      en: '/admin/catalogs/new',
+      ar: '/admin/catalogs/new'
+    },
+    '/admin/animal-types': {
+      en: '/admin/animal-types',
+      ar: '/admin/animal-types'
+    },
+    '/admin/animal-types/new': {
+      en: '/admin/animal-types/new',
+      ar: '/admin/animal-types/new'
+    },
+    '/admin/animal-types/[id]': {
+      en: '/admin/animal-types/[id]',
+      ar: '/admin/animal-types/[id]'
+    },
     '/admin/settings': {
       en: '/admin/settings',
       ar: '/admin/settings'

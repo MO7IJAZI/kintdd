@@ -8,6 +8,13 @@
     "subtitle": "قم بتحميل أحدث أدلة المنتجات والمنشورات الفنية.",
     "agricultural": "الإنتاج الزراعي",
     "animal": "الإنتاج الحيواني",
+    "mixingTable": "جدول الخلط",
+    "categories": {
+        "optimum-conditions": "الظروف المثلى",
+        "technical-guides": "الأدلة الفنية",
+        "product-catalogs": "كتالوجات منتجات إضافية",
+        "other": "وثائق أخرى"
+    },
     "download": "تحميل PDF",
     "noCatalogs": "لا توجد كتالوجات متاحة حالياً.",
     "lastUpdated": "آخر تحديث"
@@ -64,6 +71,7 @@
   },
   "Product": {
     "description": "الوصف",
+    "Description": "الوصف",
     "benefits": "الفوائد",
     "usage": "الاستخدام",
     "composition": "التركيب",
@@ -138,7 +146,8 @@
     "uploading": "جاري الرفع...",
     "uploadError": "فشل الرفع. يرجى المحاولة مرة أخرى.",
     "recommendedSize": "الحجم الموصى به: 800x600px. الصيغ: JPG, PNG, WEBP.",
-    "deleteImage": "حذف الصورة"
+    "deleteImage": "حذف الصورة",
+    "changeImage": "تغيير الصورة"
   },
   "Admin": {
     "dashboard": "لوحة التحكم",
@@ -147,6 +156,7 @@
     "cropGuides": "أدلة المحاصيل",
     "expertArticles": "مقالات الخبراء",
     "blogPosts": "مقالات المدونة",
+    "catalogs": "الكتالوجات",
     "career": "الوظائف",
     "applications": "الطلبات",
     "certificates": "الشهادات",
@@ -156,7 +166,13 @@
     "settings": "الإعدادات",
     "backToSite": "العودة للموقع",
     "logout": "تسجيل الخروج",
-    "title": "إدارة KINT"
+    "title": "إدارة KINT",
+    "loginTitle": "تسجيل الدخول",
+    "loginSubtitle": "الوصول إلى لوحة التحكم",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "loggingIn": "جاري تسجيل الدخول",
+    "loginButton": "تسجيل الدخول"
   },
   "Contact": {
     "letsGrowTogether": "لننمو معاً",
@@ -373,6 +389,8 @@
     "categoryEn": "الفئة",
     "categoryAr": "الفئة (عربي)",
     "categoryArPlaceholder": "الفئة بالعربية",
+    "english": "الإنجليزية",
+    "arabic": "العربية",
     "arableCrops": "المحاصيل الحقلية",
     "vegetableCrops": "محاصيل الخضروات",
     "fruitCrops": "محاصيل الفاكهة",
@@ -416,6 +434,10 @@
     "translating": "جاري الترجمة...",
     "summary": "المهمة / الملخص",
     "description": "الوصف",
+    "descriptionEn": "الوصف (بالإنجليزية)",
+    "descriptionAr": "الوصف (بالعربية)",
+    "english": "الإنجليزية",
+    "arabic": "العربية",
     "benefits": "المميزات (قائمة نقطية)",
     "howItWorks": "كيف يعمل / الآلية",
     "composition": "التركيب (المغذيات)",
@@ -433,7 +455,8 @@
     "organic": "عضوي معتمد",
     "create": "إضافة المنتج",
     "update": "تحديث المنتج",
-    "processing": "جار المعالجة..."
+    "processing": "جار المعالجة...",
+    "saveChanges": "حفظ التغييرات"
   },
   "AdminDownloads": {
     "title": "تنزيلات المنتج (ملفات SDS، ملصقات، منشورات)",
@@ -442,6 +465,7 @@
     "file": "ملف PDF",
     "remove": "إزالة",
     "add": "إضافة تنزيل",
+    "emptyState": "لم يتم إضافة تنزيلات بعد",
     "placeholder": "مثال: ورقة بيانات السلامة 2025",
     "types": {
       "Label": "ملصق",
@@ -458,6 +482,7 @@
     "untitled": "علامة تبويب بدون عنوان",
     "emptyState": "لم تتم إضافة علامات تبويب. انقر فوق \"إضافة علامة تبويب\" للبدء في إضافة أقسام معلومات مخصصة للمنتج.",
     "tabTitle": "عنوان علامة التبويب",
+    "tabColor": "لون علامة التبويب",
     "tabContent": "محتوى علامة التبويب",
     "placeholder": "مثال: المواصفات، الضمان، إلخ.",
     "remove": "إزالة علامة التبويب"
@@ -472,6 +497,9 @@
     "h1": "عنوان 1",
     "h2": "عنوان 2",
     "h3": "عنوان 3",
+    "h4": "عنوان 4",
+    "h5": "عنوان 5",
+    "h6": "عنوان 6",
     "bold": "عريض",
     "italic": "مائل",
     "strike": "مشطوب",
@@ -493,7 +521,12 @@
     "deleteImage": "حذف الصورة",
     "uploadError": "فشل تحميل الصورة. يرجى المحاولة مرة أخرى.",
     "replaceError": "فشل استبدال الصورة. يرجى المحاولة مرة أخرى.",
-    "tip": "نصيحة: يمكنك لصق الصور مباشرة في المحرر أو سحبها وإفلاتها!"
+    "tip": "نصيحة: يمكنك لصق الصور مباشرة في المحرر أو سحبها وإفلاتها!",
+    "floatLeft": "تعويم اليسار",
+    "floatCenter": "توسيط",
+    "floatRight": "تعويم اليمين",
+    "customWidth": "عرض مخصص (بكسل)",
+    "applyWidth": "تطبيق"
   },
   "AdminFileUpload": {
     "uploading": "جار التحميل...",
@@ -509,6 +542,8 @@
     "stageNameAr": "اسم المرحلة (عربي)",
     "stageDescriptionEn": "وصف المرحلة (إنجليزي)",
     "stageDescriptionAr": "وصف المرحلة (عربي)",
+    "english": "الإنجليزية",
+    "arabic": "العربية",
     "recommendedProducts": "المنتجات الموصى بها لهذه المرحلة",
     "addProductToStage": "+ إضافة منتج للمرحلة",
     "addGrowthStage": "+ إضافة مرحلة نمو"
@@ -530,6 +565,8 @@
     "order": "الترتيب",
     "contentEn": "المحتوى (إنجليزي)",
     "contentAr": "المحتوى (عربي)",
+    "english": "الإنجليزية",
+    "arabic": "العربية",
     "addSection": "إضافة قسم",
     "updateSection": "تحديث القسم",
     "deleteConfirm": "هل أنت متأكد من حذف هذا القسم؟",
@@ -704,6 +741,8 @@
       "templateSidebar": "مع شريط جانبي",
       "contentEn": "محتوى الصفحة (إنجليزي)",
       "contentAr": "محتوى الصفحة (عربي)",
+      "english": "الإنجليزية",
+      "arabic": "العربية",
       "isActive": "الصفحة نشطة",
       "save": "حفظ",
       "saving": "جار الحفظ...",
@@ -813,6 +852,8 @@
     "viewWebsite": "عرض الموقع",
     "totalProducts": "إجمالي المنتجات",
     "categories": "الأقسام",
+    "animalTypes": "أنواع الحيوانات",
+    "catalogs": "الكتالوجات",
     "cropGuides": "أدلة المحاصيل",
     "expertArticles": "مقالات الخبراء",
     "blogPosts": "مقالات المدونة",
@@ -824,6 +865,8 @@
     "contactInquiries": "استفسارات الاتصال",
     "quickActions": "إجراءات سريعة",
     "addProduct": "إضافة منتج",
+    "addAnimalType": "إضافة نوع حيوان",
+    "addCatalog": "إضافة كتالوج",
     "addCropGuide": "إضافة دليل محصول",
     "addArticle": "إضافة مقال",
     "writeBlogPost": "كتابة مقال مدونة",
@@ -901,6 +944,7 @@
   "Blog": {
     "title": "مركز المعرفة",
     "subtitle": "أحدث الرؤى والبحوث الزراعية وأخبار الشركة من KINT.",
+    "blogPosts": "مقالات المدونة",
     "readMore": "اقرأ المقال كاملاً",
     "noArticles": "لا توجد مقالات في مركز المعرفة لدينا حتى الآن. ترقبوا المزيد!",
     "by": "بواسطة",
@@ -910,6 +954,11 @@
     "related": "هل تريد معرفة المزيد عن حلولنا؟",
     "relatedDesc": "خبراؤنا متاحون دائمًا لمناقشة أحدث الأبحاث الزراعية وكيفية تطبيقها على محاصيلك.",
     "contactExpert": "تواصل مع خبير"
+  },
+  "ExpertArticles": {
+    "title": "مقالات الخبراء",
+    "badge": "مقال خبير",
+    "readMore": "اقرأ المقال كاملاً"
   },
   "ExpertsForum": {
     "title": "منتدى الخبراء",
@@ -1265,8 +1314,8 @@
     "globalDesc": "موثوق به من قبل المزارعين في أكثر من 50 دولة حول العالم.",
     "ourProducts": "منتجاتنا",
     "whatWeOffer": "ماذا نقدم",
-    "prodPlant": "الإنتاج النباتي",
-    "prodAnimal": "الإنتاج الحيواني",
+    "prodPlant": "الثروة النباتية",
+    "prodAnimal": "الثروة الحيوانية",
     "viewProducts": "عرض المنتجات",
     "heroCta": "اتصل بنا",
     "discoverMore": "اكتشف المزيد",

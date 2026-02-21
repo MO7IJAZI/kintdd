@@ -2,8 +2,14 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
+import { auth } from "@/auth";
 
 export async function createBlogPost(formData: FormData) {
+    const session = await auth();
+    if (!session) {
+        throw new Error("Unauthorized");
+    }
+
     const title = formData.get("title") as string;
     const title_ar = formData.get("title_ar") as string;
     const slug = formData.get("slug") as string;
@@ -17,6 +23,7 @@ export async function createBlogPost(formData: FormData) {
     const metaTitle = formData.get("metaTitle") as string;
     const metaDesc = formData.get("metaDesc") as string;
     const isPublished = formData.get("isPublished") === "true";
+    const publishedAtDate = formData.get("publishedAt") as string;
 
     // Process tags from comma-separated string to JSON array
     const tags = tagsRaw 
@@ -38,7 +45,7 @@ export async function createBlogPost(formData: FormData) {
             metaTitle,
             metaDesc,
             isPublished,
-            publishedAt: isPublished ? new Date() : null,
+            publishedAt: publishedAtDate ? new Date(publishedAtDate) : (isPublished ? new Date() : null),
         },
     });
 
@@ -48,6 +55,11 @@ export async function createBlogPost(formData: FormData) {
 }
 
 export async function updateBlogPost(id: string, formData: FormData) {
+    const session = await auth();
+    if (!session) {
+        throw new Error("Unauthorized");
+    }
+
     const title = formData.get("title") as string;
     const title_ar = formData.get("title_ar") as string;
     const slug = formData.get("slug") as string;
@@ -61,6 +73,7 @@ export async function updateBlogPost(id: string, formData: FormData) {
     const metaTitle = formData.get("metaTitle") as string;
     const metaDesc = formData.get("metaDesc") as string;
     const isPublished = formData.get("isPublished") === "true";
+    const publishedAtDate = formData.get("publishedAt") as string;
 
     // Process tags
     const tags = tagsRaw 
@@ -85,7 +98,7 @@ export async function updateBlogPost(id: string, formData: FormData) {
             metaTitle,
             metaDesc,
             isPublished,
-            publishedAt: isPublished && !post?.publishedAt ? new Date() : post?.publishedAt,
+            publishedAt: publishedAtDate ? new Date(publishedAtDate) : (isPublished && !post?.publishedAt ? new Date() : post?.publishedAt),
         },
     });
 
@@ -96,6 +109,11 @@ export async function updateBlogPost(id: string, formData: FormData) {
 }
 
 export async function deleteBlogPost(id: string) {
+    const session = await auth();
+    if (!session) {
+        throw new Error("Unauthorized");
+    }
+
     await prisma.blogPost.delete({
         where: { id },
     });

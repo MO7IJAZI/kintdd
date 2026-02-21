@@ -68,6 +68,7 @@ export default function CropForm({ initialData, products = [] }: CropFormProps) 
     const [isPending, setIsPending] = useState(false);
     const [description, setDescription] = useState(initialData?.description || "");
     const [description_ar, setDescriptionAr] = useState(initialData?.description_ar || "");
+    const [descriptionTab, setDescriptionTab] = useState<'en' | 'ar'>('en');
     const [image, setImage] = useState(initialData?.image || "");
     const [pdfUrl, setPdfUrl] = useState(initialData?.pdfUrl || "");
     const [slug, setSlug] = useState(initialData?.slug || "");
@@ -236,12 +237,57 @@ export default function CropForm({ initialData, products = [] }: CropFormProps) 
             </div>
 
             <div style={{ marginBottom: '2rem' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                {/* Language Tabs */}
+                <div style={{ 
+                    display: 'flex', 
+                    gap: '0.5rem', 
+                    marginBottom: '1rem',
+                    borderBottom: '2px solid #e5e7eb'
+                }}>
+                    <button
+                        type="button"
+                        onClick={() => setDescriptionTab('en')}
+                        style={{
+                            padding: '0.75rem 1.5rem',
+                            border: 'none',
+                            background: descriptionTab === 'en' ? '#3b82f6' : 'transparent',
+                            color: descriptionTab === 'en' ? 'white' : '#374151',
+                            fontWeight: '600',
+                            fontSize: '0.875rem',
+                            cursor: 'pointer',
+                            borderRadius: '8px 8px 0 0',
+                            transition: 'all 0.2s',
+                        }}
+                    >
+                        {t('english')} 🇬🇧
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setDescriptionTab('ar')}
+                        style={{
+                            padding: '0.75rem 1.5rem',
+                            border: 'none',
+                            background: descriptionTab === 'ar' ? '#3b82f6' : 'transparent',
+                            color: descriptionTab === 'ar' ? 'white' : '#374151',
+                            fontWeight: '600',
+                            fontSize: '0.875rem',
+                            cursor: 'pointer',
+                            borderRadius: '8px 8px 0 0',
+                            transition: 'all 0.2s',
+                        }}
+                    >
+                        {t('arabic')} 🇸🇦
+                    </button>
+                </div>
+                
+                {/* RichTextEditor based on active tab */}
+                {descriptionTab === 'en' ? (
                     <RichTextEditor
                         label={t('descriptionEn')}
                         value={description}
                         onChange={setDescription}
                     />
+                ) : (
                     <div dir="rtl">
                         <RichTextEditor
                             label={t('descriptionAr')}
@@ -249,7 +295,7 @@ export default function CropForm({ initialData, products = [] }: CropFormProps) 
                             onChange={setDescriptionAr}
                         />
                     </div>
-                </div>
+                )}
             </div>
 
             <div style={{ marginBottom: '2.5rem' }}>

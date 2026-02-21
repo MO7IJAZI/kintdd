@@ -1,11 +1,11 @@
-import prisma from "@/lib/prisma";
 import Image from 'next/image';
 import { Link } from '@/navigation';
 import { getTranslations, getLocale } from 'next-intl/server';
-import { ArrowRight, Package, Layers, Grid3X3, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, Package } from 'lucide-react';
 import styles from './products.module.css';
-import ProductCategoryCard from '@/components/products/ProductCategoryCard';
 import ProductsFeaturesGrid from '@/components/products/ProductsFeaturesGrid';
+import { CowIcon } from '@/components/icons/CowIcon';
+import { PlantIcon } from '@/components/icons/PlantIcon';
 
 export const revalidate = 300;
 
@@ -95,34 +95,6 @@ async function ProductsPageContent() {
     
     const ourSolutionsLabel = translate('ourSolutions', 'Our Solutions');
 
-    // Fetch all active main categories (no parent)
-    let categories: any[] = [];
-    let categoryError = null;
-    try {
-        console.log("Fetching main categories from database...");
-        categories = await prisma.category.findMany({
-            where: {
-                isActive: true,
-                parentId: null  // Only root categories
-            },
-            include: {
-                children: {
-                    where: { isActive: true },
-                    orderBy: { order: 'asc' }
-                },
-                _count: {
-                    select: { products: true }
-                }
-            },
-            orderBy: { order: 'asc' },
-        });
-        console.log(`Successfully fetched ${categories.length} main categories`);
-    } catch (error) {
-        console.error("Error fetching categories in products page:", error);
-        categoryError = error;
-        categories = [];
-    }
-
     // Default category icon - simplified to use only database categories
     const DefaultCategoryIcon = <Package className="w-6 h-6" />;
 
@@ -209,55 +181,109 @@ async function ProductsPageContent() {
                         <div style={{ width: '80px', height: '4px', background: 'linear-gradient(90deg, #e9496c, #142346)', margin: '0 auto', borderRadius: '2px' }}></div>
                     </div>
 
-                    {categoryError ? (
-                        <div className="text-center py-16">
-                            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <Package className="w-8 h-8 text-red-600" />
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
+                        {/* Plant Wealth Card */}
+                        <div style={{ 
+                            position: 'relative',
+                            overflow: 'hidden', 
+                            borderRadius: '1.5rem', 
+                            backgroundColor: 'white', 
+                            boxShadow: '0 10px 30px rgba(0,0,0,0.05)', 
+                            border: '1px solid rgba(0,0,0,0.05)',
+                            display: 'flex', 
+                            flexDirection: 'column', 
+                            height: '100%',
+                            transition: 'transform 0.3s ease, box-shadow 0.3s ease'
+                        }} className="hover:shadow-xl hover:-translate-y-1">
+                            <div style={{ position: 'relative', height: '350px' }}>
+                                <Image 
+                                    src="/images/planet.webp" 
+                                    alt={translateHome('prodPlant', 'Plant Wealth')} 
+                                    fill 
+                                    style={{ objectFit: 'cover' }} 
+                                />
+                                <div style={{ 
+                                    position: 'absolute', inset: 0,
+                                    background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)'
+                                }} />
+                                <div style={{ 
+                                    position: 'absolute', bottom: '1.5rem', left: isAr ? 'auto' : '1.5rem', right: isAr ? '1.5rem' : 'auto',
+                                    backgroundColor: 'white', padding: '1rem 1.5rem', borderRadius: '1rem', boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                                    color: '#142346', display: 'flex', alignItems: 'center', gap: '1rem'
+                                }}>
+                                    <PlantIcon size={28} />
+                                    <span style={{ fontWeight: 800, fontSize: '1.1rem' }}>{translateHome('prodPlant', 'Plant Wealth')}</span>
+                                </div>
                             </div>
-                            <h3 className="text-xl font-semibold text-slate-800 mb-2">Unable to load categories</h3>
-                            <p className="text-slate-600 max-w-md mx-auto">
-                                Please try refreshing the page or contact support if the issue persists.
-                            </p>
-                        </div>
-                    ) : categories.length === 0 ? (
-                        <div className="text-center py-16">
-                            <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                <Grid3X3 className="w-8 h-8 text-slate-400" />
+                            <div style={{ padding: '2.5rem', textAlign: isAr ? 'right' : 'left', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                                <h3 style={{ fontSize: '1.75rem', marginBottom: '1rem', fontWeight: 800, color: '#142346' }}>
+                                    {translateHome('prodPlant', 'Plant Wealth')}
+                                </h3>
+                                <p style={{ color: '#64748b', marginBottom: '2rem', lineHeight: 1.7, fontSize: '1.05rem', flex: 1 }}>
+                                    {translateHome('agriculturalDesc', 'Advanced solutions for crop nutrition and protection.')}
+                                </p>
+                                <Link 
+                                    href="/products/plant-wealth" 
+                                    className="group inline-flex items-center gap-2 px-6 py-3 bg-[#e9496c] text-white rounded-xl font-semibold transition-all hover:bg-[#d63d60]"
+                                    style={{ alignSelf: 'flex-start' }}
+                                >
+                                    {translateHome('viewProducts', 'View Products')} 
+                                    <ArrowRight size={20} className={isAr ? "mr-2 rotate-180" : "ml-2"} />
+                                </Link>
                             </div>
-                            <h3 className="text-xl font-semibold text-slate-800 mb-2">No categories found</h3>
-                            <p className="text-slate-600 max-w-md mx-auto">
-                                No active categories are available at the moment.
-                            </p>
                         </div>
-                    ) : (
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
-                            {categories.map((category, index) => {
-                                if (!category || !category.id || !category.slug) {
-                                    console.warn('Invalid category data:', category);
-                                    return null;
-                                }
-                                
-                                // Route to fixed pages based on slug
-                                let categoryUrl = `/products`;
-                                if (category.slug === 'animal-production') {
-                                    categoryUrl = `/products/livestock`;
-                                } else if (category.slug === 'plant-production') {
-                                    categoryUrl = `/products/plant-wealth`;
-                                }
-                                
-                                return (
-                                    <ProductCategoryCard
-                                        key={category.id}
-                                        category={category}
-                                        index={index}
-                                        isAr={isAr}
-                                        categoryUrl={categoryUrl}
-                                        viewProductsLabel={translateHome('viewProducts', 'View Products')}
-                                    />
-                                );
-                            })}
+
+                        {/* Livestock / Animal Wealth Card */}
+                        <div style={{ 
+                            position: 'relative',
+                            overflow: 'hidden', 
+                            borderRadius: '1.5rem', 
+                            backgroundColor: 'white', 
+                            boxShadow: '0 10px 30px rgba(0,0,0,0.05)', 
+                            border: '1px solid rgba(0,0,0,0.05)',
+                            display: 'flex', 
+                            flexDirection: 'column', 
+                            height: '100%',
+                            transition: 'transform 0.3s ease, box-shadow 0.3s ease'
+                        }} className="hover:shadow-xl hover:-translate-y-1">
+                            <div style={{ position: 'relative', height: '350px' }}>
+                                <Image 
+                                    src="/images/livestock.jpg" 
+                                    alt={translateHome('prodAnimal', 'Animal Wealth')} 
+                                    fill 
+                                    style={{ objectFit: 'cover' }} 
+                                />  
+                                <div style={{ 
+                                    position: 'absolute', inset: 0,
+                                    background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)'
+                                }} />
+                                <div style={{ 
+                                    position: 'absolute', bottom: '1.5rem', left: isAr ? 'auto' : '1.5rem', right: isAr ? '1.5rem' : 'auto',
+                                    backgroundColor: 'white', padding: '1rem 1.5rem', borderRadius: '1rem', boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                                    color: '#142346', display: 'flex', alignItems: 'center', gap: '1rem'
+                                }}>
+                                    <CowIcon size={28} />
+                                    <span style={{ fontWeight: 800, fontSize: '1.1rem' }}>{translateHome('prodAnimal', 'Animal Wealth')}</span>
+                                </div>
+                            </div>
+                            <div style={{ padding: '2.5rem', textAlign: isAr ? 'right' : 'left', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                                <h3 style={{ fontSize: '1.75rem', marginBottom: '1rem', fontWeight: 800, color: '#142346' }}>
+                                    {translateHome('prodAnimal', 'Animal Wealth')}
+                                </h3>
+                                <p style={{ color: '#64748b', marginBottom: '2rem', lineHeight: 1.7, fontSize: '1.05rem', flex: 1 }}>
+                                    {translateHome('animalDesc', 'Specialized health and nutrition for livestock.')}
+                                </p>
+                                <Link 
+                                    href="/products/livestock" 
+                                    className="group inline-flex items-center gap-2 px-6 py-4 bg-[#e9496c] text-white rounded-xl font-semibold transition-all hover:bg-[#d63d60]"
+                                    style={{ alignSelf: 'flex-start' }}
+                                >
+                                    {translateHome('viewProducts', 'View Products')} 
+                                    <ArrowRight size={20} className={isAr ? "mr-2 rotate-180" : "ml-2"} />
+                                </Link>
+                            </div>
                         </div>
-                    )}
+                    </div>
                 </div>
             </section>
 

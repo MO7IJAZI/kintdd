@@ -47,59 +47,45 @@ export default function FileUpload({ value, onChange, label, accept = "applicati
     }
 
     return (
-        <div style={{ marginBottom: '1.5rem' }}>
-            {label && <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.85rem' }}>{label}</label>}
+        <div className="mb-6">
+            {label && (
+                <label className="block text-sm font-bold text-slate-700 mb-2">
+                    {label}
+                </label>
+            )}
 
-            <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '1rem',
-                padding: '1.25rem',
-                backgroundColor: '#f8fafc',
-                borderRadius: '0.75rem',
-                border: '1px solid var(--border)'
-            }}>
-                <div style={{
-                    width: '50px',
-                    height: '50px',
-                    backgroundColor: value ? '#fee2e2' : 'white',
-                    borderRadius: '0.5rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    border: '1px solid var(--border)',
-                    fontSize: '1.5rem'
-                }}>
+            <div className="flex items-center gap-4 p-5 bg-slate-50 rounded-xl border border-slate-200 hover:border-slate-300 transition-colors group">
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-sm ${value ? 'bg-red-50 text-red-500 border border-red-100' : 'bg-white text-slate-400 border border-slate-200'}`}>
                     {value ? "📄" : "📁"}
                 </div>
 
-                <div style={{ flex: 1 }}>
-                    <div style={{ position: 'relative' }}>
+                <div className="flex-1 relative">
+                    <div className="relative">
                         <input
                             type="file"
                             accept={accept}
                             onChange={handleFileChange}
-                            style={{
-                                position: 'absolute',
-                                top: 0,
-                                left: 0,
-                                width: '100%',
-                                height: '100%',
-                                opacity: 0,
-                                cursor: 'pointer'
-                            }}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                         />
                         <button
                             type="button"
-                            className="btn btn-outline"
-                            style={{ width: '100%', pointerEvents: 'none', justifyContent: 'center' }}
+                            className="w-full py-2.5 px-4 border-2 border-dashed border-slate-300 rounded-lg text-sm font-medium text-slate-600 bg-white hover:bg-slate-50 hover:border-primary/50 hover:text-primary transition-all flex items-center justify-center gap-2"
                         >
-                            {isUploading ? t('uploading') : value ? t('changeFile') : finalPlaceholder}
+                            {isUploading ? (
+                                <span className="flex items-center gap-2">
+                                    <span className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></span>
+                                    {t('uploading')}
+                                </span>
+                            ) : value ? (
+                                t('changeFile')
+                            ) : (
+                                finalPlaceholder
+                            )}
                         </button>
                     </div>
                     {fileName && (
-                        <p style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#10b981', fontWeight: 600 }}>
-                            ✓ {fileName}
+                        <p className="mt-2 text-xs font-semibold text-emerald-600 flex items-center gap-1 animate-in fade-in slide-in-from-top-1">
+                            <span>✓</span> {fileName}
                         </p>
                     )}
                 </div>
@@ -108,9 +94,10 @@ export default function FileUpload({ value, onChange, label, accept = "applicati
                     <button
                         type="button"
                         onClick={() => { onChange(""); setFileName(""); }}
-                        style={{ padding: '0.5rem', color: '#ef4444', fontSize: '1.25rem', background: 'none', border: 'none', cursor: 'pointer' }}
+                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Remove file"
                     >
-                        🗑️
+                        <span className="text-lg">🗑️</span>
                     </button>
                 )}
             </div>

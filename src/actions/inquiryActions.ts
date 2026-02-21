@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
+import { auth } from "@/auth";
 
 export async function submitInquiry(formData: FormData) {
     const name = formData.get("name") as string;
@@ -43,10 +44,18 @@ const getInquiriesCached = unstable_cache(
 );
 
 export async function getInquiries() {
+    const session = await auth();
+    if (!session) {
+        throw new Error("Unauthorized");
+    }
     return getInquiriesCached();
 }
 
 export async function markAsRead(id: string) {
+    const session = await auth();
+    if (!session) {
+        throw new Error("Unauthorized");
+    }
     await prisma.contactSubmission.update({
         where: { id },
         data: { isRead: true },
@@ -56,6 +65,10 @@ export async function markAsRead(id: string) {
 }
 
 export async function deleteInquiry(id: string) {
+    const session = await auth();
+    if (!session) {
+        throw new Error("Unauthorized");
+    }
     await prisma.contactSubmission.delete({
         where: { id },
     });

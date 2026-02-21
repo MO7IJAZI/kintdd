@@ -2,8 +2,14 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath, revalidateTag } from "next/cache";
+import { auth } from "@/auth";
 
 export async function createCategory(formData: FormData) {
+    const session = await auth();
+    if (!session) {
+        throw new Error("Unauthorized");
+    }
+
     try {
         const name = formData.get("name") as string;
         const slug = formData.get("slug") as string;
@@ -44,6 +50,11 @@ export async function createCategory(formData: FormData) {
 }
 
 export async function updateCategory(id: string, formData: FormData) {
+    const session = await auth();
+    if (!session) {
+        throw new Error("Unauthorized");
+    }
+
     const name = formData.get("name") as string;
     const slug = formData.get("slug") as string;
     const description = formData.get("description") as string;
@@ -76,6 +87,11 @@ export async function updateCategory(id: string, formData: FormData) {
 }
 
 export async function deleteCategory(id: string) {
+    const session = await auth();
+    if (!session) {
+        throw new Error("Unauthorized");
+    }
+
     await prisma.category.delete({
         where: { id },
     });
