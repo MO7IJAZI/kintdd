@@ -37,6 +37,7 @@ export default auth((req) => {
     }
 
     // Redirect logged-in users away from login page
+    // We must ensure we don't cause a redirect loop if the user is ALREADY at /admin
     if (isLoginPage && isLoggedIn) {
          const segments = path.split('/');
          const locale = (segments.length > 1 && (segments[1] === 'en' || segments[1] === 'ar')) ? segments[1] : 'en';

@@ -49,13 +49,14 @@ export default function AdminLayout({
     if (!isLoginPage && status === 'unauthenticated') {
          return null; 
     }
-
-    if (status === 'unauthenticated' && isLoginPage) {
-        // Allow rendering login page
-    } else if (status === 'unauthenticated') {
-        // Should be caught by above, but safe guard
-        return null;
-    }
+    
+    // REMOVED THE BLOCKING LOGIC FOR LOGIN PAGE
+    // if (status === 'unauthenticated' && isLoginPage) {
+    //    // Allow rendering login page
+    // } else if (status === 'unauthenticated') {
+    //    // Should be caught by above, but safe guard
+    //    return null;
+    // }
 
     if (isLoginPage) {
         return (
