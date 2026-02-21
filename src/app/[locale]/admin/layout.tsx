@@ -1,7 +1,9 @@
 "use client";
 
 import Sidebar from "@/components/admin/Sidebar";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { usePathname, useRouter } from "@/navigation";
+import { useSession } from "next-auth/react";
 
 export default function AdminLayout({
     children,
@@ -9,6 +11,35 @@ export default function AdminLayout({
     children: React.ReactNode;
 }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const pathname = usePathname();
+    const router = useRouter();
+    // We can check session client-side as a second layer of defense
+    // However, middleware is the primary guard. 
+    // If middleware is working, this component won't even render for unauth users on protected routes.
+    
+    // Check if we are on the login page
+    const isLoginPage = pathname === '/admin/login' || pathname.includes('/admin/login');
+
+    const { status } = useSession();
+
+    useEffect(() => {
+        if (!isLoginPage && status === 'unauthenticated') {
+            const currentPath = window.location.pathname;
+            const segments = currentPath.split('/');
+            const locale = (segments.length > 1 && (segments[1] === 'en' || segments[1] === 'ar')) ? segments[1] : 'en';
+            window.location.href = `/${locale}/admin/login`;
+        }
+    }, [isLoginPage, status]);
+
+    if (isLoginPage) {
+        return (
+            <main className="admin-main-content" style={{ marginLeft: 0, padding: 0, width: '100%' }}>
+                <div style={{ width: '100%' }}>
+                    {children}
+                </div>
+            </main>
+        );
+    }
 
     return (
         <div className="admin-layout" style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f3f4f6' }}>
