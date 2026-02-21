@@ -47,7 +47,14 @@ export default function AdminLayout({
     // Only render children if authenticated or if it's the login page
     // This prevents flashing of protected content
     if (!isLoginPage && status === 'unauthenticated') {
-         return null; // Or return loading spinner again while redirect happens
+         return null; 
+    }
+
+    if (status === 'unauthenticated' && isLoginPage) {
+        // Allow rendering login page
+    } else if (status === 'unauthenticated') {
+        // Should be caught by above, but safe guard
+        return null;
     }
 
     if (isLoginPage) {
