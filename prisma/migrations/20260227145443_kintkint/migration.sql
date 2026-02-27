@@ -5,7 +5,7 @@
 
 */
 -- DropIndex
-DROP INDEX `catalogs_locale_idx` ON `catalogs`;
+-- DROP INDEX `catalogs_locale_idx` ON `catalogs`;
 
 -- AlterTable
-ALTER TABLE `catalogs` DROP COLUMN `locale`;
+-- ALTER TABLE `catalogs` DROP COLUMN `locale`;
