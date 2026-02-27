@@ -37,6 +37,10 @@ const nextConfig: NextConfig = {
         hostname: 'kint-group.com',
       },
       {
+        protocol: 'https',
+        hostname: 'www.kint-group.com',
+      },
+      {
         protocol: 'http',
         hostname: 'localhost',
       },
