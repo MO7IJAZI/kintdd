@@ -159,6 +159,7 @@ export default function Sidebar() {
                 <button
                     onClick={async () => {
                         await logout();
+                        // Force a hard reload to clear any client-side session state
                         window.location.href = '/';
                     }}
                     style={{
