@@ -191,7 +191,7 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
                                     </span>
                                 )}
                                 {crop.pdfUrl && (
-                                    <Link href={crop.pdfUrl} target="_blank" rel="noopener noreferrer" style={{ padding: '0.4rem 0.8rem', backgroundColor: '#eef2ff', color: '#3730a3', borderRadius: '0.5rem', fontSize: '0.75rem', fontWeight: 800, textDecoration: 'none' }}>
+                                    <Link href={crop.pdfUrl as any} target="_blank" rel="noopener noreferrer" style={{ padding: '0.4rem 0.8rem', backgroundColor: '#eef2ff', color: '#3730a3', borderRadius: '0.5rem', fontSize: '0.75rem', fontWeight: 800, textDecoration: 'none' }}>
                                         {t('documentation')} · {t('downloadPdf')}
                                     </Link>
                                 )}
