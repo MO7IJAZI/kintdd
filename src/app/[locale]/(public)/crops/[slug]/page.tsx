@@ -56,8 +56,6 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
             description_ar: true,
             metaTitle: true,
             metaTitle_ar: true,
-            metaDesc: true,
-            metaDesc_ar: true
         }
     });
 
@@ -66,11 +64,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     const name = (isRtl && crop.name_ar) ? crop.name_ar : crop.name;
     const description = (isRtl && crop.description_ar) ? crop.description_ar : crop.description;
     const metaTitle = (isRtl && crop.metaTitle_ar) ? crop.metaTitle_ar : crop.metaTitle;
-    const metaDesc = (isRtl && crop.metaDesc_ar) ? crop.metaDesc_ar : crop.metaDesc;
 
     return {
         title: metaTitle || `${name} | KINT`,
-        description: metaDesc || description?.substring(0, 160),
+        description: description?.substring(0, 160),
     };
 }
 
@@ -149,7 +146,7 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
                 <div className="container-technical">
                     <nav style={{ marginBottom: '1.5rem', fontSize: '0.8rem', color: '#999', fontWeight: 700, display: 'flex', gap: '0.5rem' }}>
                         <Link href={`/`} style={{ color: '#999' }}>{tNav('home').toUpperCase()}</Link> /
-                        <Link href={`/crop-farming`} style={{ color: '#999' }}> {t('title').toUpperCase()}</Link> /
+                        <Link href={`/crop-farming` as any} style={{ color: '#999' }}> {t('title').toUpperCase()}</Link> /
                         <span style={{ color: 'var(--primary)' }}> {name.toUpperCase()}</span>
                     </nav>
                     <h1 style={{ 
@@ -263,7 +260,7 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
                                         gap: '1.5rem'
                                     }}>
                                         {crop.recommendedProducts.map((p) => (
-                                            <Link key={p.id} href={`/product/${p.slug}`} className="card product-mini-card" style={{
+                                            <Link key={p.id} href={`/product/${p.slug}` as any} className="card product-mini-card" style={{
                                                 padding: '1.5rem',
                                                 textAlign: 'center',
                                                 transition: '0.3s',
@@ -346,7 +343,7 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
                                                                 const prod = productsMap.get(prodId);
                                                                 if (!prod) return null;
                                                                 return (
-                                                                    <Link key={prod.id} href={`/product/${prod.slug}`} style={{
+                                                                    <Link key={prod.id} href={`/product/${prod.slug}` as any} style={{
                                                                         padding: '0.4rem 1rem',
                                                                         backgroundColor: '#f1f5f9',
                                                                         color: '#475569',
