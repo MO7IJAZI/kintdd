@@ -35,6 +35,8 @@ export default function DeleteButton({ id, type }: { id: string, type: DeleteTyp
                 case 'job-offer': await deleteJobOffer(id); break;
             }
             router.refresh();
+            // Force a hard reload if router.refresh() isn't enough for some complex state
+            // setTimeout(() => window.location.reload(), 100);
         } catch (error) {
             console.error("Delete failed:", error);
             alert(`Failed to delete ${type}: ${error instanceof Error ? error.message : 'Unknown error'}`);

@@ -198,7 +198,9 @@ export default function ProductForm({
         }
 
         setIsPending(false);
+        router.refresh(); // Refresh current data first
         router.push("/admin/products");
+        router.refresh(); // Ensure list is refreshed
     }
 
     return (
