@@ -26,26 +26,14 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'images.unsplash.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'res.cloudinary.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'kint-group.com',
-      },
-      {
-        protocol: 'https',
-        hostname: 'www.kint-group.com',
+        hostname: '**',
       },
       {
         protocol: 'http',
-        hostname: 'localhost',
+        hostname: '**',
       },
     ],
-    unoptimized: false,
+    unoptimized: true, // Disable image optimization for now to debug
   },
 
   typescript: {
