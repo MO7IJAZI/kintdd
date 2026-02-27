@@ -17,6 +17,7 @@
     "dev:turbo": "next dev --turbo",
     "build": "node scripts/fix-permissions.js && prisma generate && prisma migrate deploy && prisma db seed && cross-env NODE_OPTIONS=--max-old-space-size=4096 NEXT_IGNORE_ESLINT=1 NEXT_IGNORE_TYPE_CHECKS=1 next build && node scripts/post-build.js",
     "start": "node server.js",
+    "free-port": "node scripts/free-port.js",
     "lint": "eslint .",
     "hostinger:setup": "npx prisma generate",
     "deploy": "bash deploy.sh",
