@@ -94,6 +94,7 @@ model Product {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   crops       Crop[]   @relation("CropRecommendedProducts")
+  animalTypes AnimalType[]
 
   @@index([slug])
   @@index([categoryId])
@@ -479,6 +480,7 @@ model AnimalType {
   isActive       Boolean       @default(true)
   issues         AnimalIssue[]
   tabs           AnimalTypeTab[]
+  products       Product[]
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
 
