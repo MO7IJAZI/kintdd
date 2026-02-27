@@ -398,20 +398,24 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
         );
     } catch (error) {
         console.error("Error rendering CropDetail:", error);
+        // Force logging to string for display
+        const errorMsg = error instanceof Error ? error.message : (typeof error === 'object' ? JSON.stringify(error) : String(error));
+        const stack = error instanceof Error ? error.stack : '';
+        
         return (
             <div style={{ padding: '4rem', textAlign: 'center' }}>
                 <h2>Something went wrong loading this crop details.</h2>
                 <p>Please try again later.</p>
-                <div style={{ marginTop: '2rem', padding: '1rem', backgroundColor: '#fef2f2', color: '#991b1b', borderRadius: '0.5rem', maxWidth: '600px', margin: '2rem auto', textAlign: 'left', overflow: 'auto' }}>
+                <div style={{ marginTop: '2rem', padding: '1rem', backgroundColor: '#fef2f2', color: '#991b1b', borderRadius: '0.5rem', maxWidth: '800px', margin: '2rem auto', textAlign: 'left', overflow: 'auto' }}>
                     <strong>Debug Info:</strong>
-                    <pre style={{ fontSize: '0.8rem', marginTop: '0.5rem' }}>
-                        {error instanceof Error ? error.message : String(error)}
-                        {error instanceof Error && error.stack && (
-                            <div style={{ marginTop: '1rem', opacity: 0.7 }}>
-                                {error.stack}
-                            </div>
-                        )}
+                    <pre style={{ fontSize: '0.8rem', marginTop: '0.5rem', whiteSpace: 'pre-wrap' }}>
+                        {errorMsg}
                     </pre>
+                    {stack && (
+                        <pre style={{ fontSize: '0.7rem', marginTop: '1rem', opacity: 0.7, whiteSpace: 'pre-wrap' }}>
+                            {stack}
+                        </pre>
+                    )}
                 </div>
             </div>
         );
