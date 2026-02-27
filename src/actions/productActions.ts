@@ -50,7 +50,23 @@ export async function createProduct(formData: FormData) {
     const compTable = compTableStr ? JSON.parse(compTableStr) : null;
     const tabs = tabsStr ? JSON.parse(tabsStr) : null;
     const tabs_ar = tabsArStr ? JSON.parse(tabsArStr) : null;
-    const downloads = downloadsStr ? (JSON.parse(downloadsStr) as DownloadInput[]) : [];
+    
+    // Parse downloads carefully
+    let downloads: DownloadInput[] = [];
+    try {
+        if (downloadsStr) {
+            const parsed = JSON.parse(downloadsStr);
+            if (Array.isArray(parsed)) {
+                downloads = parsed.map((d: any) => ({
+                    title: String(d.title || ''),
+                    type: String(d.type || 'Document'),
+                    fileUrl: String(d.fileUrl || '')
+                })).filter(d => d.title && d.fileUrl);
+            }
+        }
+    } catch (e) {
+        console.error("Error parsing downloads JSON:", e);
+    }
 
     await prisma.product.create({
         data: {
@@ -81,19 +97,28 @@ export async function createProduct(formData: FormData) {
             metaTitle_ar,
             metaDesc_ar,
             downloads: {
-                create: downloads.map((d) => ({
-                    title: d.title,
-                    type: d.type,
-                    fileUrl: d.fileUrl
-                }))
+                create: downloads
             }
         },
     });
 
+    // Revalidate paths to refresh cache immediately
     revalidatePath("/admin/products");
     revalidatePath("/products");
+    revalidatePath(`/${session.user.language || 'en'}/products`); // Attempt to clear localized path if possible
+    revalidatePath(`/en/products`);
+    revalidatePath(`/ar/products`);
     revalidatePath(`/product/${slug}`);
-    revalidateTag("products", { expire: 0 });
+    
+    // Invalidate cache tags
+    // This is crucial for ISR/static generation to update
+    // We're revalidating multiple possible tags to be safe
+    try {
+        revalidateTag("products");
+        revalidateTag("categories");
+    } catch (e) {
+        console.log("Revalidate tag error (ignored):", e);
+    }
 }
 
 export async function updateProduct(id: string, formData: FormData) {
