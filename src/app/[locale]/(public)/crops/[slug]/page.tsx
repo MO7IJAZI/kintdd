@@ -402,6 +402,17 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
             <div style={{ padding: '4rem', textAlign: 'center' }}>
                 <h2>Something went wrong loading this crop details.</h2>
                 <p>Please try again later.</p>
+                <div style={{ marginTop: '2rem', padding: '1rem', backgroundColor: '#fef2f2', color: '#991b1b', borderRadius: '0.5rem', maxWidth: '600px', margin: '2rem auto', textAlign: 'left', overflow: 'auto' }}>
+                    <strong>Debug Info:</strong>
+                    <pre style={{ fontSize: '0.8rem', marginTop: '0.5rem' }}>
+                        {error instanceof Error ? error.message : String(error)}
+                        {error instanceof Error && error.stack && (
+                            <div style={{ marginTop: '1rem', opacity: 0.7 }}>
+                                {error.stack}
+                            </div>
+                        )}
+                    </pre>
+                </div>
             </div>
         );
     }
