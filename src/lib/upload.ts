@@ -51,28 +51,43 @@ export async function uploadFile(file: UploadableFile, folder: string = 'uploads
             });
         }
 
-        // Fallback to local file system
-        const uploadDir = path.join(process.cwd(), 'public', folder);
+    // Fallback to local file system
+    // In standalone mode (production), process.cwd() is the root where server.js runs.
+    // We want to store uploads in a persistent directory, ideally outside .next/standalone/public if possible,
+    // or ensure we copy them. But for now, let's put them in 'public/uploads' relative to CWD.
+    const uploadDir = path.join(process.cwd(), 'public', folder);
+    
+    // Ensure directory exists
+    try {
         await fs.mkdir(uploadDir, { recursive: true });
+    } catch (e) {
+        // Ignore if exists
+    }
 
-        // Generate unique filename
-        const timestamp = Date.now();
-        const originalName = 'name' in file && typeof file.name === 'string' ? file.name : 'file';
-        const extension = path.extname(originalName) || '.pdf';
-        const baseName = path.basename(originalName, extension);
-        const uniqueName = `${baseName}-${timestamp}${extension}`;
-        
-        const filePath = path.join(uploadDir, uniqueName);
-        // Use the new custom route for serving uploads if it's a local upload
-        // But for compatibility with existing code that expects /folder/name, we return that.
-        // Our new route at /uploads/[...filename] will handle /uploads/filename.
-        // If folder is 'uploads', result is /uploads/filename.
-        const relativePath = `/${folder}/${uniqueName}`;
+    // Generate unique filename
+    const timestamp = Date.now();
+    // Safely get name
+    let originalName = 'file';
+    if ('name' in file && typeof file.name === 'string') {
+        originalName = file.name;
+    }
+    
+    const extension = path.extname(originalName) || '.bin';
+    const baseName = path.basename(originalName, extension).replace(/[^a-zA-Z0-9]/g, '-');
+    const uniqueName = `${baseName}-${timestamp}${extension}`;
+    
+    const filePath = path.join(uploadDir, uniqueName);
+    
+    // The relative path stored in DB should be handled by our custom route handler
+    // If we store "/uploads/image.jpg", Next.js default static handler might miss it in standalone mode
+    // if the file wasn't there at build time.
+    // So we use our custom route /uploads/[...filename] to serve it dynamically from disk.
+    const relativePath = `/${folder}/${uniqueName}`;
 
-        // Write file
-        await fs.writeFile(filePath, buffer);
+    // Write file
+    await fs.writeFile(filePath, buffer);
 
-        return relativePath;
+    return relativePath;
     } catch (error) {
         console.error('Error uploading file:', error);
         throw new Error('Failed to upload file');
