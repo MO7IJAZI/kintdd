@@ -62,17 +62,20 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
     // Collect all product IDs from stages
     const stageProductIds = new Set<string>();
     crop.stages.forEach((stage) => {
-        const recommendation = stage.recommendation;
-        if (recommendation?.products) {
+        // Safe access for recommendation which might be null or undefined
+        const recommendation = stage.recommendation as { products?: string[] } | null | undefined;
+        if (recommendation && Array.isArray(recommendation.products)) {
             recommendation.products.forEach((id) => stageProductIds.add(id));
         }
     });
 
     // Fetch products for stages
-    const stageProducts = await prisma.product.findMany({
-        where: { id: { in: Array.from(stageProductIds) } },
-        select: { id: true, name: true, slug: true }
-    }) as Product[];
+    const stageProducts = stageProductIds.size > 0 
+        ? await prisma.product.findMany({
+            where: { id: { in: Array.from(stageProductIds) } },
+            select: { id: true, name: true, slug: true }
+          }) as Product[]
+        : [];
 
     // Create a map for easy lookup
     const productsMap = new Map<string, Product>(stageProducts.map((p) => [p.id, p]));
@@ -280,35 +283,41 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
                                                     
                                                     {/* In a real app, recommendations would be many-to-many here too */}
                                                     <div style={{ marginTop: '1.5rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                                                        {stage.recommendation?.products?.map((prodId) => {
-                                                            const prod = productsMap.get(prodId);
-                                                            if (!prod) return null;
-                                                            return (
-                                                                <Link key={prod.id} href={`/product/${prod.slug}`} style={{
-                                                                    padding: '0.4rem 1rem',
-                                                                    backgroundColor: '#f1f5f9',
-                                                                    color: '#475569',
-                                                                    borderRadius: '0.5rem',
-                                                                    fontSize: '0.7rem',
-                                                                    fontWeight: 800,
-                                                                    textDecoration: 'none',
-                                                                    display: 'inline-block',
-                                                                    transition: '0.2s'
-                                                                }}>
-                                                                    {prod.name}
-                                                                </Link>
-                                                            );
-                                                        })}
-                                                        {(!stage.recommendation?.products || stage.recommendation.products.length === 0) && (
-                                                            <span style={{
-                                                                padding: '0.4rem 1rem',
-                                                                backgroundColor: '#f1f5f9',
-                                                                color: '#475569',
-                                                                borderRadius: '0.5rem',
-                                                                fontSize: '0.7rem',
-                                                                fontWeight: 800
-                                                            }}>{t('optimizedPerformance')}</span>
-                                                        )}
+                                                        {(() => {
+                                                            const recommendation = stage.recommendation as { products?: string[] } | null | undefined;
+                                                            if (!recommendation?.products || !Array.isArray(recommendation.products) || recommendation.products.length === 0) {
+                                                                return (
+                                                                    <span style={{
+                                                                        padding: '0.4rem 1rem',
+                                                                        backgroundColor: '#f1f5f9',
+                                                                        color: '#475569',
+                                                                        borderRadius: '0.5rem',
+                                                                        fontSize: '0.7rem',
+                                                                        fontWeight: 800
+                                                                    }}>{t('optimizedPerformance')}</span>
+                                                                );
+                                                            }
+                                                            
+                                                            return recommendation.products.map((prodId) => {
+                                                                const prod = productsMap.get(prodId);
+                                                                if (!prod) return null;
+                                                                return (
+                                                                    <Link key={prod.id} href={`/product/${prod.slug}`} style={{
+                                                                        padding: '0.4rem 1rem',
+                                                                        backgroundColor: '#f1f5f9',
+                                                                        color: '#475569',
+                                                                        borderRadius: '0.5rem',
+                                                                        fontSize: '0.7rem',
+                                                                        fontWeight: 800,
+                                                                        textDecoration: 'none',
+                                                                        display: 'inline-block',
+                                                                        transition: '0.2s'
+                                                                    }}>
+                                                                        {prod.name}
+                                                                    </Link>
+                                                                );
+                                                            });
+                                                        })()}
                                                     </div>
                                                 </div>
 
