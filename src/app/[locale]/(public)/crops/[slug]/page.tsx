@@ -1,9 +1,10 @@
 import prisma from "@/lib/prisma";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/navigation";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { stripScripts } from "@/lib/sanitizeHtml";
+import { Metadata } from "next";
 
 export const revalidate = 300;
 
@@ -36,6 +37,41 @@ interface CropDetailData {
     harvestSeason_ar?: string | null;
     stages: CropStage[];
     recommendedProducts: Product[];
+    metaTitle?: string | null;
+    metaTitle_ar?: string | null;
+    metaDesc?: string | null;
+    metaDesc_ar?: string | null;
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string; locale: string }> }): Promise<Metadata> {
+    const { slug, locale } = await params;
+    const isRtl = locale === 'ar';
+    
+    const crop = await prisma.crop.findUnique({
+        where: { slug },
+        select: {
+            name: true,
+            name_ar: true,
+            description: true,
+            description_ar: true,
+            metaTitle: true,
+            metaTitle_ar: true,
+            metaDesc: true,
+            metaDesc_ar: true
+        }
+    });
+
+    if (!crop) return {};
+
+    const name = (isRtl && crop.name_ar) ? crop.name_ar : crop.name;
+    const description = (isRtl && crop.description_ar) ? crop.description_ar : crop.description;
+    const metaTitle = (isRtl && crop.metaTitle_ar) ? crop.metaTitle_ar : crop.metaTitle;
+    const metaDesc = (isRtl && crop.metaDesc_ar) ? crop.metaDesc_ar : crop.metaDesc;
+
+    return {
+        title: metaTitle || `${name} | KINT`,
+        description: metaDesc || description?.substring(0, 160),
+    };
 }
 
 export default async function CropDetail({ params }: { params: Promise<{ slug: string; locale: string }> }) {
@@ -98,6 +134,14 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
         return '';
     })();
 
+    // Helper to ensure image path is valid
+    const getSafeImageSrc = (src: string) => {
+        if (!src) return '';
+        if (src.startsWith('http')) return src;
+        if (src.startsWith('/')) return src;
+        return `/${src}`;
+    };
+
     return (
         <div style={{ backgroundColor: '#fdfdfd', minHeight: '100vh' }} dir={isRtl ? 'rtl' : 'ltr'}>
             {/* Header / Breadcrumbs */}
@@ -126,7 +170,7 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
                     {crop.image && (
                         <div style={{ position: 'relative', width: '100%', height: '420px', margin: '0 0 2rem 0', border: '1px solid #eee', overflow: 'hidden' }}>
                             <Image
-                                src={crop.image}
+                                src={getSafeImageSrc(crop.image)}
                                 alt={name}
                                 fill
                                 style={{ objectFit: 'cover' }}
