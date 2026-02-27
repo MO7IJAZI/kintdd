@@ -145,7 +145,7 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
             <section style={{ padding: '3rem 0 2rem', backgroundColor: 'white', borderBottom: '1px solid #eee' }}>
                 <div className="container-technical">
                     <nav style={{ marginBottom: '1.5rem', fontSize: '0.8rem', color: '#999', fontWeight: 700, display: 'flex', gap: '0.5rem' }}>
-                        <Link href={`/`} style={{ color: '#999' }}>{tNav('home').toUpperCase()}</Link> /
+                        <Link href={`/` as any} style={{ color: '#999' }}>{tNav('home').toUpperCase()}</Link> /
                         <Link href={`/crop-farming` as any} style={{ color: '#999' }}> {t('title').toUpperCase()}</Link> /
                         <span style={{ color: 'var(--primary)' }}> {name.toUpperCase()}</span>
                     </nav>
