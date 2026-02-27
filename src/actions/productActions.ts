@@ -105,14 +105,16 @@ export async function createProduct(formData: FormData) {
     // Revalidate paths to refresh cache immediately
     revalidatePath("/admin/products");
     revalidatePath("/products");
-    revalidatePath(`/${session.user.language || 'en'}/products`); // Attempt to clear localized path if possible
+    // session.user is guaranteed to exist because of the check above, but TS might complain
+    // Also, 'language' might not be on the default User type, so we default to 'en' safely
+    const userLang = (session?.user as any)?.language || 'en';
+    revalidatePath(`/${userLang}/products`); 
     revalidatePath(`/en/products`);
     revalidatePath(`/ar/products`);
     revalidatePath(`/product/${slug}`);
     
     // Invalidate cache tags
-    // This is crucial for ISR/static generation to update
-    // We're revalidating multiple possible tags to be safe
+    // unstable_cache tags are invalidated via revalidateTag
     try {
         revalidateTag("products");
         revalidateTag("categories");
