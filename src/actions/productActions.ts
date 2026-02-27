@@ -116,6 +116,7 @@ export async function createProduct(formData: FormData) {
     // Invalidate cache tags
     // unstable_cache tags are invalidated via revalidateTag
     try {
+        // Next.js revalidateTag takes a single string argument
         revalidateTag("products");
         revalidateTag("categories");
     } catch (e) {
