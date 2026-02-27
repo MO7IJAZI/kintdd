@@ -1,16 +1,34 @@
-const { execSync } = require('child_process');
+const { exec } = require('child_process');
 
-try {
-  console.log('Resolving failed migration...');
-  // Mark the failed migration as rolled back so it can be re-applied (or marked applied if we fixed it)
-  // Since we modified the migration file to be empty/safe, we want to mark it as rolled back so it tries again (and succeeds doing nothing)
-  // OR we can mark it as applied if we manually fixed the DB.
-  // Given the error was "failed to apply", and we modified the SQL to comment out the erroring parts,
-  // we should mark it as rolled back so the next deploy tries to run the (now fixed) SQL.
-  
-  execSync('npx prisma migrate resolve --rolled-back 20260227145443_kintkint', { stdio: 'inherit' });
-  console.log('Successfully resolved migration as rolled back.');
-} catch (error) {
-  console.error('Failed to resolve migration:', error.message);
-  process.exit(1);
-}
+console.log('Resolving failed migration...');
+
+// We need to mark the failed migration as rolled back or resolved because the database state 
+// is inconsistent with what Prisma expects. Since we manually fixed the DB tables with fix-db,
+// we can tell Prisma to ignore this specific migration error.
+
+const MIGRATION_NAME = "20260227214622_create_crop_recommended_products_table";
+
+console.log(`Marking migration ${MIGRATION_NAME} as resolved...`);
+
+exec(`npx prisma migrate resolve --applied ${MIGRATION_NAME}`, (error, stdout, stderr) => {
+    if (error) {
+        console.error(`Error resolving migration: ${error.message}`);
+        console.log('Trying fallback: marking as rolled back...');
+        
+        exec(`npx prisma migrate resolve --rolled-back ${MIGRATION_NAME}`, (err2, out2, err2_stderr) => {
+             if (err2) {
+                 console.error(`Failed to resolve migration: ${err2.message}`);
+             } else {
+                 console.log('Successfully marked migration as rolled back.');
+                 console.log(out2);
+             }
+        });
+        return;
+    }
+    if (stderr) {
+        console.error(`Stderr: ${stderr}`);
+        return;
+    }
+    console.log(`Success! Migration resolved.`);
+    console.log(stdout);
+});

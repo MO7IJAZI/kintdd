@@ -19,6 +19,7 @@
     "start": "node server.js",
     "free-port": "node scripts/free-port.js",
     "fix-db": "node scripts/manual-db-fix.js",
+    "resolve-migration": "node scripts/resolve-migration.js",
     "lint": "eslint .",
     "hostinger:setup": "npx prisma generate",
     "deploy": "bash deploy.sh",
