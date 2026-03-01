@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { generateSlug, generateGlobalUniqueSlug, checkSlugExistsGlobal } from "@/lib/slugUtils";
 
 export async function listAnimalTypes() {
   return prisma.animalType.findMany({
@@ -56,11 +57,23 @@ export async function createAnimalType(data: {
   issues?: Array<{ title: string; title_ar?: string; description?: string; description_ar?: string; order?: number; isActive?: boolean }>;
   tabs?: TabItem[];
 }) {
+  // Ensure slug is present and unique globally
+  let finalSlug = data.slug;
+  if (!finalSlug || !finalSlug.trim()) {
+      finalSlug = await generateGlobalUniqueSlug(data.name);
+  } else {
+      finalSlug = generateSlug(finalSlug);
+  }
+
+  if (await checkSlugExistsGlobal(finalSlug)) {
+       finalSlug = await generateGlobalUniqueSlug(finalSlug);
+  }
+
   return prisma.animalType.create({
     data: {
       name: data.name,
       name_ar: data.name_ar || null,
-      slug: data.slug,
+      slug: finalSlug,
       description: data.description || null,
       description_ar: data.description_ar || null,
       imageUrl: data.imageUrl || null,
@@ -146,7 +159,7 @@ export async function updateAnimalType(id: string, data: {
       data: {
         name: data.name,
         name_ar: data.name_ar,
-        slug: data.slug,
+        slug: finalSlug,
         description: data.description,
         description_ar: data.description_ar,
         imageUrl: data.imageUrl,

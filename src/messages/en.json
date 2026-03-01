@@ -611,7 +611,8 @@
     "nameRequired": "Product name is required",
     "categoryRequired": "Category is required",
     "slugRequired": "Slug is required",
-    "fixErrors": "Please fix the errors above before saving."
+    "fixErrors": "Please fix the errors above before saving.",
+    "nameArRequired": "Arabic product name is required"
   },
   "AdminDownloads": {
     "title": "Product Downloads (SDS, Labels, Brochures)",

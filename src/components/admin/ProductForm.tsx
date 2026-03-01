@@ -183,8 +183,8 @@ export default function ProductForm({
             newErrors.name = tValidation('nameRequired');
         }
         
-        if (!slug.trim()) {
-            newErrors.slug = tValidation('slugRequired');
+        if (!nameAr.trim()) {
+            newErrors.name_ar = tValidation('nameArRequired');
         }
         
         if (!categoryId) {
@@ -299,36 +299,28 @@ export default function ProductForm({
                 </div>
                 <div dir="rtl">
                     <label className="block text-sm font-bold text-slate-700 mb-2">
-                        {t('productName')} (AR)
+                        {t('productName')} (AR) <span className="text-red-500">*</span>
                     </label>
                     <input 
                         name="name_ar" 
                         value={nameAr} 
                         onChange={handleNameArChange} 
-                        className="input w-full"
+                        className={`input w-full ${errors.name_ar ? 'border-red-500 focus:ring-red-500' : ''}`}
                         placeholder="اسم المنتج بالعربية"
                     />
+                    {errors.name_ar && (
+                        <p className="mt-1 text-sm text-red-500 flex items-center gap-1">
+                            <AlertCircle className="w-4 h-4" />
+                            {errors.name_ar}
+                        </p>
+                    )}
                 </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-2">
-                        {t('slug')} <span className="text-red-500">*</span>
-                    </label>
-                    <input 
-                        value={slug} 
-                        onChange={handleSlugChange} 
-                        className={`input w-full font-mono text-sm ${errors.slug ? 'border-red-500 focus:ring-red-500' : ''}`}
-                        placeholder="url-friendly-slug" 
-                    />
-                    {errors.slug && (
-                        <p className="mt-1 text-sm text-red-500 flex items-center gap-1">
-                            <AlertCircle className="w-4 h-4" />
-                            {errors.slug}
-                        </p>
-                    )}
-                </div>
+                {/* Slug field hidden to prevent manual errors */}
+                <input type="hidden" name="slug" value={slug} />
+                
                 <div>
                     <label className="block text-sm font-bold text-slate-700 mb-2">
                         {t('category')} <span className="text-red-500">*</span>

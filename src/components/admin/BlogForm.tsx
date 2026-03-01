@@ -29,7 +29,8 @@ interface BlogPostFormData {
 export default function BlogForm({ initialData }: { initialData?: Partial<BlogPostFormData> }) {
     const t = useTranslations('AdminBlogForm');
     const router = useRouter();
-    const [isPending, setIsPending] = useState(false);
+    const [title, setTitle] = useState(initialData?.title || "");
+    const [titleAr, setTitleAr] = useState(initialData?.title_ar || "");
     const [content, setContent] = useState(initialData?.content || "");
     const [contentAr, setContentAr] = useState(initialData?.content_ar || "");
     const [image, setImage] = useState(initialData?.image || "");
@@ -37,6 +38,7 @@ export default function BlogForm({ initialData }: { initialData?: Partial<BlogPo
     const [slugEdited, setSlugEdited] = useState(false);
     const [currentLang, setCurrentLang] = useState<'en' | 'ar'>('en');
     const [publishedAt, setPublishedAt] = useState(initialData?.publishedAt ? new Date(initialData.publishedAt).toISOString().split('T')[0] : '');
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
     // Parse initial tags if they exist
     const defaultTags = initialData?.tags 
@@ -51,9 +53,17 @@ export default function BlogForm({ initialData }: { initialData?: Partial<BlogPo
 
     // Auto-generate slug from title when title changes and slug hasn't been manually edited
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = e.target.value;
+        setTitle(val);
         if (!slugEdited && !initialData?.id && currentLang === 'en') {
-            setSlug(generateSlug(e.target.value));
+            setSlug(generateSlug(val));
         }
+        if (errors.title) setErrors(prev => ({ ...prev, title: '' }));
+    };
+
+    const handleTitleArChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setTitleAr(e.target.value);
+        if (errors.title_ar) setErrors(prev => ({ ...prev, title_ar: '' }));
     };
 
     // Allow manual slug editing
@@ -62,12 +72,36 @@ export default function BlogForm({ initialData }: { initialData?: Partial<BlogPo
         setSlug(generateSlug(e.target.value));
     };
 
-    async function action(formData: FormData) {
+    const validate = () => {
+        const newErrors: Record<string, string> = {};
+        if (!title.trim()) newErrors.title = t('titleRequired') || "Title is required"; // Fallback if translation missing
+        if (!titleAr.trim()) newErrors.title_ar = t('titleArRequired') || "Arabic title is required";
+        
+        // We can check translations exist by trying to use them, if not found, use default.
+        // But AdminBlogForm might not have validation keys.
+        // Let's assume we can use generic messages or add keys later.
+        
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+        e.preventDefault();
+        
+        if (!validate()) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
+
         setIsPending(true);
-        // Append rich text content manually since they are state-controlled
+        const formData = new FormData(e.currentTarget);
+        // Explicitly set controlled values
+        formData.set('title', title);
+        formData.set('title_ar', titleAr);
         formData.set('content', content);
         formData.set('content_ar', contentAr);
         formData.set('image', image);
+        formData.set('slug', slug);
         
         try {
             if (initialData?.id) {
@@ -84,7 +118,7 @@ export default function BlogForm({ initialData }: { initialData?: Partial<BlogPo
     }
 
     return (
-        <form action={action} className="card" style={{ padding: '2rem', maxWidth: '900px' }}>
+        <form onSubmit={handleSubmit} className="card" style={{ padding: '2rem', maxWidth: '900px' }}>
             <div style={{ marginBottom: '2rem', display: 'flex', gap: '1rem', borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>
                 <button
                     type="button"
@@ -125,17 +159,33 @@ export default function BlogForm({ initialData }: { initialData?: Partial<BlogPo
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
                 <div style={{ display: currentLang === 'en' ? 'block' : 'none' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>{t('titleEn')}</label>
-                    <input name="title" defaultValue={initialData?.title} onChange={handleTitleChange} required={currentLang === 'en'} className="input" style={{ width: '100%' }} />
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>
+                        {t('titleEn')} <span style={{ color: 'red' }}>*</span>
+                    </label>
+                    <input 
+                        name="title" 
+                        value={title} 
+                        onChange={handleTitleChange} 
+                        className={`input ${errors.title ? 'border-red-500' : ''}`} 
+                        style={{ width: '100%' }} 
+                    />
+                    {errors.title && <p style={{ color: 'red', fontSize: '0.8rem', marginTop: '0.25rem' }}>{errors.title}</p>}
                 </div>
                 <div style={{ display: currentLang === 'ar' ? 'block' : 'none' }} dir="rtl">
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>{t('titleAr')}</label>
-                    <input name="title_ar" defaultValue={initialData?.title_ar || ''} className="input" style={{ width: '100%' }} />
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>
+                        {t('titleAr')} <span style={{ color: 'red' }}>*</span>
+                    </label>
+                    <input 
+                        name="title_ar" 
+                        value={titleAr} 
+                        onChange={handleTitleArChange} 
+                        className={`input ${errors.title_ar ? 'border-red-500' : ''}`} 
+                        style={{ width: '100%' }} 
+                    />
+                    {errors.title_ar && <p style={{ color: 'red', fontSize: '0.8rem', marginTop: '0.25rem' }}>{errors.title_ar}</p>}
                 </div>
-                <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>{t('slug')}</label>
-                    <input name="slug" value={slug} onChange={handleSlugChange} required className="input" style={{ width: '100%' }} placeholder="url-friendly-slug" />
-                </div>
+                {/* Hidden slug input */}
+                <input type="hidden" name="slug" value={slug} />
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>

@@ -25,16 +25,49 @@ export default function PageForm({ initialData }: { initialData?: Partial<PageFo
     const [contentAr, setContentAr] = useState(initialData?.content_ar || "");
     const [contentTab, setContentTab] = useState<'en' | 'ar'>('en');
     const [slug, setSlug] = useState(initialData?.slug || "");
+    const [title, setTitle] = useState(initialData?.title || "");
+    const [titleAr, setTitleAr] = useState(initialData?.title_ar || "");
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
     // Auto-generate slug from title when title changes
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = e.target.value;
+        setTitle(val);
         if (!initialData?.id || !initialData?.slug) {
-            setSlug(e.target.value.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""));
+            setSlug(val.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""));
         }
+        if (errors.title) setErrors(prev => ({ ...prev, title: '' }));
     };
 
-    async function action(formData: FormData) {
+    const handleTitleArChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setTitleAr(e.target.value);
+        if (errors.title_ar) setErrors(prev => ({ ...prev, title_ar: '' }));
+    };
+
+    const validate = () => {
+        const newErrors: Record<string, string> = {};
+        if (!title.trim()) newErrors.title = t('titleRequired') || "Title is required";
+        if (!titleAr.trim()) newErrors.title_ar = t('titleArRequired') || "Arabic title is required";
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+        e.preventDefault();
+        
+        if (!validate()) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
+
         setIsPending(true);
+        const formData = new FormData(e.currentTarget);
+        formData.set('title', title);
+        formData.set('title_ar', titleAr);
+        formData.set('content', content);
+        formData.set('content_ar', contentAr);
+        formData.set('slug', slug);
+
         try {
             if (initialData?.id) {
                 await updatePage(initialData.id, formData);
@@ -50,50 +83,47 @@ export default function PageForm({ initialData }: { initialData?: Partial<PageFo
     }
 
     return (
-        <form action={action} className="card" style={{ padding: '2rem', maxWidth: '900px' }}>
+        <form onSubmit={handleSubmit} className="card" style={{ padding: '2rem', maxWidth: '900px' }}>
             {/* Hidden input for controlled component */}
             <input type="hidden" name="content" value={content} />
             <input type="hidden" name="content_ar" value={contentAr} />
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
                 <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>{t('titleEn')}</label>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>
+                        {t('titleEn')} <span style={{ color: 'red' }}>*</span>
+                    </label>
                     <input 
                         name="title" 
-                        defaultValue={initialData?.title} 
+                        value={title} 
                         onChange={handleTitleChange} 
-                        required 
-                        className="input" 
+                        className={`input ${errors.title ? 'border-red-500' : ''}`} 
                         style={{ width: '100%' }} 
                         placeholder={t('titlePlaceholder')}
                     />
+                    {errors.title && <p style={{ color: 'red', fontSize: '0.8rem', marginTop: '0.25rem' }}>{errors.title}</p>}
                 </div>
                 <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>{t('titleAr')}</label>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>
+                        {t('titleAr')} <span style={{ color: 'red' }}>*</span>
+                    </label>
                     <input 
                         name="title_ar" 
-                        defaultValue={initialData?.title_ar || ""} 
+                        value={titleAr} 
+                        onChange={handleTitleArChange}
                         dir="rtl"
-                        className="input" 
+                        className={`input ${errors.title_ar ? 'border-red-500' : ''}`} 
                         style={{ width: '100%' }} 
                         placeholder={t('titleArPlaceholder')}
                     />
+                    {errors.title_ar && <p style={{ color: 'red', fontSize: '0.8rem', marginTop: '0.25rem' }}>{errors.title_ar}</p>}
                 </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
-                <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>{t('slug')}</label>
-                    <input 
-                        name="slug" 
-                        value={slug} 
-                        onChange={(e) => setSlug(e.target.value)} 
-                        required 
-                        className="input" 
-                        style={{ width: '100%' }} 
-                        placeholder={t('slugPlaceholder')}
-                    />
-                </div>
+                {/* Hidden slug input */}
+                <input type="hidden" name="slug" value={slug} />
+                
                 <div>
                     <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>{t('template')}</label>
                     <select name="template" defaultValue={initialData?.template || "default"} className="input" style={{ width: '100%' }}>

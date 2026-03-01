@@ -38,6 +38,9 @@ export default function ExpertArticleForm({ initialData }: { initialData?: Parti
     const [slug, setSlug] = useState(initialData?.slug || "");
     const [currentLang, setCurrentLang] = useState<'en' | 'ar'>('en');
     const [publishedAt, setPublishedAt] = useState(initialData?.publishedAt ? new Date(initialData.publishedAt).toISOString().split('T')[0] : '');
+    const [title, setTitle] = useState(initialData?.title || "");
+    const [titleAr, setTitleAr] = useState(initialData?.title_ar || "");
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
     const generateSlug = (text: string) => {
         return text
@@ -50,34 +53,65 @@ export default function ExpertArticleForm({ initialData }: { initialData?: Parti
     };
 
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = e.target.value;
+        setTitle(val);
         if (!initialData && currentLang === 'en') { // Only auto-generate for new articles from English title
-            const newSlug = generateSlug(e.target.value);
+            const newSlug = generateSlug(val);
             setSlug(newSlug);
         }
+        if (errors.title) setErrors(prev => ({ ...prev, title: '' }));
+    };
+
+    const handleTitleArChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setTitleAr(e.target.value);
+        if (errors.title_ar) setErrors(prev => ({ ...prev, title_ar: '' }));
     };
 
     const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSlug(generateSlug(e.target.value));
     };
 
-    async function action(formData: FormData) {
+    const validate = () => {
+        const newErrors: Record<string, string> = {};
+        if (!title.trim()) newErrors.title = t('titleRequired') || "Title is required";
+        if (!titleAr.trim()) newErrors.title_ar = t('titleArRequired') || "Arabic title is required";
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+        e.preventDefault();
+        
+        if (!validate()) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
+
         setIsPending(true);
-        // Append controlled inputs manually
+        const formData = new FormData(e.currentTarget);
+        formData.set('title', title);
+        formData.set('title_ar', titleAr);
         formData.set('content', content);
         formData.set('content_ar', contentAr);
         formData.set('image', image);
+        formData.set('slug', slug);
         
-        if (initialData?.id) {
-            await updateExpertArticle(initialData.id, formData);
-        } else {
-            await createExpertArticle(formData);
+        try {
+            if (initialData?.id) {
+                await updateExpertArticle(initialData.id, formData);
+            } else {
+                await createExpertArticle(formData);
+            }
+            router.push("/admin/expert-articles");
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsPending(false);
         }
-        setIsPending(false);
-        router.push("/admin/expert-articles");
     }
 
     return (
-        <form action={action} className="card" style={{ padding: '2rem', maxWidth: '1100px' }}>
+        <form onSubmit={handleSubmit} className="card" style={{ padding: '2rem', maxWidth: '1100px' }}>
             <div style={{ marginBottom: '2rem', display: 'flex', gap: '1rem', borderBottom: '1px solid var(--border)', paddingBottom: '1rem' }}>
                 <button
                     type="button"
@@ -118,17 +152,33 @@ export default function ExpertArticleForm({ initialData }: { initialData?: Parti
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
                 <div style={{ display: currentLang === 'en' ? 'block' : 'none' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>{t('articleTitleEn')}</label>
-                    <input name="title" defaultValue={initialData?.title} onChange={handleTitleChange} required={currentLang === 'en'} className="input" style={{ width: '100%' }} />
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>
+                        {t('articleTitleEn')} <span style={{ color: 'red' }}>*</span>
+                    </label>
+                    <input 
+                        name="title" 
+                        value={title} 
+                        onChange={handleTitleChange} 
+                        className={`input ${errors.title ? 'border-red-500' : ''}`} 
+                        style={{ width: '100%' }} 
+                    />
+                    {errors.title && <p style={{ color: 'red', fontSize: '0.8rem', marginTop: '0.25rem' }}>{errors.title}</p>}
                 </div>
                 <div style={{ display: currentLang === 'ar' ? 'block' : 'none' }} dir="rtl">
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>{t('articleTitleAr')}</label>
-                    <input name="title_ar" defaultValue={initialData?.title_ar || ''} className="input" style={{ width: '100%' }} />
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>
+                        {t('articleTitleAr')} <span style={{ color: 'red' }}>*</span>
+                    </label>
+                    <input 
+                        name="title_ar" 
+                        value={titleAr} 
+                        onChange={handleTitleArChange} 
+                        className={`input ${errors.title_ar ? 'border-red-500' : ''}`} 
+                        style={{ width: '100%' }} 
+                    />
+                    {errors.title_ar && <p style={{ color: 'red', fontSize: '0.8rem', marginTop: '0.25rem' }}>{errors.title_ar}</p>}
                 </div>
-                <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>{t('slug')}</label>
-                    <input name="slug" value={slug} onChange={handleSlugChange} required className="input" style={{ width: '100%' }} placeholder={t('slugPlaceholder')} />
-                </div>
+                {/* Hidden slug input */}
+                <input type="hidden" name="slug" value={slug} />
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>

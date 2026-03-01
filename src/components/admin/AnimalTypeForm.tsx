@@ -62,6 +62,7 @@ export default function AnimalTypeForm({ initialData }: { initialData?: InitialD
   const [name, setName] = useState(initialData?.name || "");
   const [name_ar, setNameAr] = useState(initialData?.name_ar || "");
   const [slug, setSlug] = useState(initialData?.slug || "");
+  const [slugEdited, setSlugEdited] = useState(false);
   const [description, setDescription] = useState(initialData?.description || "");
   const [description_ar, setDescriptionAr] = useState(initialData?.description_ar || "");
   const [imageUrl, setImageUrl] = useState(initialData?.imageUrl || initialData?.icon || "");
@@ -70,10 +71,28 @@ export default function AnimalTypeForm({ initialData }: { initialData?: InitialD
   const [tabs, setTabs] = useState<TabItem[]>(initialData?.tabs || []);
   const [isPending, setIsPending] = useState(false);
   const [openTab, setOpenTab] = useState<number | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  useEffect(() => {
-    if (!slug && name) setSlug(generateSlug(name));
-  }, [name, slug]);
+  const handleNameChange = (val: string) => {
+    setName(val);
+    if (!slugEdited && !initialData?.id) {
+      setSlug(generateSlug(val));
+    }
+    if (errors.name) setErrors(prev => ({ ...prev, name: '' }));
+  };
+
+  const handleNameArChange = (val: string) => {
+    setNameAr(val);
+    if (errors.name_ar) setErrors(prev => ({ ...prev, name_ar: '' }));
+  };
+
+  const validate = () => {
+    const newErrors: Record<string, string> = {};
+    if (!name.trim()) newErrors.name = t('nameRequired') || "Name is required";
+    if (!name_ar.trim()) newErrors.name_ar = t('nameArRequired') || "Arabic name is required";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   // --- Issues Handlers ---
   const addIssue = () => {
@@ -113,38 +132,65 @@ export default function AnimalTypeForm({ initialData }: { initialData?: InitialD
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsPending(true);
-    try {
-      const payload = { name, name_ar, slug, description, description_ar, imageUrl, order, issues, tabs };
-      if (initialData?.id) {
-        await updateAnimalType(initialData.id, payload);
-      } else {
-        await createAnimalType(payload);
-      }
-      router.push("/admin/animal-types");
-      router.refresh(); // Add this line
-    } finally {
-      setIsPending(false);
+    
+    if (!validate()) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
     }
-  };
+
+    setIsPending(true);
+ 
+     try {
+       const payload = { 
+         name, 
+         name_ar, 
+         slug, 
+         description, 
+         description_ar, 
+         imageUrl, 
+         order, 
+         issues, 
+         tabs 
+       };
+       if (initialData?.id) {
+         await updateAnimalType(initialData.id, payload);
+       } else {
+         await createAnimalType(payload);
+       }
+       router.push('/admin/animal-types');
+       router.refresh();
+     } catch (error) {
+       console.error(error);
+     } finally {
+       setIsPending(false);
+     }
+   };
 
   return (
     <form onSubmit={onSubmit} className="form-grid">
       <div className="form-group-grid">
         <div className="form-field">
-          <label>{t('EnglishName')}</label>
-          <input value={name} onChange={e => setName(e.target.value)} className="input" required />
+          <label>{t('EnglishName')} <span style={{ color: 'red' }}>*</span></label>
+          <input 
+            value={name} 
+            onChange={e => handleNameChange(e.target.value)} 
+            className={`input ${errors.name ? 'border-red-500' : ''}`} 
+          />
+          {errors.name && <p style={{ color: 'red', fontSize: '0.8rem', marginTop: '0.25rem' }}>{errors.name}</p>}
         </div>
-        <div className="form-field">
-          <label>{t('ArabicName')}</label>
-          <input value={name_ar} onChange={e => setNameAr(e.target.value)} className="input" dir="rtl" />
+        <div className="form-field" dir="rtl">
+          <label>{t('ArabicName')} <span style={{ color: 'red' }}>*</span></label>
+          <input 
+            value={name_ar} 
+            onChange={e => handleNameArChange(e.target.value)} 
+            className={`input ${errors.name_ar ? 'border-red-500' : ''}`} 
+          />
+          {errors.name_ar && <p style={{ color: 'red', fontSize: '0.8rem', marginTop: '0.25rem' }}>{errors.name_ar}</p>}
         </div>
       </div>
       <div className="form-group-grid">
-        <div className="form-field">
-          <label>{t('Slug')}</label>
-          <input value={slug} onChange={e => setSlug(e.target.value)} className="input" required />
-        </div>
+        {/* Slug hidden */}
+        <input type="hidden" name="slug" value={slug} />
         <div className="form-field">
           <label>{t('Order')}</label>
           <input type="number" value={order} onChange={e => setOrder(parseInt(e.target.value || '0'))} className="input" />

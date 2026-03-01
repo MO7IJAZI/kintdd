@@ -4,16 +4,7 @@ import prisma from "@/lib/prisma";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { syncArticleToSeeder, removeArticleFromSeeder, formatRichText } from "@/lib/seed-utils";
 import { auth } from "@/auth";
-
-function sanitizeSlug(text: string) {
-    return text
-        .toString()
-        .toLowerCase()
-        .trim()
-        .replace(/\s+/g, '-')        // Replace spaces with -
-        .replace(/[^\w\-]+/g, '')    // Remove all non-word chars
-        .replace(/\-\-+/g, '-');     // Replace multiple - with single -
-}
+import { generateSlug, generateGlobalUniqueSlug, checkSlugExistsGlobal } from "@/lib/slugUtils";
 
 export async function createExpertArticle(formData: FormData) {
     const session = await auth();
@@ -23,8 +14,19 @@ export async function createExpertArticle(formData: FormData) {
 
     const title = formData.get("title") as string;
     const title_ar = formData.get("title_ar") as string;
-    const rawSlug = formData.get("slug") as string;
-    const slug = sanitizeSlug(rawSlug || title); // Fallback to title if slug is empty
+    let slug = formData.get("slug") as string;
+    
+    // Ensure slug is present and unique globally
+    if (!slug || !slug.trim()) {
+        slug = await generateGlobalUniqueSlug(title);
+    } else {
+        slug = generateSlug(slug);
+    }
+
+    if (await checkSlugExistsGlobal(slug)) {
+         slug = await generateGlobalUniqueSlug(slug);
+    }
+
     const excerpt = formData.get("excerpt") as string;
     const excerpt_ar = formData.get("excerpt_ar") as string;
     const rawContent = formData.get("content") as string;
@@ -90,8 +92,20 @@ export async function updateExpertArticle(id: string, formData: FormData) {
 
     const title = formData.get("title") as string;
     const title_ar = formData.get("title_ar") as string;
-    const rawSlug = formData.get("slug") as string;
-    const slug = sanitizeSlug(rawSlug || title);
+    let slug = formData.get("slug") as string;
+    
+    // Ensure slug is valid and unique (excluding current article)
+    if (slug && slug.trim()) {
+        slug = generateSlug(slug);
+    } else {
+         // If slug is empty, regenerate from title
+         slug = generateSlug(title);
+    }
+
+    if (await checkSlugExistsGlobal(slug, id)) {
+         slug = await generateGlobalUniqueSlug(slug, id);
+    }
+
     const excerpt = formData.get("excerpt") as string;
     const excerpt_ar = formData.get("excerpt_ar") as string;
     const rawContent = formData.get("content") as string;

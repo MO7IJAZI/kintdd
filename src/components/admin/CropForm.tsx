@@ -73,7 +73,10 @@ export default function CropForm({ initialData, products = [] }: CropFormProps) 
     const [pdfUrl, setPdfUrl] = useState(initialData?.pdfUrl || "");
     const [slug, setSlug] = useState(initialData?.slug || "");
     const [slugEdited, setSlugEdited] = useState(false);
-    
+    const [name, setName] = useState(initialData?.name || "");
+    const [name_ar, setNameAr] = useState(initialData?.name_ar || "");
+    const [errors, setErrors] = useState<Record<string, string>>({});
+
     // Legacy simple product selection (might be redundant if stages are used, but good to keep for general recommendations)
     const [selectedProducts, setSelectedProducts] = useState<string[]>(
         initialData?.recommendedProducts?.map((p) => p.id) || []
@@ -143,9 +146,17 @@ export default function CropForm({ initialData, products = [] }: CropFormProps) 
 
     // Auto-generate slug from name when name changes and slug hasn't been manually edited
     const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const val = e.target.value;
+        setName(val);
         if (!slugEdited && !initialData?.id) {
-            setSlug(generateSlug(e.target.value));
+            setSlug(generateSlug(val));
         }
+        if (errors.name) setErrors(prev => ({ ...prev, name: '' }));
+    };
+
+    const handleNameArChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setNameAr(e.target.value);
+        if (errors.name_ar) setErrors(prev => ({ ...prev, name_ar: '' }));
     };
 
     // Allow manual slug editing
@@ -154,11 +165,27 @@ export default function CropForm({ initialData, products = [] }: CropFormProps) 
         setSlug(generateSlug(e.target.value));
     };
 
+    const validate = () => {
+        const newErrors: Record<string, string> = {};
+        if (!name.trim()) newErrors.name = t('nameRequired');
+        if (!name_ar.trim()) newErrors.name_ar = t('nameArRequired');
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
+        
+        if (!validate()) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
+
         setIsPending(true);
 
         const formData = new FormData(e.currentTarget);
+        formData.set("name", name);
+        formData.set("name_ar", name_ar);
         formData.set("description", description);
         formData.set("description_ar", description_ar);
         formData.set("image", image);
@@ -167,17 +194,22 @@ export default function CropForm({ initialData, products = [] }: CropFormProps) 
         formData.set("productIds", JSON.stringify(selectedProducts));
         formData.set("stages", JSON.stringify(stages));
 
-        if (initialData?.id) {
-            await updateCrop(initialData.id, formData);
-        } else {
-            await createCrop(formData);
-        }
-
-        setIsPending(false);
-        router.push("/admin/crops");
         try {
-            localStorage.removeItem(storageKey);
-        } catch {}
+            if (initialData?.id) {
+                await updateCrop(initialData.id, formData);
+            } else {
+                await createCrop(formData);
+            }
+
+            setIsPending(false);
+            router.push("/admin/crops");
+            try {
+                localStorage.removeItem(storageKey);
+            } catch {}
+        } catch (error) {
+            console.error("Error saving crop:", error);
+            setIsPending(false);
+        }
     }
 
     const toggleProduct = (productId: string) => {
@@ -192,22 +224,37 @@ export default function CropForm({ initialData, products = [] }: CropFormProps) 
         <form onSubmit={handleSubmit} className="card" style={{ padding: '2.5rem', maxWidth: '1000px', backgroundColor: 'white' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
                 <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.9rem' }}>{t('cropNameEn')}</label>
-                    <input name="name" defaultValue={initialData?.name} onChange={handleNameChange} required className="input" style={{ width: '100%' }} placeholder={t('cropNamePlaceholder')} />
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.9rem' }}>
+                        {t('cropNameEn')} <span style={{ color: 'red' }}>*</span>
+                    </label>
+                    <input 
+                        name="name" 
+                        value={name} 
+                        onChange={handleNameChange} 
+                        className={`input ${errors.name ? 'border-red-500' : ''}`} 
+                        style={{ width: '100%' }} 
+                        placeholder={t('cropNamePlaceholder')} 
+                    />
+                    {errors.name && <p style={{ color: 'red', fontSize: '0.8rem', marginTop: '0.25rem' }}>{errors.name}</p>}
                 </div>
                 <div dir="rtl">
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.9rem' }}>{t('cropNameAr')}</label>
-                    <input name="name_ar" defaultValue={initialData?.name_ar || ''} className="input" style={{ width: '100%' }} placeholder={t('cropNameArPlaceholder')} />
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.9rem' }}>
+                        {t('cropNameAr')} <span style={{ color: 'red' }}>*</span>
+                    </label>
+                    <input 
+                        name="name_ar" 
+                        value={name_ar} 
+                        onChange={handleNameArChange}
+                        className={`input ${errors.name_ar ? 'border-red-500' : ''}`} 
+                        style={{ width: '100%' }} 
+                        placeholder={t('cropNameArPlaceholder')} 
+                    />
+                    {errors.name_ar && <p style={{ color: 'red', fontSize: '0.8rem', marginTop: '0.25rem' }}>{errors.name_ar}</p>}
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem', marginBottom: '2rem' }}>
-                <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.9rem' }}>{t('slug')}</label>
-                    <input value={slug} onChange={handleSlugChange} required className="input" style={{ width: '100%' }} placeholder="url-friendly-slug" />
-                    <input type="hidden" name="slug" value={slug} />
-                </div>
-            </div>
+            {/* Slug hidden */}
+            <input type="hidden" name="slug" value={slug} />
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem', marginBottom: '2rem' }}>
                 <div>
