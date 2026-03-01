@@ -131,6 +131,20 @@ export async function updateAnimalType(id: string, data: {
   const incomingIssueIds = new Set((data.issues || []).map(i => i.id).filter((id): id is string => !!id));
   const issuesToDelete = [...existingIssueIds].filter(x => !incomingIssueIds.has(x));
 
+  let finalSlug = data.slug;
+  if (finalSlug !== undefined) {
+      if (finalSlug && finalSlug.trim()) {
+          finalSlug = generateSlug(finalSlug);
+      } else if (data.name) {
+           // If slug is empty string, regenerate from name
+           finalSlug = generateSlug(data.name);
+      }
+      
+      if (finalSlug && await checkSlugExistsGlobal(finalSlug, id)) {
+           finalSlug = await generateGlobalUniqueSlug(finalSlug, id);
+      }
+  }
+
   // --- Tabs and Images ---
   const existingTabs = await prisma.animalTypeTab.findMany({ 
     where: { animalTypeId: id },

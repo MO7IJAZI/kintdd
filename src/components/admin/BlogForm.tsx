@@ -39,6 +39,7 @@ export default function BlogForm({ initialData }: { initialData?: Partial<BlogPo
     const [currentLang, setCurrentLang] = useState<'en' | 'ar'>('en');
     const [publishedAt, setPublishedAt] = useState(initialData?.publishedAt ? new Date(initialData.publishedAt).toISOString().split('T')[0] : '');
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const [isPending, setIsPending] = useState(false);
 
     // Parse initial tags if they exist
     const defaultTags = initialData?.tags 
