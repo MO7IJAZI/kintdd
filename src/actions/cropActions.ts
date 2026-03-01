@@ -3,8 +3,7 @@
 import prisma from "@/lib/prisma";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { auth } from "@/auth";
-import { generateUniqueSlug } from "@/lib/slugUtils";
-import { auth } from "@/auth";
+import { generateUniqueSlug, generateSlug, generateGlobalUniqueSlug, checkSlugExistsGlobal } from "@/lib/slugUtils";
 
 const MAX_QUERY_CHARS = 450;
 
