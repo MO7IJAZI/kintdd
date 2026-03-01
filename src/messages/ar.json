@@ -458,6 +458,12 @@
     "processing": "جار المعالجة...",
     "saveChanges": "حفظ التغييرات"
   },
+  "AdminValidation": {
+    "nameRequired": "اسم المنتج مطلوب",
+    "categoryRequired": "القسم مطلوب",
+    "slugRequired": "الرابط اللطيف مطلوب",
+    "fixErrors": "يرجى إصلاح الأخطاء أعلاه قبل الحفظ."
+  },
   "AdminDownloads": {
     "title": "تنزيلات المنتج (ملفات SDS، ملصقات، منشورات)",
     "docTitle": "عنوان المستند",

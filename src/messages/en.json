@@ -607,6 +607,12 @@
     "processing": "Processing...",
     "saveChanges": "Save Changes"
   },
+  "AdminValidation": {
+    "nameRequired": "Product name is required",
+    "categoryRequired": "Category is required",
+    "slugRequired": "Slug is required",
+    "fixErrors": "Please fix the errors above before saving."
+  },
   "AdminDownloads": {
     "title": "Product Downloads (SDS, Labels, Brochures)",
     "docTitle": "Document Title",

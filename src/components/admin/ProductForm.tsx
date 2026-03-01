@@ -18,7 +18,8 @@ import {
     Languages,
     ArrowRightLeft,
     CheckCircle2,
-    Leaf
+    Leaf,
+    AlertCircle
 } from "lucide-react";
 
 // Dynamic imports for heavy components
@@ -97,9 +98,11 @@ export default function ProductForm({
     const locale = useLocale();
     const t = useTranslations('AdminProductForm');
     const tCommon = useTranslations('AdminCommon');
+    const tValidation = useTranslations('AdminValidation');
     const isArLocale = locale === "ar";
 
     const [isPending, setIsPending] = useState(false);
+    const [errors, setErrors] = useState<Record<string, string>>({});
     
     // English State
     const [nameEn, setNameEn] = useState(initialData?.name || "");
@@ -141,6 +144,9 @@ export default function ProductForm({
     const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const nameValue = e.target.value;
         setNameEn(nameValue);
+        if (errors.name) {
+            setErrors(prev => ({ ...prev, name: '' }));
+        }
         if (!slugEdited && !initialData?.id) {
             setSlug(generateAutoSlug(nameValue, nameAr, 'en'));
         }
@@ -159,10 +165,38 @@ export default function ProductForm({
     const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSlugEdited(true);
         setSlug(generateSlug(e.target.value));
+        if (errors.slug) {
+            setErrors(prev => ({ ...prev, slug: '' }));
+        }
+    };
+
+    const validate = () => {
+        const newErrors: Record<string, string> = {};
+        
+        if (!nameEn.trim()) {
+            newErrors.name = tValidation('nameRequired');
+        }
+        
+        if (!slug.trim()) {
+            newErrors.slug = tValidation('slugRequired');
+        }
+        
+        if (!categoryId) {
+            newErrors.categoryId = tValidation('categoryRequired');
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
     };
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault();
+        
+        if (!validate()) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
+
         setIsPending(true);
 
         const formData = new FormData(e.currentTarget);
@@ -205,6 +239,13 @@ export default function ProductForm({
 
     return (
         <form onSubmit={handleSubmit} className="card" style={{ padding: '2.5rem', maxWidth: '1200px', backgroundColor: 'white', margin: '0 auto' }}>
+            {Object.keys(errors).length > 0 && (
+                <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 text-red-700">
+                    <AlertCircle className="w-5 h-5 shrink-0" />
+                    <p className="font-medium">{tValidation('fixErrors')}</p>
+                </div>
+            )}
+
             <div className="flex justify-between items-center mb-8 border-b border-slate-200 pb-4">
                 <h1 className="text-2xl font-bold text-slate-900">
                     {initialData?.id ? t('update') : t('create')}
@@ -228,10 +269,15 @@ export default function ProductForm({
                         name="name" 
                         value={nameEn} 
                         onChange={handleNameChange} 
-                        required 
-                        className="input w-full"
+                        className={`input w-full ${errors.name ? 'border-red-500 focus:ring-red-500' : ''}`}
                         placeholder="e.g., Premium Tomato Seeds"
                     />
+                    {errors.name && (
+                        <p className="mt-1 text-sm text-red-500 flex items-center gap-1">
+                            <AlertCircle className="w-4 h-4" />
+                            {errors.name}
+                        </p>
+                    )}
                 </div>
                 <div dir="rtl">
                     <label className="block text-sm font-bold text-slate-700 mb-2">
@@ -250,14 +296,20 @@ export default function ProductForm({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                 <div>
                     <label className="block text-sm font-bold text-slate-700 mb-2">
-                        {t('slug')}
+                        {t('slug')} <span className="text-red-500">*</span>
                     </label>
                     <input 
                         value={slug} 
                         onChange={handleSlugChange} 
-                        className="input w-full font-mono text-sm"
+                        className={`input w-full font-mono text-sm ${errors.slug ? 'border-red-500 focus:ring-red-500' : ''}`}
                         placeholder="url-friendly-slug" 
                     />
+                    {errors.slug && (
+                        <p className="mt-1 text-sm text-red-500 flex items-center gap-1">
+                            <AlertCircle className="w-4 h-4" />
+                            {errors.slug}
+                        </p>
+                    )}
                 </div>
                 <div>
                     <label className="block text-sm font-bold text-slate-700 mb-2">
@@ -266,9 +318,11 @@ export default function ProductForm({
                     <select 
                         name="categoryId" 
                         value={categoryId} 
-                        onChange={(e) => setCategoryId(e.target.value)}
-                        required 
-                        className="input w-full"
+                        onChange={(e) => {
+                            setCategoryId(e.target.value);
+                            if (errors.categoryId) setErrors(prev => ({ ...prev, categoryId: '' }));
+                        }}
+                        className={`input w-full ${errors.categoryId ? 'border-red-500 focus:ring-red-500' : ''}`}
                     >
                         <option value="">{t('selectCategory')}</option>
                         {categories.map((c) => {
@@ -285,6 +339,12 @@ export default function ProductForm({
                             );
                         })}
                     </select>
+                    {errors.categoryId && (
+                        <p className="mt-1 text-sm text-red-500 flex items-center gap-1">
+                            <AlertCircle className="w-4 h-4" />
+                            {errors.categoryId}
+                        </p>
+                    )}
                 </div>
             </div>
 
