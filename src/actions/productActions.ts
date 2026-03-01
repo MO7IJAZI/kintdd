@@ -24,6 +24,12 @@ export async function createProduct(formData: FormData) {
         const description = formData.get("description") as string;
         const shortDesc = formData.get("shortDesc") as string;
         const categoryId = formData.get("categoryId") as string;
+        
+        // Validation
+        if (!name || !name.trim()) throw new Error("Product name is required");
+        if (!slug || !slug.trim()) throw new Error("Product slug is required");
+        if (!categoryId || !categoryId.trim()) throw new Error("Category is required");
+
         const isFeatured = formData.get("isFeatured") === "true";
         const isOrganic = formData.get("isOrganic") === "true";
         const order = parseInt(formData.get("order") as string) || 0;
@@ -134,23 +140,22 @@ export async function createProduct(formData: FormData) {
         console.log("createProduct: Product created successfully. Revalidating...");
 
         // Revalidate paths to refresh cache immediately
-        revalidatePath("/admin/products");
-        revalidatePath("/products");
-        // session.user is guaranteed to exist because of the check above, but TS might complain
-        // Also, 'language' might not be on the default User type, so we default to 'en' safely
-        const userLang = (session?.user as any)?.language || 'en';
-        revalidatePath(`/${userLang}/products`); 
-        revalidatePath(`/en/products`);
-        revalidatePath(`/ar/products`);
-        revalidatePath(`/product/${slug}`);
-        
-        // Invalidate cache tags
-        // unstable_cache tags are invalidated via revalidateTag
+        // Wrap revalidation in try-catch to prevent 500 error if revalidation fails
         try {
+            revalidatePath("/admin/products");
+            revalidatePath("/products");
+            // session.user is guaranteed to exist because of the check above, but TS might complain
+            // Also, 'language' might not be on the default User type, so we default to 'en' safely
+            const userLang = (session?.user as any)?.language || 'en';
+            revalidatePath(`/${userLang}/products`); 
+            revalidatePath(`/en/products`);
+            revalidatePath(`/ar/products`);
+            revalidatePath(`/product/${slug}`);
+            
             revalidateTag("products", { expire: 0 });
             revalidateTag("categories", { expire: 0 });
-        } catch (e) {
-            console.log("Revalidate tag error (ignored):", e);
+        } catch (revalError) {
+            console.error("createProduct: Error during revalidation (ignored to prevent 500):", revalError);
         }
     } catch (error) {
         console.error("createProduct: Error creating product:", error);

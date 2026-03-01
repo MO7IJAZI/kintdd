@@ -231,16 +231,25 @@ export default function ProductForm({
         formData.set("tabs", JSON.stringify(tabs));
         formData.set("tabs_ar", JSON.stringify(tabsAr));
 
-        if (initialData?.id) {
-            await updateProduct(initialData.id, formData);
-        } else {
-            await createProduct(formData);
-        }
+        try {
+            if (initialData?.id) {
+                await updateProduct(initialData.id, formData);
+            } else {
+                await createProduct(formData);
+            }
 
-        setIsPending(false);
-        // Use window.location.href to force a full reload and ensure fresh data
-        // This bypasses any client-side cache that might be stale
-        window.location.href = "/admin/products";
+            // Use window.location.href to force a full reload and ensure fresh data
+            // This bypasses any client-side cache that might be stale
+            window.location.href = "/admin/products";
+        } catch (error) {
+            console.error("Error saving product:", error);
+            setErrors(prev => ({ 
+                ...prev, 
+                submit: error instanceof Error ? error.message : "Failed to save product" 
+            }));
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            setIsPending(false);
+        }
     }
 
     return (
@@ -248,7 +257,10 @@ export default function ProductForm({
             {Object.keys(errors).length > 0 && (
                 <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 text-red-700">
                     <AlertCircle className="w-5 h-5 shrink-0" />
-                    <p className="font-medium">{tValidation('fixErrors')}</p>
+                    <div>
+                        <p className="font-medium">{tValidation('fixErrors')}</p>
+                        {errors.submit && <p className="text-sm mt-1">{errors.submit}</p>}
+                    </div>
                 </div>
             )}
 
