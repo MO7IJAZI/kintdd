@@ -40,36 +40,34 @@ export default async function SubcategoryPage({
   let category: CategoryData | null = null;
   let parentPath = '';
 
-  try {
-    // Fetch the subcategory with its parent
-    const categoryData = await prisma.category.findUnique({
-      where: { slug: subcategory },
-      include: {
-        products: {
-          where: { isActive: true },
-          orderBy: { order: 'asc' }
-        },
-        parent: {
-          select: { slug: true, name: true, name_ar: true }
-        }
+  // Fetch the subcategory with its parent
+  const categoryData = await prisma.category.findUnique({
+    where: { slug: subcategory },
+    include: {
+      products: {
+        where: { isActive: true },
+        orderBy: { order: 'asc' }
+      },
+      parent: {
+        select: { slug: true, name: true, name_ar: true }
       }
-    });
-
-    if (!categoryData) {
-      notFound();
     }
-
-    category = categoryData as CategoryData;
-
-    // Determine parent path based on parent slug
-    if (category.parent?.slug === 'livestock') {
-      parentPath = 'livestock';
-    } else if (category.parent?.slug === 'plant-wealth') {
-      parentPath = 'plant-wealth';
-    }
-  } catch (error) {
+  }).catch(error => {
     console.error('Error fetching subcategory:', error);
+    return null;
+  });
+
+  if (!categoryData) {
     notFound();
+  }
+
+  category = categoryData as CategoryData;
+
+  // Determine parent path based on parent slug
+  if (category.parent?.slug === 'livestock') {
+    parentPath = 'livestock';
+  } else if (category.parent?.slug === 'plant-wealth') {
+    parentPath = 'plant-wealth';
   }
 
   // At this point, category is guaranteed to be non-null due to notFound() in catch/if blocks
