@@ -1,4 +1,4 @@
-import { getProducts } from "@/actions/productActions";
+import { getAdminProducts } from "@/actions/productActions";
 import { Link } from '@/navigation';
 import Image from "next/image";
 import DeleteButton from "@/components/admin/DeleteButton";
@@ -7,7 +7,7 @@ import { getTranslations } from 'next-intl/server';
 export const dynamic = 'force-dynamic';
 
 export default async function AdminProducts() {
-    const products = await getProducts();
+    const products = await getAdminProducts();
     const t = await getTranslations('AdminProducts');
     const tCommon = await getTranslations('AdminCommon');
 

@@ -220,7 +220,7 @@ export async function updateProduct(id: string, formData: FormData) {
     revalidatePath("/admin/products");
     revalidatePath("/products");
     revalidatePath(`/product/${slug}`);
-    revalidateTag("products", { expire: 0 });
+    revalidateTag("products");
 }
 
 export async function deleteProduct(id: string) {
@@ -235,7 +235,7 @@ export async function deleteProduct(id: string) {
 
     revalidatePath("/admin/products");
     revalidatePath("/products");
-    revalidateTag("products", { expire: 0 });
+    revalidateTag("products");
 }
 
 const getProductsCached = unstable_cache(
@@ -289,6 +289,30 @@ const getProductByIdCached = unstable_cache(
 
 export async function getProducts() {
     return getProductsCached();
+}
+
+export async function getAdminProducts() {
+    const session = await auth();
+    if (!session) {
+        throw new Error("Unauthorized");
+    }
+    
+    return prisma.product.findMany({
+        select: {
+            id: true,
+            name: true,
+            slug: true,
+            image: true,
+            isActive: true,
+            category: {
+                select: {
+                    id: true,
+                    name: true,
+                },
+            },
+        },
+        orderBy: { createdAt: "desc" },
+    });
 }
 
 export async function getProductBySlug(slug: string) {

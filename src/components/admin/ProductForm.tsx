@@ -232,9 +232,9 @@ export default function ProductForm({
         }
 
         setIsPending(false);
-        router.refresh(); // Refresh current data first
-        router.push("/admin/products");
-        router.refresh(); // Ensure list is refreshed
+        // Use window.location.href to force a full reload and ensure fresh data
+        // This bypasses any client-side cache that might be stale
+        window.location.href = "/admin/products";
     }
 
     return (
