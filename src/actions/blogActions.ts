@@ -4,6 +4,8 @@ import prisma from "@/lib/prisma";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { auth } from "@/auth";
 
+import { generateSlug, generateGlobalUniqueSlug, checkSlugExistsGlobal } from "@/lib/slugUtils";
+
 export async function createBlogPost(formData: FormData) {
     const session = await auth();
     if (!session) {
@@ -12,7 +14,7 @@ export async function createBlogPost(formData: FormData) {
 
     const title = formData.get("title") as string;
     const title_ar = formData.get("title_ar") as string;
-    const slug = formData.get("slug") as string;
+    let slug = formData.get("slug") as string;
     const excerpt = formData.get("excerpt") as string;
     const excerpt_ar = formData.get("excerpt_ar") as string;
     const content = formData.get("content") as string;
@@ -24,6 +26,19 @@ export async function createBlogPost(formData: FormData) {
     const metaDesc = formData.get("metaDesc") as string;
     const isPublished = formData.get("isPublished") === "true";
     const publishedAtDate = formData.get("publishedAt") as string;
+
+    // Ensure slug is present and unique globally
+    if (!slug || !slug.trim()) {
+        slug = await generateGlobalUniqueSlug(title);
+    } else {
+        // If user provided a slug, make sure it's URL friendly
+        slug = generateSlug(slug);
+    }
+
+    if (await checkSlugExistsGlobal(slug)) {
+         // If provided slug exists, append a number
+         slug = await generateGlobalUniqueSlug(slug);
+    }
 
     // Process tags from comma-separated string to JSON array
     const tags = tagsRaw 
@@ -62,7 +77,7 @@ export async function updateBlogPost(id: string, formData: FormData) {
 
     const title = formData.get("title") as string;
     const title_ar = formData.get("title_ar") as string;
-    const slug = formData.get("slug") as string;
+    let slug = formData.get("slug") as string;
     const excerpt = formData.get("excerpt") as string;
     const excerpt_ar = formData.get("excerpt_ar") as string;
     const content = formData.get("content") as string;
@@ -74,6 +89,19 @@ export async function updateBlogPost(id: string, formData: FormData) {
     const metaDesc = formData.get("metaDesc") as string;
     const isPublished = formData.get("isPublished") === "true";
     const publishedAtDate = formData.get("publishedAt") as string;
+
+    // Ensure slug is valid and unique (excluding current post)
+    if (slug && slug.trim()) {
+        slug = generateSlug(slug);
+    } else {
+         // If slug is empty, regenerate from title
+         slug = generateSlug(title);
+    }
+
+    if (await checkSlugExistsGlobal(slug, id)) {
+         // If slug exists on ANOTHER record, generate a unique one
+         slug = await generateGlobalUniqueSlug(slug, id);
+    }
 
     // Process tags
     const tags = tagsRaw 

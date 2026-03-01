@@ -10,6 +10,8 @@ interface DownloadInput {
     fileUrl: string;
 }
 
+import { generateSlug, generateGlobalUniqueSlug, checkSlugExistsGlobal } from "@/lib/slugUtils";
+
 export async function createProduct(formData: FormData) {
     try {
         const session = await auth();
@@ -19,7 +21,7 @@ export async function createProduct(formData: FormData) {
         }
 
         const name = formData.get("name") as string;
-        const slug = formData.get("slug") as string;
+        let slug = formData.get("slug") as string;
         const sku = formData.get("sku") as string;
         const description = formData.get("description") as string;
         const shortDesc = formData.get("shortDesc") as string;
@@ -27,8 +29,20 @@ export async function createProduct(formData: FormData) {
         
         // Validation
         if (!name || !name.trim()) throw new Error("Product name is required");
-        if (!slug || !slug.trim()) throw new Error("Product slug is required");
         if (!categoryId || !categoryId.trim()) throw new Error("Category is required");
+
+        // Ensure slug is present and unique globally
+        if (!slug || !slug.trim()) {
+            slug = generateSlug(name);
+        } else {
+            // If user provided a slug, make sure it's URL friendly
+            slug = generateSlug(slug);
+        }
+
+        if (await checkSlugExistsGlobal(slug)) {
+             // If provided slug exists, append a number
+             slug = await generateGlobalUniqueSlug(slug);
+        }
 
         const isFeatured = formData.get("isFeatured") === "true";
         const isOrganic = formData.get("isOrganic") === "true";
@@ -170,11 +184,27 @@ export async function updateProduct(id: string, formData: FormData) {
     }
 
     const name = formData.get("name") as string;
-    const slug = formData.get("slug") as string;
+    let slug = formData.get("slug") as string;
     const sku = formData.get("sku") as string;
     const description = formData.get("description") as string;
     const shortDesc = formData.get("shortDesc") as string;
     const categoryId = formData.get("categoryId") as string;
+
+    // Validation
+    if (!name || !name.trim()) throw new Error("Product name is required");
+    
+    // Ensure slug is valid and unique (excluding current product)
+    if (slug && slug.trim()) {
+        slug = generateSlug(slug);
+    } else {
+         // If slug is empty, regenerate from name
+         slug = generateSlug(name);
+    }
+
+    if (await checkSlugExistsGlobal(slug, id)) {
+         // If slug exists on ANOTHER record, generate a unique one
+         slug = await generateGlobalUniqueSlug(slug, id);
+    }
     const isFeatured = formData.get("isFeatured") === "true";
     const isOrganic = formData.get("isOrganic") === "true";
     const order = parseInt(formData.get("order") as string) || 0;

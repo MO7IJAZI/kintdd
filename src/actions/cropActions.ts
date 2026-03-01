@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
+import { auth } from "@/auth";
 import { generateUniqueSlug } from "@/lib/slugUtils";
 import { auth } from "@/auth";
 
@@ -154,12 +155,20 @@ export async function createCrop(formData: FormData) {
     if (!finalDesc) finalDesc = null as any;
     if (!finalDescAr) finalDescAr = null as any;
 
-    const safeSlug = await generateUniqueSlug(slug || finalName, async (s) => {
-        const found = await prisma.crop.findUnique({ where: { slug: s }, select: { id: true } });
-        return !!found;
-    });
+    let finalSlug = "";
+    // Ensure slug is present and unique globally
+    if (!slug || !slug.trim()) {
+        finalSlug = await generateGlobalUniqueSlug(finalName);
+    } else {
+        // If user provided a slug, make sure it's URL friendly
+        finalSlug = generateSlug(slug);
+    }
 
-    let finalSlug = safeSlug;
+    if (await checkSlugExistsGlobal(finalSlug)) {
+         // If provided slug exists, append a number
+         finalSlug = await generateGlobalUniqueSlug(finalSlug);
+    }
+
     try {
         await prisma.crop.create({
             data: {
@@ -372,10 +381,19 @@ export async function updateCrop(id: string, formData: FormData) {
     if (!finalDesc) finalDesc = null as any;
     if (!finalDescAr) finalDescAr = null as any;
 
-    const safeSlug = await generateUniqueSlug(slug || finalName, async (s) => {
-        const found = await prisma.crop.findUnique({ where: { slug: s }, select: { id: true } });
-        return !!found && found.id !== id;
-    });
+    let safeSlug = "";
+    // Ensure slug is valid and unique (excluding current crop)
+    if (slug && slug.trim()) {
+        safeSlug = generateSlug(slug);
+    } else {
+         // If slug is empty, regenerate from name
+         safeSlug = generateSlug(finalName);
+    }
+
+    if (await checkSlugExistsGlobal(safeSlug, id)) {
+         // If slug exists on ANOTHER record, generate a unique one
+         safeSlug = await generateGlobalUniqueSlug(safeSlug, id);
+    }
 
     await prisma.crop.update({
         where: { id },

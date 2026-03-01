@@ -4,6 +4,8 @@ import prisma from "@/lib/prisma";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { auth } from "@/auth";
 
+import { generateSlug, generateGlobalUniqueSlug, checkSlugExistsGlobal } from "@/lib/slugUtils";
+
 export async function createCategory(formData: FormData) {
     const session = await auth();
     if (!session) {
@@ -12,7 +14,7 @@ export async function createCategory(formData: FormData) {
 
     try {
         const name = formData.get("name") as string;
-        const slug = formData.get("slug") as string;
+        let slug = formData.get("slug") as string;
         const description = formData.get("description") as string;
         const parentId = formData.get("parentId") as string;
         const image = formData.get("image") as string;
@@ -21,11 +23,19 @@ export async function createCategory(formData: FormData) {
         const description_ar = formData.get("description_ar") as string;
 
         if (!name || !name.trim()) throw new Error("Name is required");
-        if (!slug || !slug.trim()) throw new Error("Slug is required");
+        
+        // Ensure slug is present and unique globally
+        if (!slug || !slug.trim()) {
+            slug = await generateGlobalUniqueSlug(name);
+        } else {
+            // If user provided a slug, make sure it's URL friendly
+            slug = generateSlug(slug);
+        }
 
-        // Validate slug uniqueness
-        const existing = await prisma.category.findUnique({ where: { slug: slug.trim() } });
-        if (existing) throw new Error("Slug already exists");
+        if (await checkSlugExistsGlobal(slug)) {
+             // If provided slug exists, append a number
+             slug = await generateGlobalUniqueSlug(slug);
+        }
 
         await prisma.category.create({
             data: {
@@ -56,7 +66,7 @@ export async function updateCategory(id: string, formData: FormData) {
     }
 
     const name = formData.get("name") as string;
-    const slug = formData.get("slug") as string;
+    let slug = formData.get("slug") as string;
     const description = formData.get("description") as string;
     const parentId = formData.get("parentId") as string;
     const image = formData.get("image") as string;
@@ -66,6 +76,19 @@ export async function updateCategory(id: string, formData: FormData) {
 
     if (!name_ar || !name_ar.trim()) {
         throw new Error("name_ar is required");
+    }
+
+    // Ensure slug is valid and unique (excluding current category)
+    if (slug && slug.trim()) {
+        slug = generateSlug(slug);
+    } else {
+         // If slug is empty, regenerate from name
+         slug = generateSlug(name);
+    }
+
+    if (await checkSlugExistsGlobal(slug, id)) {
+         // If slug exists on ANOTHER record, generate a unique one
+         slug = await generateGlobalUniqueSlug(slug, id);
     }
 
     await prisma.category.update({

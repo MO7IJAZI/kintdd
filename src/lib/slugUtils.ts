@@ -1,3 +1,5 @@
+import prisma from "@/lib/prisma";
+
 // Utility function to generate URL-friendly slugs with Arabic support
 export function generateSlug(text: string): string {
     return text
@@ -52,6 +54,61 @@ export async function generateUniqueSlug(text: string, checkExists: (slug: strin
     let counter = 1;
 
     while (await checkExists(slug)) {
+        slug = `${baseSlug}-${counter}`;
+        counter++;
+    }
+
+    return slug;
+}
+
+// Global slug check across all relevant models
+
+export async function checkSlugExistsGlobal(slug: string, excludeId?: string): Promise<boolean> {
+    // Check all models that use slugs
+    const checks = [
+        prisma.product.findUnique({ where: { slug }, select: { id: true } }),
+        prisma.category.findUnique({ where: { slug }, select: { id: true } }),
+        prisma.crop.findUnique({ where: { slug }, select: { id: true } }),
+        prisma.blogPost.findUnique({ where: { slug }, select: { id: true } }),
+        prisma.page.findUnique({ where: { slug }, select: { id: true } }),
+        prisma.expertArticle.findUnique({ where: { slug }, select: { id: true } }),
+        prisma.document.findUnique({ where: { slug }, select: { id: true } }),
+        prisma.animalType.findUnique({ where: { slug }, select: { id: true } }),
+    ];
+
+    const results = await Promise.all(checks);
+    
+    // Check if any result exists and matches a different ID (if updating)
+    // Note: This logic assumes 'id' is unique across tables if we just check for existence.
+    // Since we are checking different tables, 'item' will be { id: ... } from *some* table.
+    // If we are updating a Product with ID '123', and we find a Category with ID '123' (unlikely but possible with UUIDs/CUIDs collision or if not CUID),
+    // we should consider it a collision.
+    // However, usually we just want to know if *any* other record has this slug.
+    
+    for (const result of results) {
+        if (result) {
+            // Found a record with this slug
+            // If excludeId is provided, we check if this record is the one we are excluding
+            if (excludeId && result.id === excludeId) {
+                continue; // It's the same record, so not a conflict
+            }
+            return true; // Conflict found
+        }
+    }
+    
+    return false;
+}
+
+// Generate a globally unique slug
+export async function generateGlobalUniqueSlug(
+    baseText: string,
+    excludeId?: string
+): Promise<string> {
+    const baseSlug = generateSlug(baseText);
+    let slug = baseSlug;
+    let counter = 1;
+
+    while (await checkSlugExistsGlobal(slug, excludeId)) {
         slug = `${baseSlug}-${counter}`;
         counter++;
     }
