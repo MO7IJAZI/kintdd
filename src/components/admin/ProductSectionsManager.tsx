@@ -290,7 +290,7 @@ export default function ProductSectionsManager({
                 {sections.length === 0 ? (
                     <div className="text-center py-12 px-4 bg-slate-50 rounded-lg border border-dashed border-slate-300">
                         <p className="text-slate-600 font-medium mb-2">No sections added yet</p>
-                        <p className="text-slate-400 text-sm">Add custom sections like "Specifications", "Usage", etc.</p>
+                        <p className="text-slate-400 text-sm">Add custom sections like &quot;Specifications&quot;, &quot;Usage&quot;, etc.</p>
                     </div>
                 ) : (
                     sections.map((section) => (
