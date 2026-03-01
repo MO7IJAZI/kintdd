@@ -108,22 +108,22 @@ export default function Header({ productCategories }: HeaderProps) {
 
   // Fallback static categories if database is empty
   const fallbackCategories: ProductCategoryNav[] = [
-    // {
-    //   id: 'animal-production',
-    //   name: 'Livestock',
-    //   name_ar: 'الثروة الحيوانية',
-    //   slug: 'animal-production',
-    //   description: 'Veterinary products and animal nutrition solutions',
-    //   description_ar: 'منتجات الثروة الحيوانية وحلول تغذية الحيوان',
-    // },
-    // {
-    //   id: 'plant-production',
-    //   name: 'Plant Wealth',
-    //   name_ar: 'الثروة النباتية',
-    //   slug: 'plant-production',
-    //   description: 'Agricultural products for crop nutrition and protection',
-    //   description_ar: 'منتجات الثروة النباتية لتغذية وحماية المحاصيل',
-    // },
+    {
+      id: 'animal-production',
+      name: 'Livestock',
+      name_ar: 'الثروة الحيوانية',
+      slug: 'animal-production',
+      description: 'Veterinary products and animal nutrition solutions',
+      description_ar: 'منتجات الثروة الحيوانية وحلول تغذية الحيوان',
+    },
+    {
+      id: 'plant-production',
+      name: 'Plant Wealth',
+      name_ar: 'الثروة النباتية',
+      slug: 'plant-production',
+      description: 'Agricultural products for crop nutrition and protection',
+      description_ar: 'منتجات الثروة النباتية لتغذية وحماية المحاصيل',
+    },
   ];
 
   // Use database categories if available, otherwise use fallback
