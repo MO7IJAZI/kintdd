@@ -138,11 +138,14 @@ export default function Header({ productCategories }: HeaderProps) {
     // Map to fixed routes based on slug
     let href = `/products/${category.slug}`;
 
+    // Hide image for specific categories to show arrow instead
+    const hideImage = ['livestock', 'plant-wealth', 'animal-production', 'plant-production'].includes(category.slug);
+
     return {
       name,
       href: href as any,
       description: description || undefined,
-      image: (category as any).image || undefined,
+      image: hideImage ? undefined : ((category as any).image || undefined),
     };
   });
 
