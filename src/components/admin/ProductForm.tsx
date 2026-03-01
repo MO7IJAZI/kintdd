@@ -23,8 +23,14 @@ import {
 } from "lucide-react";
 
 // Dynamic imports for heavy components
-const ImageUpload = dynamic(() => import("./ImageUpload"), { ssr: false });
-const RichTextEditor = dynamic(() => import("./RichTextEditor"), { ssr: false });
+const ImageUpload = dynamic(() => import("./ImageUpload"), { 
+    ssr: false,
+    loading: () => <div className="h-32 w-full bg-slate-100 animate-pulse rounded-lg" />
+});
+const RichTextEditor = dynamic(() => import("./RichTextEditor"), { 
+    ssr: false,
+    loading: () => <div className="h-64 w-full bg-slate-100 animate-pulse rounded-lg" />
+});
 const DownloadsManager = dynamic(() => import("./DownloadsManager"), { ssr: false });
 const TabsManager = dynamic(() => import("./TabsManager"), { ssr: false });
 

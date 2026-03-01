@@ -242,7 +242,7 @@ export default function RichTextEditor({
       TableHeader,
       TableCell,
       Link.configure({
-        openOnClick: true,
+        openOnClick: false,
         autolink: true,
       }),
       ImageResizer.configure({
