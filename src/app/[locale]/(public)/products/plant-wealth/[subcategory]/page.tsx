@@ -218,25 +218,15 @@ export default async function SubcategoryPage({
                     href={{ pathname: '/product/[slug]', params: { slug: product.slug } } as any}
                     style={{ textDecoration: 'none', color: 'inherit' }}
                   >
-                    <div style={{
+                    <div className="card hover-card" style={{
                       background: 'white',
                       border: '1px solid #e2e8f0',
                       borderRadius: '12px',
                       overflow: 'hidden',
-                      transition: 'all 0.3s ease',
-                      cursor: 'pointer',
                       height: '100%',
                       display: 'flex',
                       flexDirection: 'column',
                       boxShadow: '0 1px 3px rgba(0,0,0,0.08)'
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 24px rgba(0,0,0,0.12)';
-                      (e.currentTarget as HTMLElement).style.transform = 'translateY(-4px)';
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLElement).style.boxShadow = '0 1px 3px rgba(0,0,0,0.08)';
-                      (e.currentTarget as HTMLElement).style.transform = 'translateY(0)';
                     }}>
                       {/* Product Image */}
                       {product.image && (
