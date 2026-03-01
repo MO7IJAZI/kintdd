@@ -4,6 +4,7 @@ import { getTranslations, getLocale } from 'next-intl/server';
 import { ArrowRight, Package } from 'lucide-react';
 import { notFound } from "next/navigation";
 import Image from "next/image";
+import { Metadata } from "next";
 
 export const revalidate = 300;
 
@@ -29,6 +30,31 @@ interface CategoryData {
   products: Product[];
 }
 
+export async function generateMetadata({ params }: { params: Promise<{ subcategory: string; locale: string }> }): Promise<Metadata> {
+  const { subcategory, locale } = await params;
+  const isAr = locale === 'ar';
+
+  const category = await prisma.category.findUnique({
+    where: { slug: subcategory },
+    select: {
+      name: true,
+      name_ar: true,
+      description: true,
+      description_ar: true
+    }
+  });
+
+  if (!category) return {};
+
+  const title = isAr ? (category.name_ar || category.name) : category.name;
+  const description = isAr ? (category.description_ar || category.description) : category.description;
+
+  return {
+    title: `${title} | KINT`,
+    description: description || undefined
+  };
+}
+
 export default async function SubcategoryPage({ 
   params 
 }: { 
@@ -36,9 +62,6 @@ export default async function SubcategoryPage({
 }) {
   const { subcategory, locale } = await params;
   const isAr = locale === 'ar';
-
-  let category: CategoryData | null = null;
-  let parentPath = '';
 
   // Fetch the subcategory with its parent
   const categoryData = await prisma.category.findUnique({
@@ -61,19 +84,23 @@ export default async function SubcategoryPage({
     notFound();
   }
 
-  category = categoryData as CategoryData;
-
-  // Determine parent path based on parent slug
+  const category = categoryData as CategoryData;
+  let parentPath = '';
+  
+  // Determine parent path based on parent slug or fallback
   if (category.parent?.slug === 'livestock') {
     parentPath = 'livestock';
   } else if (category.parent?.slug === 'plant-wealth') {
     parentPath = 'plant-wealth';
+  } else {
+    // Fallback if parent is missing or unknown
+    parentPath = 'plant-wealth'; 
   }
 
   // At this point, category is guaranteed to be non-null due to notFound() in catch/if blocks
-  const categoryName = isAr ? category!.name_ar || category!.name : category!.name;
-  const categoryDesc = isAr ? category!.description_ar || category!.description : category!.description;
-  const parentName = isAr ? category!.parent?.name_ar || category!.parent?.name : category!.parent?.name;
+  const categoryName = isAr ? category.name_ar || category.name : category.name;
+  const categoryDesc = isAr ? category.description_ar || category.description : category.description;
+  const parentName = category.parent ? (isAr ? category.parent.name_ar || category.parent.name : category.parent.name) : (isAr ? 'الثروة النباتية' : 'Plant Wealth');
 
   return (
     <div style={{ direction: isAr ? 'rtl' : 'ltr', overflowX: 'hidden' }}>
@@ -99,12 +126,13 @@ export default async function SubcategoryPage({
               {isAr ? 'المنتجات' : 'Products'}
             </Link>
             {' / '}
-            <Link href={`/products/${parentPath}` as '/products/livestock' | '/products/plant-wealth'} style={{ color: 'inherit', textDecoration: 'none' }}>
+            <Link href={`/products/${parentPath}` as any} style={{ color: 'inherit', textDecoration: 'none' }}>
               {parentName}
             </Link>
             {' / '}
             <span>{categoryName}</span>
           </div>
+
 
           <h1 style={{
             fontSize: 'clamp(2rem, 5vw, 3.5rem)',
