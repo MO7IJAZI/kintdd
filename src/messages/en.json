@@ -8,6 +8,7 @@
     "subtitle": "Download our latest product guides and technical brochures.",
     "agricultural": "Agricultural Production",
     "animal": "Animal Production",
+    "technical": "Technical Catalogs",
     "mixingTable": "Mixing Table",
     "categories": {
         "optimum-conditions": "Optimum Conditions",
@@ -15,9 +16,32 @@
         "product-catalogs": "Additional Product Catalogs",
         "other": "Other Documents"
     },
+    "view": "View",
     "download": "Download PDF",
     "noCatalogs": "No catalogs available at the moment.",
-    "lastUpdated": "Last updated"
+    "lastUpdated": "Last updated",
+    "viewer": {
+      "share": "Share",
+      "download": "Download",
+      "fullscreen": "Fullscreen",
+      "exitFullscreen": "Exit fullscreen",
+      "firstPage": "First page",
+      "previousPage": "Previous",
+      "nextPage": "Next",
+      "lastPage": "Last page",
+      "singlePage": "Single page",
+      "spreadMode": "Spread mode",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "page": "Page",
+      "of": "of",
+      "thumbnails": "Thumbnails",
+      "outline": "Outline",
+      "loading": "Loading PDF...",
+      "noOutline": "This PDF has no outline.",
+      "openSidebar": "Open sidebar",
+      "closeSidebar": "Close sidebar"
+    }
   },
   "Navigation": {
     "home": "Home",
@@ -53,13 +77,7 @@
     "mixingTable": "Mixing Table 2026",
     "expertsForum": "Experts' Forum",
     "bioSafeFood": "BioSafeFood Project",
-    "rdCentre": "R&D Centre",
-    "productionPlants": "Production Plants",
-    "logisticsCentre": "Logistics Centre",
-    "companyData": "Company Data",
     "career": "Career",
-    "certificates": "Certificates",
-    "awards": "Awards",
     "productsForAnimals": "Products for Animals",
     "news": "News",
     "catalogs": "Catalogs",
@@ -152,6 +170,8 @@
   "Admin": {
     "dashboard": "Dashboard",
     "products": "Products",
+    "productCards": "Product Cards",
+    "categories": "Company Sections",
     "animalTypes": "Animal Types",
     "cropGuides": "Crop Guides",
     "expertArticles": "Expert Articles",
@@ -159,10 +179,10 @@
     "catalogs": "Catalogs",
     "career": "Career",
     "applications": "Applications",
-    "certificates": "Certificates",
-    "awards": "Awards",
+    "agents": "Agents",
     "headquarter": "Headquarter",
     "contactInquiries": "Contact Inquiries",
+    "pages": "Contact Pages",
     "settings": "Settings",
     "backToSite": "Back to Site",
     "logout": "Logout",
@@ -173,6 +193,65 @@
     "password": "Password",
     "loggingIn": "Signing in",
     "loginButton": "Sign In"
+  },
+  "AdminCatalogs": {
+    "management": "Management",
+    "admin": "Admin",
+    "editCatalog": "Edit Catalog",
+    "addNewCatalog": "Add New Catalog",
+    "titleEnPlaceholder": "Catalog Title (English)",
+    "titleArPlaceholder": "Catalog Title (Arabic)",
+    "categoryAgricultural": "Agricultural",
+    "categoryAnimal": "Animal / Veterinary",
+    "categoryTechnical": "Technical",
+    "displayOrder": "Display Order",
+    "uploading": "UPLOADING...",
+    "fileReady": "✅ FILE READY",
+    "fileReadyAr": "✅ FILE READY (AR)",
+    "uploadPdf": "📁 UPLOAD PDF (EN)",
+    "uploadPdfAr": "📁 UPLOAD PDF (AR)",
+    "visibleToPublic": "Visible to Public",
+    "descriptionEnPlaceholder": "Description (English)",
+    "descriptionArPlaceholder": "Description (Arabic)",
+    "update": "Update",
+    "addCatalog": "Add Catalog",
+    "cancel": "Cancel",
+    "tableTitle": "Title",
+    "tableCategory": "Category",
+    "tableOrder": "Order",
+    "tableActions": "Actions",
+    "noCatalogsFound": "No catalogs found",
+    "confirmDelete": "Are you sure you want to delete this catalog?",
+    "uploadFailed": "File upload failed. Please try again."
+  },
+  "AdminBlogForm": {
+    "english": "English",
+    "arabic": "Arabic",
+    "titleEn": "Title (English)",
+    "titleAr": "Title (Arabic)",
+    "authorEn": "Author (English)",
+    "authorAr": "Author (Arabic)",
+    "tagsEn": "Tags (English)",
+    "tagsAr": "Tags (Arabic)",
+    "tagsPlaceholderEn": "Comma-separated tags (e.g., agriculture, biostimulants)",
+    "tagsPlaceholderAr": "Comma-separated tags (e.g., agriculture, biostimulants)",
+    "metaTitleEn": "Meta Title (English)",
+    "metaTitleAr": "Meta Title (Arabic)",
+    "metaDescEn": "Meta Description (English)",
+    "metaDescAr": "Meta Description (Arabic)",
+    "excerptEn": "Excerpt (English)",
+    "excerptAr": "Excerpt (Arabic)",
+    "contentEn": "Content (English)",
+    "contentAr": "Content (Arabic)",
+    "mainImage": "Main Image",
+    "seo": "SEO Settings",
+    "publish": "Publish",
+    "saving": "Saving...",
+    "update": "Update",
+    "create": "Create",
+    "cancel": "Cancel",
+    "titleRequired": "Title is required",
+    "titleArRequired": "Arabic title is required"
   },
   "Contact": {
     "letsGrowTogether": "Let's Grow Together",
@@ -203,47 +282,6 @@
     "errorMessage": "Something went wrong. Please try again.",
     "failedMessage": "Failed to send message."
   },
-  "ProductionPlants": {
-    "title": "Production Plants",
-    "subtitle": "State-of-the-art manufacturing facilities ensuring highest quality standards.",
-    "sectionTitle": "Our Production Capabilities",
-    "intro": "We operate modern production plants equipped with the latest technology to manufacture our range of agricultural products.",
-    "products": {
-      "title": "Manufactured Products",
-      "desc": "Our production lines cover a wide range of agricultural inputs:",
-      "list": ["Fertilizers", "Pesticides", "Growth Regulators", "Soil Conditioners"]
-    },
-    "facilities": {
-      "title": "Production Facilities",
-      "desc": "Our facilities are designed for efficiency and safety:",
-      "list": ["Chemical Synthesis Plant", "Formulation Plant", "Packaging Unit", "Quality Control Lab"]
-    },
-    "capabilities": "With a high production capacity, we can meet the demands of the local and international markets.",
-    "quality": "Quality and safety are our top priorities. All our production processes adhere to strict international standards."
-  },
-  "RdCentre": {
-    "title": "Research & Development Centre",
-    "subtitle": "Innovating for a sustainable agricultural future.",
-    "sectionTitle": "Innovation Hub",
-    "intro": "Our R&D centre is the heart of our innovation, where we develop new solutions to address the challenges of modern agriculture.",
-    "labsIntro": "The centre comprises several specialized laboratories:",
-    "formulationLab": {
-      "title": "Formulation Research Laboratory",
-      "desc": "Dedicated to developing effective and stable formulations for our products."
-    },
-    "analyticalLab": {
-      "title": "Analytical Laboratory",
-      "desc": "Ensures the precise composition and quality of all raw materials and finished products."
-    },
-    "biotechLab": {
-      "title": "Biotechnology Laboratory",
-      "desc": "Focuses on biological solutions and advanced agricultural biotechnology."
-    },
-    "biologicalLab": {
-      "title": "Biological Research Laboratory",
-      "desc": "Tests the efficacy of our products on various crops and pests in controlled environments."
-    }
-  },
   "Career": {
     "title": "Career",
     "subtitle": "Join our team and grow with us.",
@@ -268,40 +306,6 @@
     "ctaButton": "Contact Us",
     "whatWeOffer": "What We Offer",
     "applyButton": "Apply Now"
-  },
-  "CompanyData": {
-    "title": "Company Data",
-    "subtitle": "Official registration and contact details.",
-    "name": "KINT Group Sp. z o.o.",
-    "address": "123 Agriculture St.\n00-001 Warsaw, Poland",
-    "court": "District Court for the Capital City of Warsaw",
-    "ncr": "KRS (NCR)",
-    "vat": "NIP (VAT)",
-    "capital": "Share Capital"
-  },
-  "LogisticsCentre": {
-    "title": "Logistics Centre",
-    "subtitle": "Efficient distribution network serving global markets.",
-    "sectionTitle": "Our Logistics Hub",
-    "intro1": "Our logistics centre is strategically located to ensure fast and efficient delivery.",
-    "intro2": "We manage a complex supply chain to deliver products to over 50 countries.",
-    "planning": "Advanced planning systems ensure optimal stock levels.",
-    "warehouseAreas": {
-      "title": "Warehouse Areas",
-      "collection": {
-        "title": "Collection Area",
-        "desc": "Designated area for incoming goods and quality checks."
-      },
-      "storage": {
-        "title": "Storage Area",
-        "desc": "Climate-controlled storage for sensitive products."
-      },
-      "release": {
-        "title": "Release Area",
-        "desc": "Efficient staging area for outgoing shipments."
-      }
-    },
-    "loading": "High-capacity loading docks for rapid turnaround."
   },
   "JobApplication": {
     "title": "Apply for {jobTitle}",
@@ -486,6 +490,10 @@
     "delete": "Delete",
     "cancel": "Cancel",
     "save": "Save",
+    "create": "Create",
+    "saveChanges": "Save Changes",
+    "recommendedSize": "Recommended size: 800x600px (JPG, PNG, WEBP)",
+    "externalCardNote": "Image for product card display",
     "actions": "Actions",
     "name": "Name",
     "slug": "Slug",
@@ -547,6 +555,11 @@
     "cereals": "Cereals",
     "industrial": "Industrial",
     "herbs": "Herbs",
+    "addNewCategoryOption": "+ Add new category",
+    "newCategoryEnPlaceholder": "New category name in English",
+    "newCategoryArPlaceholder": "New category name in Arabic",
+    "newCategoryEnRequired": "New category name in English is required.",
+    "newCategoryArRequired": "New category name in Arabic is required.",
     "metaTitleAr": "Meta Title (Arabic)",
     "metaTitleArPlaceholder": "عنوان Meta عربي",
     "image": "Image",
@@ -566,6 +579,42 @@
     "newProductDesc": "Fill in the details to add a new product to the catalog.",
     "editProductTitle": "Edit Product",
     "editProductDesc": "Update the product details below.",
+    "createProduct": "Create Product",
+    "editProduct": "Edit Product",
+    "creationMode": "Creation Mode",
+    "editingMode": "Editing Mode",
+    "tabs": {
+      "general": "General",
+      "details": "Details",
+      "images": "Images",
+      "downloads": "Downloads",
+      "seo": "SEO"
+    },
+    "sections": {
+      "productSections": "Additional Product Sections",
+      "basicInfo": "Basic Information",
+      "shortDescription": "Short Description",
+      "longDescription": "Long Description",
+      "features": "Features",
+      "mainImage": "Main Image",
+      "externalCardImage": "External Card Image",
+      "downloads": "Downloads",
+      "seoSettings": "SEO Settings"
+    },
+    "fields": {
+      "productName": "Product Name",
+      "productNameAr": "Product Name (Arabic)",
+      "slug": "Slug",
+      "category": "Category",
+      "displayOrder": "Display Order",
+      "featured": "Featured",
+      "organic": "Organic",
+      "metaTitle": "Meta Title",
+      "metaDescription": "Meta Description",
+      "metaTitleAr": "Meta Title (Arabic)",
+      "metaDescriptionAr": "Meta Description (Arabic)",
+      "colorTheme": "Color Theme"
+    },
     "productName": "Product Name",
     "slug": "URL Slug",
     "image": "Product Image",
@@ -639,6 +688,7 @@
     "emptyState": "No tabs added. Click \"Add Tab\" to start adding custom product information sections.",
     "tabTitle": "Tab Title",
     "tabColor": "Tab Color",
+    "tabColorHexPlaceholder": "#3b82f6",
     "tabContent": "Tab Content",
     "placeholder": "e.g., Specifications, Warranty, etc.",
     "remove": "Remove Tab"
@@ -934,34 +984,6 @@
     "noSubject": "No Subject",
     "noData": "No messages received yet."
   },
-  "AdminCertificates": {
-    "title": "Certificates Gallery",
-    "subtitle": "Add certificate images to display on the public Certificates page (max 5)",
-    "add": "Add Certificate",
-    "addNew": "Add New Certificate",
-    "cancel": "Cancel",
-    "titleEn": "Title (English) *",
-    "titleEnPlaceholder": "Certificate title",
-    "titleAr": "Title (Arabic)",
-    "titleArPlaceholder": "Certificate title in Arabic",
-    "descEn": "Description (English)",
-    "descEnPlaceholder": "Brief description",
-    "descAr": "Description (Arabic)",
-    "descArPlaceholder": "Brief description in Arabic",
-    "image": "Certificate Image *",
-    "save": "Save Certificate",
-    "saving": "Saving...",
-    "deleteConfirm": "Are you sure you want to delete this certificate?",
-    "deleteFail": "Failed to delete certificate",
-    "uploadFail": "Failed to upload image",
-    "loading": "Loading...",
-    "noData": "No certificates added yet.",
-    "addFirst": "Add First Certificate",
-    "delete": "Delete",
-    "uploading": "Uploading...",
-    "countInfo": "certificates",
-    "maxLimitReached": "Maximum limit reached. Delete a certificate to add a new one."
-  },
   "AdminCrops": {
     "title": "Crop Guides Management",
     "subtitle": "Manage fertilization programs for different crops.",
@@ -1005,6 +1027,8 @@
   "AdminDashboard": {
     "overview": "Dashboard Overview",
     "welcome": "Welcome back to the KINT Management Portal",
+    "dashboardSearchPlaceholder": "Search dashboard cards and actions...",
+    "dashboardSearchNoResults": "No matching dashboard results.",
     "viewWebsite": "View Website",
     "totalProducts": "Total Products",
     "categories": "Categories",
@@ -1015,8 +1039,6 @@
     "blogPosts": "Blog Posts",
     "jobOffers": "Job Offers",
     "newApplications": "New Applications",
-    "certificates": "Certificates",
-    "awards": "Awards",
     "companyHeadquarter": "Company Headquarter",
     "contactInquiries": "Contact Inquiries",
     "quickActions": "Quick Actions",
@@ -1028,36 +1050,23 @@
     "writeBlogPost": "Write Blog Post",
     "manageJobs": "Manage Jobs",
     "createPage": "Create Page",
-    "editCompanyData": "Edit Company Data",
-    "manageMixingTablePdf": "Manage Mixing Table PDF",
+    "manageCompanySections": "Manage Company Sections",
+    "manageCompanySectionsDesc": "Add and organize main company sections and sub-sections.",
+    "addCompanySection": "Add Company Section",
+    "sectionNameEn": "Section name (English)",
+    "sectionNameAr": "Section name (Arabic)",
+    "optionalSlug": "Optional slug",
+    "rootSectionOption": "Root section (Top-level)",
+    "optionalDescriptionEn": "Optional description (English)",
+    "optionalDescriptionAr": "Optional description (Arabic)",
+    "parentLabel": "Parent",
+    "manageMixingTablePdf": "Technical Catalogs",
     "recentInquiries": "Recent Inquiries",
     "unreadInquiries": "unread inquiries",
     "noInquiries": "No new inquiries",
     "jobApplications": "Job Applications",
     "newApps": "new applications",
     "noApps": "No applications yet"
-  },
-  "AdminCompanyData": {
-    "title": "Edit Company Data",
-    "subtitle": "Manage company registration details, address, and legal information.",
-    "basicInfo": "Basic Information",
-    "companyNameEn": "Company Name (English)",
-    "companyNameAr": "Company Name (Arabic)",
-    "contactAddress": "Contact & Address",
-    "addressEn": "Address (English)",
-    "addressAr": "Address (Arabic)",
-    "registrationDetails": "Registration Details",
-    "courtInfoEn": "Court Info (English)",
-    "courtInfoAr": "Court Info (Arabic)",
-    "ncrNumber": "NCR Number",
-    "vatNumber": "VAT Number",
-    "capitalEn": "Capital (English)",
-    "capitalAr": "Capital (Arabic)",
-    "saveChanges": "Save Changes",
-    "saving": "Saving...",
-    "successMessage": "Company data updated successfully",
-    "errorMessage": "Failed to update",
-    "unexpectedError": "An unexpected error occurred"
   },
   "AdminJobApplications": {
     "title": "Job Applications",
@@ -1125,7 +1134,6 @@
     "resources": "Resources",
     "cropGuides": "Crop Guides",
     "mixingTable": "Mixing Table",
-    "rdCentre": "R&D Centre",
     "expertForum": "Expert Forum",
     "companyProfile": "Company Profile",
     "contactUs": "Contact Us",
@@ -1249,29 +1257,6 @@
     "editTitle": "Edit Article",
     "editSubtitle": "Update your content and publishing status."
   },
-  "AdminBlogForm": {
-    "titleEn": "Article Title (English)",
-    "titleAr": "Article Title (Arabic)",
-    "slug": "Slug",
-    "author": "Author",
-    "tags": "Tags",
-    "tagsPlaceholder": "Agriculture, Wheat, Tips (comma separated)",
-    "mainImage": "Main Article Image",
-    "excerptEn": "Excerpt (Concise summary - English)",
-    "excerptAr": "Excerpt (Concise summary - Arabic)",
-    "contentEn": "Full Content (English)",
-    "contentAr": "Full Content (Arabic)",
-    "seo": "SEO Settings",
-    "metaTitle": "Meta Title",
-    "metaDesc": "Meta Description",
-    "publish": "Publish Immediately",
-    "create": "Create Article",
-    "update": "Update Article",
-    "saving": "Saving...",
-    "cancel": "Cancel",
-    "english": "English",
-    "arabic": "العربية"
-  },
   "ContactPage": {
     "titlePart1": "Let's Grow",
     "titlePart2": "Together"
@@ -1376,14 +1361,6 @@
     "whyChooseUs": "Why Choose Us",
     "ourAdvantages": "Our Advantages"
   },
-  "About": {
-    "awardsTitle": "Awards",
-    "awardsSubtitle": "Our awards and accreditations.",
-    "noAwards": "No awards available.",
-    "certificatesTitle": "Certificates",
-    "certificatesSubtitle": "Our certificates and quality standards.",
-    "noCertificates": "No certificates available."
-  },
   "AboutNew": {
     "whoWeAre": {
       "title": "Get to Know Us",
@@ -1405,11 +1382,17 @@
     }
   },
   "Search": {
-    "placeholder": "Search products...",
+    "placeholder": "Search the entire website...",
     "search": "Search",
     "title": "Search Results",
-    "noResults": "No products found matching \"{query}\"",
-    "resultsFound": "Found {count} products matching \"{query}\""
+    "noResults": "No matching results found for \"{query}\"",
+    "resultsFound": "Found {count} results matching \"{query}\"",
+    "products": "Products",
+    "categories": "Categories",
+    "crops": "Crops",
+    "blogPosts": "Blog Posts",
+    "expertArticles": "Expert Articles",
+    "pages": "Pages"
   },
   "FormFields": {
     "required": "Required",

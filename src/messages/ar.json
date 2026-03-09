@@ -8,6 +8,7 @@
     "subtitle": "قم بتحميل أحدث أدلة المنتجات والمنشورات الفنية.",
     "agricultural": "الإنتاج الزراعي",
     "animal": "الإنتاج الحيواني",
+    "technical": "الكتالوجات التقنية",
     "mixingTable": "جدول الخلط",
     "categories": {
         "optimum-conditions": "الظروف المثلى",
@@ -15,9 +16,32 @@
         "product-catalogs": "كتالوجات منتجات إضافية",
         "other": "وثائق أخرى"
     },
+    "view": "عرض",
     "download": "تحميل PDF",
     "noCatalogs": "لا توجد كتالوجات متاحة حالياً.",
-    "lastUpdated": "آخر تحديث"
+    "lastUpdated": "آخر تحديث",
+    "viewer": {
+      "share": "مشاركة",
+      "download": "تحميل",
+      "fullscreen": "ملء الشاشة",
+      "exitFullscreen": "الخروج من ملء الشاشة",
+      "firstPage": "الصفحة الأولى",
+      "previousPage": "السابق",
+      "nextPage": "التالي",
+      "lastPage": "الصفحة الأخيرة",
+      "singlePage": "صفحة واحدة",
+      "spreadMode": "عرض كتاب",
+      "zoomIn": "تكبير",
+      "zoomOut": "تصغير",
+      "page": "صفحة",
+      "of": "من",
+      "thumbnails": "الصور المصغرة",
+      "outline": "الفهرس",
+      "loading": "جاري تحميل الملف...",
+      "noOutline": "لا يوجد فهرس داخل هذا الملف.",
+      "openSidebar": "إظهار الشريط الجانبي",
+      "closeSidebar": "إخفاء الشريط الجانبي"
+    }
   },
   "Navigation": {
     "home": "الرئيسية",
@@ -53,13 +77,7 @@
     "mixingTable": "جدول الخلط 2026",
     "expertsForum": "منتدى الخبراء",
     "bioSafeFood": "مشروع الغذاء الحيوي الآمن",
-    "rdCentre": "مركز البحث والتطوير",
-    "productionPlants": "مصانع الإنتاج",
-    "logisticsCentre": "مركز الخدمات اللوجستية",
-    "companyData": "بيانات الشركة",
     "career": "الوظائف",
-    "certificates": "الشهادات",
-    "awards": "الجوائز",
     "productsForAnimals": "منتجات الحيوانات",
     "news": "الأخبار",
     "catalogs": "الكتالوجات",
@@ -152,6 +170,8 @@
   "Admin": {
     "dashboard": "لوحة التحكم",
     "products": "المنتجات",
+    "productCards": "بطاقات المنتجات",
+    "categories": "أقسام الشركة",
     "animalTypes": "أنواع الحيوانات",
     "cropGuides": "أدلة المحاصيل",
     "expertArticles": "مقالات الخبراء",
@@ -159,10 +179,10 @@
     "catalogs": "الكتالوجات",
     "career": "الوظائف",
     "applications": "الطلبات",
-    "certificates": "الشهادات",
-    "awards": "الجوائز",
+    "agents": "الوكلاء",
     "headquarter": "المقر الرئيسي",
     "contactInquiries": "استفسارات التواصل",
+    "pages": "صفحات التواصل",
     "settings": "الإعدادات",
     "backToSite": "العودة للموقع",
     "logout": "تسجيل الخروج",
@@ -173,6 +193,65 @@
     "password": "كلمة المرور",
     "loggingIn": "جاري تسجيل الدخول",
     "loginButton": "تسجيل الدخول"
+  },
+  "AdminCatalogs": {
+    "management": "الإدارة",
+    "admin": "لوحة التحكم",
+    "editCatalog": "تعديل الكتالوج",
+    "addNewCatalog": "إضافة كتالوج جديد",
+    "titleEnPlaceholder": "عنوان الكتالوج (إنجليزي)",
+    "titleArPlaceholder": "عنوان الكتالوج (عربي)",
+    "categoryAgricultural": "زراعي",
+    "categoryAnimal": "حيواني / بيطري",
+    "categoryTechnical": "تقني",
+    "displayOrder": "ترتيب العرض",
+    "uploading": "جاري الرفع...",
+    "fileReady": "✅ الملف جاهز (EN)",
+    "fileReadyAr": "✅ الملف جاهز (AR)",
+    "uploadPdf": "📁 رفع ملف PDF (EN)",
+    "uploadPdfAr": "📁 رفع ملف PDF (AR)",
+    "visibleToPublic": "ظاهر للعامة",
+    "descriptionEnPlaceholder": "الوصف (إنجليزي)",
+    "descriptionArPlaceholder": "الوصف (عربي)",
+    "update": "تحديث",
+    "addCatalog": "إضافة كتالوج",
+    "cancel": "إلغاء",
+    "tableTitle": "العنوان",
+    "tableCategory": "التصنيف",
+    "tableOrder": "الترتيب",
+    "tableActions": "الإجراءات",
+    "noCatalogsFound": "لا توجد كتالوجات",
+    "confirmDelete": "هل أنت متأكد من حذف هذا الكتالوج؟",
+    "uploadFailed": "فشل رفع الملف. يرجى المحاولة مرة أخرى."
+  },
+  "AdminBlogForm": {
+    "english": "الإنجليزية",
+    "arabic": "العربية",
+    "titleEn": "العنوان (الإنجليزية)",
+    "titleAr": "العنوان (العربية)",
+    "authorEn": "المؤلف (الإنجليزية)",
+    "authorAr": "المؤلف (العربية)",
+    "tagsEn": "الكلمات الدلالية (الإنجليزية)",
+    "tagsAr": "الكلمات الدلالية (العربية)",
+    "tagsPlaceholderEn": "كلمات مفصولة بفاصلة (مثال: agriculture, biostimulants)",
+    "tagsPlaceholderAr": "علامات مفصولة بفاصلة (مثال: الزراعة، المنشطات الحيوية)",
+    "metaTitleEn": "عنوان Meta (الإنجليزية)",
+    "metaTitleAr": "عنوان Meta (العربية)",
+    "metaDescEn": "وصف Meta (الإنجليزية)",
+    "metaDescAr": "وصف Meta (العربية)",
+    "excerptEn": "المقتطف (الإنجليزية)",
+    "excerptAr": "المقتطف (العربية)",
+    "contentEn": "المحتوى (الإنجليزية)",
+    "contentAr": "المحتوى (العربية)",
+    "mainImage": "الصورة الرئيسية",
+    "seo": "إعدادات تحسين محركات البحث",
+    "publish": "نشر",
+    "saving": "جاري الحفظ...",
+    "update": "تحديث",
+    "create": "إنشاء",
+    "cancel": "إلغاء",
+    "titleRequired": "العنوان مطلوب",
+    "titleArRequired": "العنوان العربي مطلوب"
   },
   "Contact": {
     "letsGrowTogether": "لننمو معاً",
@@ -203,47 +282,6 @@
     "errorMessage": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
     "failedMessage": "فشل إرسال الرسالة."
   },
-  "ProductionPlants": {
-    "title": "مصانع الإنتاج",
-    "subtitle": "مرافق تصنيع متطورة تضمن أعلى معايير الجودة.",
-    "sectionTitle": "قدراتنا الإنتاجية",
-    "intro": "ندير مصانع إنتاج حديثة مجهزة بأحدث التقنيات لتصنيع مجموعتنا من المنتجات الزراعية.",
-    "products": {
-      "title": "المنتجات المصنعة",
-      "desc": "تغطي خطوط إنتاجنا مجموعة واسعة من المدخلات الزراعية:",
-      "list": ["الأسمدة", "المبيدات", "منظمات النمو", "محسنات التربة"]
-    },
-    "facilities": {
-      "title": "مرافق الإنتاج",
-      "desc": "تم تصميم مرافقنا لتحقيق الكفاءة والسلامة:",
-      "list": ["مصنع التخليق الكيميائي", "مصنع التركيب", "وحدة التعبئة والتغليف", "مختبر مراقبة الجودة"]
-    },
-    "capabilities": "بفضل القدرة الإنتاجية العالية، يمكننا تلبية متطلبات الأسواق المحلية والدولية.",
-    "quality": "الجودة والسلامة هما أولويتنا القصوى. تلتزم جميع عمليات الإنتاج لدينا بمعايير دولية صارمة."
-  },
-  "RdCentre": {
-    "title": "مركز البحث والتطوير",
-    "subtitle": "الابتكار لمستقبل زراعي مستدام.",
-    "sectionTitle": "مركز الابتكار",
-    "intro": "مركز البحث والتطوير لدينا هو قلب ابتكارنا، حيث نطور حلولاً جديدة لمواجهة تحديات الزراعة الحديثة.",
-    "labsIntro": "يضم المركز عدة مختبرات متخصصة:",
-    "formulationLab": {
-      "title": "مختبر أبحاث التركيب",
-      "desc": "مخصص لتطوير تركيبات فعالة ومستقرة لمنتجاتنا."
-    },
-    "analyticalLab": {
-      "title": "المختبر التحليلي",
-      "desc": "يضمن التركيب الدقيق والجودة لجميع المواد الخام والمنتجات النهائية."
-    },
-    "biotechLab": {
-      "title": "مختبر التكنولوجيا الحيوية",
-      "desc": "يركز على الحلول البيولوجية والتكنولوجيا الحيوية الزراعية المتقدمة."
-    },
-    "biologicalLab": {
-      "title": "مختبر الأبحاث البيولوجية",
-      "desc": "يختبر فعالية منتجاتنا على مختلف المحاصيل والآفات في بيئات خاضعة للرقابة."
-    }
-  },
   "Career": {
     "title": "الوظائف",
     "subtitle": "انضم إلى فريقنا وتطور معنا.",
@@ -268,40 +306,6 @@
     "ctaButton": "اتصل بنا",
     "whatWeOffer": "ماذا نقدم",
     "applyButton": "قدم الآن"
-  },
-  "CompanyData": {
-    "title": "بيانات الشركة",
-    "subtitle": "تفاصيل التسجيل والاتصال الرسمية.",
-    "name": "مجموعة كينت ذ.م.م",
-    "address": "123 شارع الزراعة\n00-001 وارسو، بولندا",
-    "court": "المحكمة المحلية للعاصمة وارسو",
-    "ncr": "سجل المحكمة الوطني",
-    "vat": "رقم التعريف الضريبي",
-    "capital": "رأس المال المساهم"
-  },
-  "LogisticsCentre": {
-    "title": "مركز الخدمات اللوجستية",
-    "subtitle": "شبكة توزيع فعالة تخدم الأسواق العالمية.",
-    "sectionTitle": "مركزنا اللوجستي",
-    "intro1": "يقع مركزنا اللوجستي في موقع استراتيجي لضمان تسليم سريع وفعال.",
-    "intro2": "ندير سلسلة توريد معقدة لتوصيل المنتجات إلى أكثر من 50 دولة.",
-    "planning": "تضمن أنظمة التخطيط المتقدمة مستويات مخزون مثالية.",
-    "warehouseAreas": {
-      "title": "مناطق المستودع",
-      "collection": {
-        "title": "منطقة التجميع",
-        "desc": "منطقة مخصصة للبضائع الواردة وفحوصات الجودة."
-      },
-      "storage": {
-        "title": "منطقة التخزين",
-        "desc": "تخزين يتم التحكم فيه مناخياً للمنتجات الحساسة."
-      },
-      "release": {
-        "title": "منطقة الصرف",
-        "desc": "منطقة تجهيز فعالة للشحنات الصادرة."
-      }
-    },
-    "loading": "أرصفة تحميل عالية السعة لسرعة الدوران."
   },
   "CropGuides": {
     "title": "أدلة المحاصيل",
@@ -339,6 +343,10 @@
     "delete": "حذف",
     "cancel": "إلغاء",
     "save": "حفظ",
+    "create": "إنشاء",
+    "saveChanges": "حفظ التغييرات",
+    "recommendedSize": "الحجم الموصى به: 800x600px (JPG, PNG, WEBP)",
+    "externalCardNote": "صورة لعرض بطاقة المنتج",
     "actions": "الإجراءات",
     "name": "الاسم",
     "slug": "المسار (Slug)",
@@ -400,6 +408,11 @@
     "cereals": "الحبوب",
     "industrial": "الصناعية",
     "herbs": "الأعشاب",
+    "addNewCategoryOption": "+ إضافة قسم جديد",
+    "newCategoryEnPlaceholder": "اسم القسم الجديد بالإنجليزية",
+    "newCategoryArPlaceholder": "اسم القسم الجديد بالعربية",
+    "newCategoryEnRequired": "اسم القسم بالإنجليزية مطلوب",
+    "newCategoryArRequired": "اسم القسم بالعربية مطلوب",
     "metaTitleAr": "عنوان Meta",
     "metaTitleArPlaceholder": "أدخل عنوان Meta عربي",
     "image": "الصورة",
@@ -417,6 +430,42 @@
     "newProductDesc": "املأ التفاصيل لإضافة منتج جديد إلى الكتالوج.",
     "editProductTitle": "تعديل المنتج",
     "editProductDesc": "تحديث تفاصيل المنتج أدناه.",
+    "createProduct": "إنشاء منتج",
+    "editProduct": "تعديل منتج",
+    "creationMode": "وضع الإنشاء",
+    "editingMode": "وضع التعديل",
+    "tabs": {
+      "general": "عام",
+      "details": "التفاصيل",
+      "images": "الصور",
+      "downloads": "التنزيلات",
+      "seo": "SEO"
+    },
+    "sections": {
+      "productSections": "أقسام المنتج الإضافية",
+      "basicInfo": "المعلومات الأساسية",
+      "shortDescription": "وصف قصير",
+      "longDescription": "وصف طويل",
+      "features": "الميزات",
+      "mainImage": "الصورة الرئيسية",
+      "externalCardImage": "صورة البطاقة الخارجية",
+      "downloads": "التنزيلات",
+      "seoSettings": "إعدادات SEO"
+    },
+    "fields": {
+      "productName": "اسم المنتج",
+      "productNameAr": "اسم المنتج (بالعربية)",
+      "slug": "الرابط (Slug)",
+      "category": "الفئة",
+      "displayOrder": "ترتيب العرض",
+      "featured": "متميز",
+      "organic": "عضوي",
+      "metaTitle": "عنوان الميتا",
+      "metaDescription": "وصف الميتا",
+      "metaTitleAr": "عنوان الميتا (بالعربية)",
+      "metaDescriptionAr": "وصف الميتا (بالعربية)",
+      "colorTheme": "سمة اللون"
+    },
     "productName": "اسم المنتج",
     "slug": "المسار (Slug)",
     "image": "صورة المنتج",
@@ -490,6 +539,7 @@
     "emptyState": "لم تتم إضافة علامات تبويب. انقر فوق \"إضافة علامة تبويب\" للبدء في إضافة أقسام معلومات مخصصة للمنتج.",
     "tabTitle": "عنوان علامة التبويب",
     "tabColor": "لون علامة التبويب",
+    "tabColorHexPlaceholder": "#3b82f6",
     "tabContent": "محتوى علامة التبويب",
     "placeholder": "مثال: المواصفات، الضمان، إلخ.",
     "remove": "إزالة علامة التبويب"
@@ -593,34 +643,6 @@
     "view": "عرض",
     "noSubject": "بدون موضوع",
     "noData": "لم يتم استلام أي رسائل بعد."
-  },
-  "AdminCertificates": {
-    "title": "معرض الشهادات",
-    "subtitle": "إضافة صور الشهادات للعرض في صفحة الشهادات العامة (بحد أقصى 5)",
-    "add": "إضافة شهادة",
-    "addNew": "إضافة شهادة جديدة",
-    "cancel": "إلغاء",
-    "titleEn": "العنوان (بالإنجليزية) *",
-    "titleEnPlaceholder": "عنوان الشهادة",
-    "titleAr": "العنوان (بالعربية)",
-    "titleArPlaceholder": "عنوان الشهادة بالعربية",
-    "descEn": "الوصف (بالإنجليزية)",
-    "descEnPlaceholder": "وصف مختصر",
-    "descAr": "الوصف (بالعربية)",
-    "descArPlaceholder": "وصف مختصر بالعربية",
-    "image": "صورة الشهادة *",
-    "save": "حفظ الشهادة",
-    "saving": "جار الحفظ...",
-    "deleteConfirm": "هل أنت متأكد أنك تريد حذف هذه الشهادة؟",
-    "deleteFail": "فشل حذف الشهادة",
-    "uploadFail": "فشل رفع الصورة",
-    "loading": "جار التحميل...",
-    "noData": "لم يتم إضافة شهادات بعد.",
-    "addFirst": "إضافة أول شهادة",
-    "delete": "حذف",
-    "uploading": "جار الرفع...",
-    "countInfo": "شهادات",
-    "maxLimitReached": "تم الوصول إلى الحد الأقصى. احذف شهادة لإضافة واحدة جديدة."
   },
   "AdminCrops": {
     "title": "إدارة أدلة المحاصيل",
@@ -856,6 +878,8 @@
   "AdminDashboard": {
     "overview": "نظرة عامة على لوحة التحكم",
     "welcome": "مرحباً بكم في بوابة إدارة KINT",
+    "dashboardSearchPlaceholder": "ابحث داخل بطاقات وإجراءات لوحة التحكم...",
+    "dashboardSearchNoResults": "لا توجد نتائج مطابقة في لوحة التحكم.",
     "viewWebsite": "عرض الموقع",
     "totalProducts": "إجمالي المنتجات",
     "categories": "الأقسام",
@@ -866,8 +890,6 @@
     "blogPosts": "مقالات المدونة",
     "jobOffers": "عروض العمل",
     "newApplications": "طلبات جديدة",
-    "certificates": "الشهادات",
-    "awards": "الجوائز",
     "companyHeadquarter": "مقر الشركة",
     "contactInquiries": "استفسارات الاتصال",
     "quickActions": "إجراءات سريعة",
@@ -879,36 +901,23 @@
     "writeBlogPost": "كتابة مقال مدونة",
     "manageJobs": "إدارة الوظائف",
     "createPage": "إنشاء صفحة",
-    "editCompanyData": "تعديل بيانات الشركة",
-    "manageMixingTablePdf": "إدارة PDF جدول الخلط",
+    "manageCompanySections": "إدارة أقسام الشركة",
+    "manageCompanySectionsDesc": "إضافة وتنظيم الأقسام الرئيسية والفرعية للشركة.",
+    "addCompanySection": "إضافة قسم للشركة",
+    "sectionNameEn": "اسم القسم (إنجليزي)",
+    "sectionNameAr": "اسم القسم (عربي)",
+    "optionalSlug": "Slug اختياري",
+    "rootSectionOption": "قسم رئيسي (بدون أب)",
+    "optionalDescriptionEn": "وصف اختياري (إنجليزي)",
+    "optionalDescriptionAr": "وصف اختياري (عربي)",
+    "parentLabel": "القسم الأب",
+    "manageMixingTablePdf": "الكاتالوجات الفنية",
     "recentInquiries": "الاستفسارات الأخيرة",
     "unreadInquiries": "استفسارات غير مقروءة",
     "noInquiries": "لا توجد استفسارات جديدة",
     "jobApplications": "طلبات التوظيف",
     "newApps": "طلبات جديدة",
     "noApps": "لا توجد طلبات حتى الآن"
-  },
-  "AdminCompanyData": {
-    "title": "تعديل بيانات الشركة",
-    "subtitle": "إدارة تفاصيل تسجيل الشركة والعنوان والمعلومات القانونية.",
-    "basicInfo": "المعلومات الأساسية",
-    "companyNameEn": "اسم الشركة (إنجليزي)",
-    "companyNameAr": "اسم الشركة (عربي)",
-    "contactAddress": "الاتصال والعنوان",
-    "addressEn": "العنوان (إنجليزي)",
-    "addressAr": "العنوان (عربي)",
-    "registrationDetails": "تفاصيل التسجيل",
-    "courtInfoEn": "معلومات المحكمة (إنجليزي)",
-    "courtInfoAr": "معلومات المحكمة (عربي)",
-    "ncrNumber": "رقم السجل التجاري (NCR)",
-    "vatNumber": "رقم الضريبة (VAT)",
-    "capitalEn": "رأس المال (إنجليزي)",
-    "capitalAr": "رأس المال (عربي)",
-    "saveChanges": "حفظ التغييرات",
-    "saving": "جاري الحفظ...",
-    "successMessage": "تم تحديث بيانات الشركة بنجاح",
-    "errorMessage": "فشل التحديث",
-    "unexpectedError": "حدث خطأ غير متوقع"
   },
   "JobApplication": {
     "title": "التقديم لوظيفة {jobTitle}",
@@ -939,7 +948,6 @@
     "resources": "الموارد",
     "cropGuides": "أدلة المحاصيل",
     "mixingTable": "جدول الخلط",
-    "rdCentre": "مركز البحث والتطوير",
     "expertForum": "منتدى الخبراء",
     "companyProfile": "ملف الشركة",
     "contactUs": "اتصل بنا",
@@ -1107,29 +1115,6 @@
     "newSubtitle": "شارك الخبرات الزراعية وأخبار الشركة.",
     "editTitle": "تعديل المقالة",
     "editSubtitle": "تحديث المحتوى وحالة النشر."
-  },
-  "AdminBlogForm": {
-    "titleEn": "عنوان المقالة (بالإنجليزية)",
-    "titleAr": "عنوان المقالة (بالعربية)",
-    "slug": "الرابط الدائم (Slug)",
-    "author": "المؤلف",
-    "tags": "الوسوم",
-    "tagsPlaceholder": "الزراعة، القمح، نصائح (مفصولة بفواصل)",
-    "mainImage": "صورة المقالة الرئيسية",
-    "excerptEn": "ملخص (موجز - بالإنجليزية)",
-    "excerptAr": "ملخص (موجز - بالعربية)",
-    "contentEn": "المحتوى الكامل (بالإنجليزية)",
-    "contentAr": "المحتوى الكامل (بالعربية)",
-    "seo": "إعدادات تحسين محركات البحث (SEO)",
-    "metaTitle": "عنوان الميتا",
-    "metaDesc": "وصف الميتا",
-    "publish": "نشر فوري",
-    "create": "إنشاء المقالة",
-    "update": "تحديث المقالة",
-    "saving": "جاري الحفظ...",
-    "cancel": "إلغاء",
-    "english": "الإنجليزية",
-    "arabic": "العربية"
   },
   "ProductsForAnimals": {
     "title": "منتجات الحيوانات",
@@ -1364,14 +1349,6 @@
     "whyChooseUs": "لماذا تختارنا",
     "ourAdvantages": "مميزاتنا"
   },
-  "About": {
-    "awardsTitle": "الجوائز",
-    "awardsSubtitle": "جوائزنا واعتماداتنا.",
-    "noAwards": "لا توجد جوائز متاحة حالياً.",
-    "certificatesTitle": "الشهادات",
-    "certificatesSubtitle": "شهاداتنا ومعايير الجودة الخاصة بنا.",
-    "noCertificates": "لا توجد شهادات متاحة حالياً."
-  },
   "AboutNew": {
     "whoWeAre": {
       "title": "تعرف علينا",
@@ -1393,11 +1370,17 @@
     }
   },
   "Search": {
-    "placeholder": "ابحث عن منتجات...",
+    "placeholder": "ابحث في كامل الموقع...",
     "search": "بحث",
     "title": "نتائج البحث",
-    "noResults": "لم يتم العثور على منتجات تطابق \"{query}\"",
-    "resultsFound": "تم العثور على {count} منتجات تطابق \"{query}\""
+    "noResults": "لم يتم العثور على نتائج مطابقة لـ \"{query}\"",
+    "resultsFound": "تم العثور على {count} نتيجة مطابقة لـ \"{query}\"",
+    "products": "المنتجات",
+    "categories": "الأقسام",
+    "crops": "المحاصيل",
+    "blogPosts": "مقالات المدونة",
+    "expertArticles": "مقالات الخبراء",
+    "pages": "الصفحات"
   },
   "FormFields": {
     "required": "مطلوب",
