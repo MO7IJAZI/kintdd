@@ -26,7 +26,7 @@ interface CategoryData {
     description?: string | null;
     description_ar?: string | null;
     children: CategoryData[];
-    products: ProductSummary[];
+    products: (ProductSummary & { images?: { url: string; alt: string }[] })[];
 }
 
 export default async function CategoryPage({ params }: { params: Promise<{ slug: string, locale: string }> }) {
@@ -43,7 +43,8 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
             include: {
                 products: {
                     where: { isActive: true },
-                    orderBy: { order: "asc" }
+                    orderBy: { order: "asc" },
+                    include: { images: true }
                 },
                 children: true
             }
@@ -102,23 +103,42 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
                          const pShortDesc = (isAr && product.shortDesc_ar) ? product.shortDesc_ar : product.shortDesc;
                          const pDesc = (isAr && product.description_ar) ? product.description_ar : product.description;
                          
+                         const externalImage = product.images?.find((img) => img.alt === 'external-card')?.url;
+                         const displayImage = externalImage || product.image || '/images/cat-biostimulants.png';
+                         
                          return (
-                            <Link key={product.id} href={`/product/${product.slug}`} className="card">
-                                <div style={{ position: 'relative', height: '250px', backgroundColor: '#fff' }}>
-                                    <Image
-                                        src={product.image || '/images/cat-biostimulants.png'}
-                                        alt={pName}
-                                        fill
-                                        style={{ objectFit: 'contain', padding: '1rem' }}
-                                    />
-                                </div>
-                                <div style={{ padding: '1.5rem' }}>
-                                    <h3 style={{ marginBottom: '0.5rem' }}>{pName}</h3>
-                                    <p style={{ color: 'var(--muted-foreground)', fontSize: '0.9rem', marginBottom: '1.5rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                            <Link key={product.id} href={`/product/${product.slug}`} className="card" style={{
+                                overflow: 'hidden', borderRadius: '1.5rem', backgroundColor: 'white',
+                                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)', 
+                                border: '1px solid #e2e8f0',
+                                textDecoration: 'none', color: 'inherit',
+                                display: 'flex', flexDirection: 'column', height: '100%'
+                            }}>
+                                <div style={{ position: 'relative', height: '260px', backgroundColor: '#fff', padding: '0' }}>
+                                      <Image
+                                          src={displayImage}
+                                          alt={pName}
+                                          fill
+                                          style={{ objectFit: 'contain' }}
+                                      />
+                                  </div>
+                                <div style={{ padding: '2rem', flex: 1, display: 'flex', flexDirection: 'column', borderTop: '1px solid #e2e8f0' }}>
+                                    <span style={{
+                                        backgroundColor: '#fff0f3', color: '#e9496c',
+                                        fontSize: '0.75rem', padding: '0.4rem 0.8rem', borderRadius: '50px',
+                                        textTransform: 'uppercase', fontWeight: '800', display: 'inline-block',
+                                        marginBottom: '1rem', width: 'fit-content'
+                                    }}>
+                                        {name}
+                                    </span>
+                                    <h3 style={{ fontSize: '1.25rem', marginBottom: '1rem', fontWeight: 800, lineHeight: 1.3, color: '#142346' }}>{pName}</h3>
+                                    <p style={{ fontSize: '0.95rem', color: '#64748b', lineHeight: 1.6, marginBottom: '1.5rem', flex: 1, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                                         {pShortDesc || (pDesc ? pDesc.replace(/<[^>]*>?/gm, '').substring(0, 100) + '...' : '')}
                                     </p>
-                                    <div style={{ color: 'var(--primary)', fontWeight: '700' }}>
-                                        {tNav('viewDetails')} {isAr ? '←' : '→'}
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
+                                        <span style={{ color: '#e9496c', fontWeight: 800, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                            {tNav('viewDetails')} {isAr ? '←' : '→'}
+                                        </span>
                                     </div>
                                 </div>
                             </Link>

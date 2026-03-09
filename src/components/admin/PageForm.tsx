@@ -33,7 +33,8 @@ export default function PageForm({ initialData }: { initialData?: Partial<PageFo
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value;
         setTitle(val);
-        if (!initialData?.id || !initialData?.slug) {
+        // Only generate slug if it's a new page (not editing)
+        if (!initialData?.id) {
             setSlug(val.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, ""));
         }
         if (errors.title) setErrors(prev => ({ ...prev, title: '' }));

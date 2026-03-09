@@ -9,6 +9,7 @@ export async function createCatalog(formData: FormData) {
     const description = formData.get("description") as string;
     const description_ar = formData.get("description_ar") as string;
     const fileUrl = formData.get("fileUrl") as string;
+    const fileUrl_ar = formData.get("fileUrl_ar") as string;
     const category = formData.get("category") as string;
     const order = parseInt(formData.get("order") as string) || 0;
 
@@ -19,6 +20,7 @@ export async function createCatalog(formData: FormData) {
             description,
             description_ar,
             fileUrl,
+            fileUrl_ar,
             category,
             order,
             isActive: true,
@@ -36,6 +38,7 @@ export async function updateCatalog(id: string, formData: FormData) {
     const description = formData.get("description") as string;
     const description_ar = formData.get("description_ar") as string;
     const fileUrl = formData.get("fileUrl") as string;
+    const fileUrl_ar = formData.get("fileUrl_ar") as string;
     const category = formData.get("category") as string;
     const order = parseInt(formData.get("order") as string) || 0;
     const isActive = formData.get("isActive") === "true";
@@ -48,6 +51,7 @@ export async function updateCatalog(id: string, formData: FormData) {
             description,
             description_ar,
             fileUrl,
+            fileUrl_ar,
             category,
             order,
             isActive,

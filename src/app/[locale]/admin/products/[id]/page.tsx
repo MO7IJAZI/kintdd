@@ -3,6 +3,7 @@ import { getProductById } from "@/actions/productActions";
 import { getProductSections } from "@/actions/productSectionActions";
 import ProductForm from "@/components/admin/ProductForm";
 import { Tab } from "@/components/admin/TabsManager";
+import { filterProductAssignmentCategories } from "@/lib/data";
 import { notFound } from "next/navigation";
 import { getTranslations } from 'next-intl/server';
 
@@ -13,9 +14,7 @@ interface TableRow {
 export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const t = await getTranslations('AdminProductForm');
-    const allCategories = await getCategories();
-    // Only show subcategories (categories with parent)
-    const categories = allCategories.filter((c: any) => c.parentId);
+    const categories = filterProductAssignmentCategories(await getCategories());
     const [product, sections] = await Promise.all([
         getProductById(id),
         getProductSections(id)

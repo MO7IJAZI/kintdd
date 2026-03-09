@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { ensureCoreCategoriesExist } from "@/lib/data";
 import { Link } from "@/navigation";
 import { getTranslations, getLocale } from 'next-intl/server';
 import { ArrowRight, Package } from 'lucide-react';
@@ -14,6 +15,7 @@ interface Product {
   name: string;
   name_ar?: string | null;
   image?: string | null;
+  images?: { url: string; alt?: string | null }[];
   shortDesc?: string | null;
   shortDesc_ar?: string | null;
   order?: number;
@@ -33,6 +35,7 @@ interface CategoryData {
 export async function generateMetadata({ params }: { params: Promise<{ subcategory: string; locale: string }> }): Promise<Metadata> {
   const { subcategory, locale } = await params;
   const isAr = locale === 'ar';
+  await ensureCoreCategoriesExist();
 
   const category = await prisma.category.findUnique({
     where: { slug: subcategory },
@@ -62,6 +65,7 @@ export default async function SubcategoryPage({
 }) {
   const { subcategory, locale } = await params;
   const isAr = locale === 'ar';
+  await ensureCoreCategoriesExist();
 
   // Fetch the subcategory with its parent
   const categoryData = await prisma.category.findUnique({
@@ -69,7 +73,13 @@ export default async function SubcategoryPage({
     include: {
       products: {
         where: { isActive: true },
-        orderBy: { order: 'asc' }
+        orderBy: { order: 'asc' },
+        include: {
+          images: {
+            // where: { alt: 'external-card' }, // Remove filter to get all images and find external-card manually
+            select: { url: true, alt: true }
+          }
+        }
       },
       parent: {
         select: { slug: true, name: true, name_ar: true }
@@ -211,78 +221,57 @@ export default async function SubcategoryPage({
               {category!.products.map((product) => {
                 const productName = isAr ? product.name_ar || product.name : product.name;
                 const productDesc = isAr ? product.shortDesc_ar || product.shortDesc : product.shortDesc;
+                const externalImage = product.images?.find((img) => img.alt === 'external-card')?.url;
+                const productCardImage = externalImage || product.image || '/images/cat-biostimulants.png';
 
                 return (
                   <Link
                     key={product.id}
-                    href={{ pathname: '/product/[slug]', params: { slug: product.slug } } as any}
-                    style={{ textDecoration: 'none', color: 'inherit' }}
+                    href={`/product/${product.slug}` as any}
+                    className="card" 
+                    style={{
+                        overflow: 'hidden', borderRadius: '1.5rem', backgroundColor: 'white',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)', 
+                        border: '1px solid #e2e8f0',
+                        textDecoration: 'none', color: 'inherit',
+                        display: 'flex', flexDirection: 'column', height: '100%'
+                    }}
                   >
-                    <div className="card hover-card" style={{
-                      background: 'white',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '12px',
-                      overflow: 'hidden',
-                      height: '100%',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.08)'
-                    }}>
                       {/* Product Image */}
-                      {product.image && (
-                        <div style={{
-                          width: '100%',
-                          height: '200px',
-                          position: 'relative',
-                          backgroundColor: '#f8fafc'
-                        }}>
+                      <div style={{ position: 'relative', height: '260px', backgroundColor: '#fff', padding: '0' }}>
                           <Image
-                            src={product.image}
+                            src={productCardImage}
                             alt={productName}
                             fill
-                            style={{ objectFit: 'contain', padding: '1rem' }}
+                            style={{ objectFit: 'contain' }}
                           />
-                        </div>
-                      )}
+                      </div>
 
                       {/* Product Info */}
-                      <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                        <h3 style={{
-                          fontSize: '1.1rem',
-                          fontWeight: 700,
-                          color: '#142346',
-                          marginBottom: '0.5rem',
-                          lineHeight: 1.4
+                      <div style={{ padding: '2rem', flex: 1, display: 'flex', flexDirection: 'column', borderTop: '1px solid #e2e8f0' }}>
+                        <span style={{
+                            backgroundColor: '#fff0f3', color: '#e9496c',
+                            fontSize: '0.75rem', padding: '0.4rem 0.8rem', borderRadius: '50px',
+                            textTransform: 'uppercase', fontWeight: '800', display: 'inline-block',
+                            marginBottom: '1rem', width: 'fit-content'
                         }}>
+                            {categoryName}
+                        </span>
+                        <h3 style={{ fontSize: '1.25rem', marginBottom: '1rem', fontWeight: 800, lineHeight: 1.3, color: '#142346' }}>
                           {productName}
                         </h3>
 
-                        {productDesc && (
-                          <p style={{
-                            color: '#666',
-                            fontSize: '0.9rem',
-                            lineHeight: 1.5,
-                            marginBottom: '1rem',
-                            flex: 1
-                          }}>
-                            {productDesc}
-                          </p>
-                        )}
+                        <p style={{ fontSize: '0.95rem', color: '#64748b', lineHeight: 1.6, marginBottom: '1.5rem', flex: 1, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                            {productDesc ? (productDesc.length > 90 ? productDesc.substring(0, 90) + '...' : productDesc) : ''}
+                        </p>
 
                         {/* View Details Link */}
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          color: '#e9496c',
-                          fontWeight: 600,
-                          fontSize: '0.95rem',
-                          gap: '0.5rem'
-                        }}>
-                          <span>{isAr ? 'عرض التفاصيل' : 'View Details'}</span>
-                          <ArrowRight style={{ width: '18px', height: '18px' }} />
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
+                            <span style={{ color: '#e9496c', fontWeight: 800, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                {isAr ? 'عرض التفاصيل' : 'View Details'} {isAr ? '←' : '→'}
+                            </span>
                         </div>
                       </div>
-                    </div>
                   </Link>
                 );
               })}

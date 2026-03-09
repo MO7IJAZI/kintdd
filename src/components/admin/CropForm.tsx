@@ -41,6 +41,7 @@ interface CropInitialData {
     harvestSeason_ar?: string | null;
     image?: string | null;
     pdfUrl?: string | null;
+    pdfUrl_ar?: string | null; // Added
     metaTitle?: string | null;
     metaTitle_ar?: string | null;
     recommendedProducts?: CropRecommendedProduct[];
@@ -71,11 +72,20 @@ export default function CropForm({ initialData, products = [] }: CropFormProps) 
     const [descriptionTab, setDescriptionTab] = useState<'en' | 'ar'>('en');
     const [image, setImage] = useState(initialData?.image || "");
     const [pdfUrl, setPdfUrl] = useState(initialData?.pdfUrl || "");
+    const [pdfUrl_ar, setPdfUrlAr] = useState(initialData?.pdfUrl_ar || "");
     const [slug, setSlug] = useState(initialData?.slug || "");
     const [slugEdited, setSlugEdited] = useState(false);
     const [name, setName] = useState(initialData?.name || "");
     const [name_ar, setNameAr] = useState(initialData?.name_ar || "");
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const predefinedCategories = ["vegetables", "fruits", "legumes", "cereals", "industrial", "herbs"];
+    const isExistingInitialCategory = initialData?.category ? predefinedCategories.includes(initialData.category) : true;
+    const [categoryMode, setCategoryMode] = useState<'existing' | 'new'>(isExistingInitialCategory ? 'existing' : 'new');
+    const [selectedCategory, setSelectedCategory] = useState(
+        isExistingInitialCategory ? (initialData?.category || "vegetables") : "vegetables"
+    );
+    const [newCategoryEn, setNewCategoryEn] = useState(isExistingInitialCategory ? "" : (initialData?.category || ""));
+    const [newCategoryAr, setNewCategoryAr] = useState(isExistingInitialCategory ? "" : (initialData?.category_ar || ""));
 
     // Legacy simple product selection (might be redundant if stages are used, but good to keep for general recommendations)
     const [selectedProducts, setSelectedProducts] = useState<string[]>(
@@ -169,6 +179,10 @@ export default function CropForm({ initialData, products = [] }: CropFormProps) 
         const newErrors: Record<string, string> = {};
         if (!name.trim()) newErrors.name = t('nameRequired');
         if (!name_ar.trim()) newErrors.name_ar = t('nameArRequired');
+        if (categoryMode === 'new') {
+            if (!newCategoryEn.trim()) newErrors.category = t('newCategoryEnRequired');
+            if (!newCategoryAr.trim()) newErrors.category_ar = t('newCategoryArRequired');
+        }
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -190,7 +204,15 @@ export default function CropForm({ initialData, products = [] }: CropFormProps) 
         formData.set("description_ar", description_ar);
         formData.set("image", image);
         formData.set("pdfUrl", pdfUrl);
+        formData.set("pdfUrl_ar", pdfUrl_ar);
         formData.set("slug", slug);
+        if (categoryMode === 'new') {
+            formData.set("category", newCategoryEn.trim());
+            formData.set("category_ar", newCategoryAr.trim());
+        } else {
+            formData.set("category", selectedCategory);
+            formData.delete("category_ar");
+        }
         formData.set("productIds", JSON.stringify(selectedProducts));
         formData.set("stages", JSON.stringify(stages));
 
@@ -255,31 +277,74 @@ export default function CropForm({ initialData, products = [] }: CropFormProps) 
 
             {/* Slug hidden */}
             <input type="hidden" name="slug" value={slug} />
+            <input type="hidden" name="pdfUrl" value={pdfUrl} />
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem', marginBottom: '2rem' }}>
                 <div>
                     <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.9rem' }}>{t('categoryEn')}</label>
-                    <select name="category" defaultValue={initialData?.category || "vegetables"} className="input" style={{ width: '100%' }}>
+                    <select
+                        value={categoryMode === 'new' ? '__new__' : selectedCategory}
+                        onChange={(e) => {
+                            if (e.target.value === '__new__') {
+                                setCategoryMode('new');
+                            } else {
+                                setCategoryMode('existing');
+                                setSelectedCategory(e.target.value);
+                            }
+                        }}
+                        className="input"
+                        style={{ width: '100%' }}
+                    >
                         <option value="vegetables">{t('vegetables')}</option>
                         <option value="fruits">{t('fruits')}</option>
                         <option value="legumes">{t('legumes')}</option>
                         <option value="cereals">{t('cereals')}</option>
                         <option value="industrial">{t('industrial')}</option>
                         <option value="herbs">{t('herbs')}</option>
+                        <option value="__new__">{t('addNewCategoryOption')}</option>
                     </select>
+                    {categoryMode === 'new' && (
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '0.75rem' }}>
+                            <div>
+                                <input
+                                    value={newCategoryEn}
+                                    onChange={(e) => setNewCategoryEn(e.target.value)}
+                                    className="input"
+                                    style={{ width: '100%' }}
+                                    placeholder={t('newCategoryEnPlaceholder')}
+                                />
+                                {errors.category && <p style={{ color: 'red', fontSize: '0.8rem', marginTop: '0.25rem' }}>{errors.category}</p>}
+                            </div>
+                            <div dir="rtl">
+                                <input
+                                    value={newCategoryAr}
+                                    onChange={(e) => setNewCategoryAr(e.target.value)}
+                                    className="input"
+                                    style={{ width: '100%' }}
+                                    placeholder={t('newCategoryArPlaceholder')}
+                                />
+                                {errors.category_ar && <p style={{ color: 'red', fontSize: '0.8rem', marginTop: '0.25rem' }}>{errors.category_ar}</p>}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '2rem', marginBottom: '2.5rem' }}>
                 <ImageUpload
                     label={t('image')}
                     value={image}
                     onChange={setImage}
                 />
                 <FileUpload
-                    label={t('pdf')}
+                    label={`${t('pdf')} (${t('english')})`}
                     value={pdfUrl}
                     onChange={setPdfUrl}
+                />
+                <FileUpload
+                    label={`${t('pdf')} (${t('arabic')})`}
+                    value={pdfUrl_ar}
+                    onChange={setPdfUrlAr}
                 />
             </div>
 

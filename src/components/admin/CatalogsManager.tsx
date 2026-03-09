@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createCatalog, updateCatalog, deleteCatalog } from "@/actions/catalogActions";
 import { Plus, Trash2, Edit2, Download } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface Catalog {
     id: string;
@@ -11,6 +12,7 @@ interface Catalog {
     description?: string | null;
     description_ar?: string | null;
     fileUrl: string;
+    fileUrl_ar?: string | null;
     category: string;
     order: number;
     isActive: boolean;
@@ -21,6 +23,7 @@ export default function CatalogsManager({
 }: {
     initialCatalogs?: Catalog[];
 }) {
+    const t = useTranslations("AdminCatalogs");
     const [catalogs, setCatalogs] = useState<Catalog[]>(initialCatalogs);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [formData, setFormData] = useState({
@@ -29,12 +32,21 @@ export default function CatalogsManager({
         description: "",
         description_ar: "",
         fileUrl: "",
+        fileUrl_ar: "",
         category: "agricultural",
         order: 0,
         isActive: true,
     });
     const [isLoading, setIsLoading] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
+    const [isUploadingAr, setIsUploadingAr] = useState(false);
+
+    const getCategoryLabel = (category: string) => {
+        if (category === "agricultural") return t("categoryAgricultural");
+        if (category === "animal") return t("categoryAnimal");
+        if (category === "technical") return t("categoryTechnical");
+        return category;
+    };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
@@ -45,11 +57,13 @@ export default function CatalogsManager({
         }));
     };
 
-    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'fileUrl' | 'fileUrl_ar') => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        setIsUploading(true);
+        if (field === 'fileUrl') setIsUploading(true);
+        else setIsUploadingAr(true);
+
         const formData = new FormData();
         formData.append("file", file);
 
@@ -61,13 +75,17 @@ export default function CatalogsManager({
 
             const data = await response.json();
             if (data.url) {
-                setFormData(prev => ({ ...prev, fileUrl: data.url }));
+                setFormData(prev => ({ ...prev, [field]: data.url }));
             }
         } catch (error) {
             console.error("Upload failed:", error);
-            alert("File upload failed. Please try again.");
+            alert(t("uploadFailed"));
         } finally {
-            setIsUploading(false);
+            if (field === 'fileUrl') setIsUploading(false);
+            else setIsUploadingAr(false);
+            
+            // Clear the input value so the same file can be selected again if needed
+            e.target.value = '';
         }
     };
 
@@ -90,6 +108,7 @@ export default function CatalogsManager({
                 description: "",
                 description_ar: "",
                 fileUrl: "",
+                fileUrl_ar: "",
                 category: "agricultural",
                 order: catalogs.length + 1,
                 isActive: true,
@@ -122,6 +141,7 @@ export default function CatalogsManager({
                 description: "",
                 description_ar: "",
                 fileUrl: "",
+                fileUrl_ar: "",
                 category: "agricultural",
                 order: 0,
                 isActive: true,
@@ -141,6 +161,7 @@ export default function CatalogsManager({
             description: catalog.description || "",
             description_ar: catalog.description_ar || "",
             fileUrl: catalog.fileUrl,
+            fileUrl_ar: catalog.fileUrl_ar || "",
             category: catalog.category,
             order: catalog.order,
             isActive: catalog.isActive,
@@ -148,7 +169,7 @@ export default function CatalogsManager({
     };
 
     const handleDeleteCatalog = async (id: string) => {
-        if (!confirm("Are you sure you want to delete this catalog?")) return;
+        if (!confirm(t("confirmDelete"))) return;
         setIsLoading(true);
 
         try {
@@ -167,14 +188,14 @@ export default function CatalogsManager({
             {/* Form */}
             <form onSubmit={editingId ? handleUpdateCatalog : handleAddCatalog} style={{ marginBottom: "2rem", padding: "2rem", backgroundColor: "#f8fafc", borderRadius: "1rem", border: "1px solid #e2e8f0" }}>
                 <h3 style={{ marginBottom: "1.5rem", fontSize: "1.25rem", fontWeight: 700 }}>
-                    {editingId ? "Edit Catalog" : "Add New Catalog"}
+                    {editingId ? t("editCatalog") : t("addNewCatalog")}
                 </h3>
 
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "1rem", marginBottom: "1rem" }}>
                     <input
                         type="text"
                         name="title"
-                        placeholder="Catalog Title (English)"
+                        placeholder={t("titleEnPlaceholder")}
                         value={formData.title}
                         onChange={handleInputChange}
                         required
@@ -183,7 +204,7 @@ export default function CatalogsManager({
                     <input
                         type="text"
                         name="title_ar"
-                        placeholder="Catalog Title (Arabic)"
+                        placeholder={t("titleArPlaceholder")}
                         value={formData.title_ar}
                         onChange={handleInputChange}
                         style={{ padding: "0.75rem", border: "1px solid #e2e8f0", borderRadius: "0.5rem" }}
@@ -194,42 +215,70 @@ export default function CatalogsManager({
                         onChange={handleInputChange}
                         style={{ padding: "0.75rem", border: "1px solid #e2e8f0", borderRadius: "0.5rem" }}
                     >
-                        <option value="agricultural">Agricultural</option>
-                        <option value="animal">Animal / Veterinary</option>
+                        <option value="agricultural">{t("categoryAgricultural")}</option>
+                        <option value="animal">{t("categoryAnimal")}</option>
+                        <option value="technical">{t("categoryTechnical")}</option>
                     </select>
                     <input
                         type="number"
                         name="order"
-                        placeholder="Display Order"
+                        placeholder={t("displayOrder")}
                         value={formData.order}
                         onChange={handleInputChange}
                         min="0"
                         style={{ padding: "0.75rem", border: "1px solid #e2e8f0", borderRadius: "0.5rem" }}
                     />
-                    <div style={{ position: 'relative' }}>
+                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                         <input
                             type="file"
+                            id="fileUrlInput"
                             accept=".pdf"
-                            onChange={handleFileUpload}
-                            style={{
-                                position: 'absolute',
-                                top: 0,
-                                left: 0,
-                                width: '100%',
-                                height: '100%',
-                                opacity: 0,
-                                cursor: 'pointer',
-                                zIndex: 1
-                            }}
+                            onChange={(e) => handleFileUpload(e, 'fileUrl')}
+                            style={{ display: 'none' }}
                         />
-                        <button
-                            type="button"
-                            disabled={isUploading}
+                        <label
+                            htmlFor="fileUrlInput"
                             className="btn btn-outline"
-                            style={{ width: '100%', pointerEvents: 'none', textAlign: 'left', fontSize: '0.8rem' }}
+                            style={{ 
+                                width: '100%', 
+                                textAlign: 'left', 
+                                fontSize: '0.8rem', 
+                                cursor: isUploading ? 'not-allowed' : 'pointer',
+                                padding: '0.75rem',
+                                border: '1px solid #e2e8f0',
+                                borderRadius: '0.5rem',
+                                backgroundColor: 'white',
+                                display: 'block'
+                            }}
                         >
-                            {isUploading ? "UPLOADING..." : (formData.fileUrl ? "✅ FILE READY" : "📁 UPLOAD PDF")}
-                        </button>
+                            {isUploading ? t("uploading") : (formData.fileUrl ? t("fileReady") : t("uploadPdf"))}
+                        </label>
+                    </div>
+                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                        <input
+                            type="file"
+                            id="fileUrlArInput"
+                            accept=".pdf"
+                            onChange={(e) => handleFileUpload(e, 'fileUrl_ar')}
+                            style={{ display: 'none' }}
+                        />
+                        <label
+                            htmlFor="fileUrlArInput"
+                            className="btn btn-outline"
+                            style={{ 
+                                width: '100%', 
+                                textAlign: 'left', 
+                                fontSize: '0.8rem', 
+                                cursor: isUploadingAr ? 'not-allowed' : 'pointer',
+                                padding: '0.75rem',
+                                border: '1px solid #e2e8f0',
+                                borderRadius: '0.5rem',
+                                backgroundColor: 'white',
+                                display: 'block'
+                            }}
+                        >
+                            {isUploadingAr ? t("uploading") : (formData.fileUrl_ar ? t("fileReadyAr") : t("uploadPdfAr"))}
+                        </label>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <input
@@ -240,13 +289,13 @@ export default function CatalogsManager({
                             onChange={handleInputChange}
                             style={{ width: '1.25rem', height: '1.25rem' }}
                         />
-                        <label htmlFor="isActive" style={{ fontWeight: 600, fontSize: '0.9rem' }}>Visible to Public</label>
+                        <label htmlFor="isActive" style={{ fontWeight: 600, fontSize: '0.9rem' }}>{t("visibleToPublic")}</label>
                     </div>
                 </div>
 
                 <textarea
                     name="description"
-                    placeholder="Description (English)"
+                    placeholder={t("descriptionEnPlaceholder")}
                     value={formData.description}
                     onChange={handleInputChange}
                     rows={2}
@@ -254,7 +303,7 @@ export default function CatalogsManager({
                 />
                 <textarea
                     name="description_ar"
-                    placeholder="Description (Arabic)"
+                    placeholder={t("descriptionArPlaceholder")}
                     value={formData.description_ar}
                     onChange={handleInputChange}
                     rows={2}
@@ -280,7 +329,7 @@ export default function CatalogsManager({
                         }}
                     >
                         <Plus size={18} />
-                        {editingId ? "Update" : "Add Catalog"}
+                        {editingId ? t("update") : t("addCatalog")}
                     </button>
                     {editingId && (
                         <button
@@ -293,6 +342,7 @@ export default function CatalogsManager({
                                     description: "",
                                     description_ar: "",
                                     fileUrl: "",
+                                    fileUrl_ar: "",
                                     category: "agricultural",
                                     order: 0,
                                     isActive: true,
@@ -308,7 +358,7 @@ export default function CatalogsManager({
                                 cursor: "pointer",
                             }}
                         >
-                            Cancel
+                            {t("cancel")}
                         </button>
                     )}
                 </div>
@@ -319,17 +369,17 @@ export default function CatalogsManager({
                 <table style={{ width: "100%", borderCollapse: "collapse" }}>
                     <thead>
                         <tr style={{ backgroundColor: "#f8fafc", borderBottom: "1px solid #e2e8f0" }}>
-                            <th style={{ padding: "1rem", textAlign: "left", fontWeight: 700 }}>Title</th>
-                            <th style={{ padding: "1rem", textAlign: "left", fontWeight: 700 }}>Category</th>
-                            <th style={{ padding: "1rem", textAlign: "left", fontWeight: 700 }}>Order</th>
-                            <th style={{ padding: "1rem", textAlign: "left", fontWeight: 700 }}>Actions</th>
+                            <th style={{ padding: "1rem", textAlign: "left", fontWeight: 700 }}>{t("tableTitle")}</th>
+                            <th style={{ padding: "1rem", textAlign: "left", fontWeight: 700 }}>{t("tableCategory")}</th>
+                            <th style={{ padding: "1rem", textAlign: "left", fontWeight: 700 }}>{t("tableOrder")}</th>
+                            <th style={{ padding: "1rem", textAlign: "left", fontWeight: 700 }}>{t("tableActions")}</th>
                         </tr>
                     </thead>
                     <tbody>
                         {catalogs.length === 0 ? (
                             <tr>
                                 <td colSpan={4} style={{ padding: "2rem", textAlign: "center", color: "#94a3b8" }}>
-                                    No catalogs found
+                                    {t("noCatalogsFound")}
                                 </td>
                             </tr>
                         ) : (
@@ -341,14 +391,18 @@ export default function CatalogsManager({
                                     </td>
                                     <td style={{ padding: "1rem" }}>
                                         <span style={{
-                                            backgroundColor: catalog.category === "agricultural" ? "rgba(34, 197, 94, 0.1)" : "rgba(59, 130, 246, 0.1)",
-                                            color: catalog.category === "agricultural" ? "#22c55e" : "#3b82f6",
+                                            backgroundColor: catalog.category === "agricultural" ? "rgba(34, 197, 94, 0.1)" : 
+                                                            catalog.category === "animal" ? "rgba(59, 130, 246, 0.1)" :
+                                                            "rgba(249, 115, 22, 0.1)",
+                                            color: catalog.category === "agricultural" ? "#22c55e" : 
+                                                   catalog.category === "animal" ? "#3b82f6" :
+                                                   "#f97316",
                                             padding: "0.25rem 0.75rem",
                                             borderRadius: "1rem",
                                             fontSize: "0.85rem",
                                             fontWeight: 600,
                                         }}>
-                                            {catalog.category}
+                                            {getCategoryLabel(catalog.category)}
                                         </span>
                                     </td>
                                     <td style={{ padding: "1rem" }}>{catalog.order}</td>

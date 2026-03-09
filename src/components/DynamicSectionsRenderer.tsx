@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { ChevronDown, Plus, Minus } from 'lucide-react';
+import { Plus, Minus } from 'lucide-react';
 import { useLocale } from 'next-intl';
 import { stripScripts } from '@/lib/sanitizeHtml';
 
@@ -27,7 +27,11 @@ const themeColors: Record<string, string> = {
     purple: '#a855f7',
     orange: '#f97316',
     pink: '#db2777',
-    slate: '#475569'
+    slate: '#475569',
+    red: '#ef4444',
+    primary: '#e9496c', // KINT Pink
+    secondary: '#142346', // KINT Navy
+    dark: '#1e293b'
 };
 
 export default function DynamicSectionsRenderer({ sections, isRtl }: DynamicSectionsProps) {
@@ -43,7 +47,7 @@ export default function DynamicSectionsRenderer({ sections, isRtl }: DynamicSect
     };
 
     return (
-        <section style={{ padding: '4rem 0', backgroundColor: '#ffffff' }}>
+        <section style={{ padding: '1rem 0 4rem', backgroundColor: '#ffffff' }}>
             <div className="container">
                 <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
                     <h2 style={{ 
@@ -58,7 +62,7 @@ export default function DynamicSectionsRenderer({ sections, isRtl }: DynamicSect
                     </h2>
                 </div>
 
-                <div style={{ maxWidth: '900px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ maxWidth: '1100px', width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
                     {sections.map((section) => {
                         const title = locale === 'ar' && section.title_ar ? section.title_ar : section.title;
                         const content = locale === 'ar' && section.content_ar ? section.content_ar : section.content;
@@ -66,14 +70,18 @@ export default function DynamicSectionsRenderer({ sections, isRtl }: DynamicSect
                         const isExpanded = expandedId === section.id;
                         
                         // Determine the background color: prioritize direct 'color' prop, then mapped 'colorTheme', then fallback
-                        const sectionColor = section.color || (section.colorTheme ? themeColors[section.colorTheme] : null);
+                        const sectionColor =
+                            section.color ||
+                            (section.colorTheme
+                                ? (themeColors[section.colorTheme] || (/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(section.colorTheme) ? section.colorTheme : null))
+                                : null);
 
                         return (
                             <div
                                 key={section.id}
                                 style={{
                                     border: '1px solid #e2e8f0',
-                                    borderRadius: '1rem',
+                                    borderRadius: '0.85rem',
                                     backgroundColor: 'white',
                                     overflow: 'hidden',
                                     transition: 'all 0.3s ease',
@@ -84,7 +92,7 @@ export default function DynamicSectionsRenderer({ sections, isRtl }: DynamicSect
                                     onClick={() => toggleSection(section.id)}
                                     style={{
                                         width: '100%',
-                                        padding: '1.5rem 2rem',
+                                        padding: '0.9rem 1.25rem',
                                         backgroundColor: sectionColor || (isExpanded ? '#f8fafc' : 'white'),
                                         border: 'none',
                                         cursor: 'pointer',
@@ -97,7 +105,7 @@ export default function DynamicSectionsRenderer({ sections, isRtl }: DynamicSect
                                     aria-expanded={isExpanded}
                                 >
                                     <h3 style={{
-                                        fontSize: '1.1rem',
+                                        fontSize: '1rem',
                                         fontWeight: 700,
                                         margin: 0,
                                         color: sectionColor ? 'white' : (isExpanded ? 'var(--primary)' : '#1e293b'),
@@ -109,8 +117,8 @@ export default function DynamicSectionsRenderer({ sections, isRtl }: DynamicSect
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        width: '32px',
-                                        height: '32px',
+                                        width: '30px',
+                                        height: '30px',
                                         borderRadius: '50%',
                                         backgroundColor: sectionColor 
                                             ? 'rgba(255, 255, 255, 0.2)' 
@@ -132,7 +140,7 @@ export default function DynamicSectionsRenderer({ sections, isRtl }: DynamicSect
                                     transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
                                     opacity: isExpanded ? 1 : 0.5,
                                 }}>
-                                    <div style={{ padding: '2rem' }}>
+                                    <div style={{ padding: '1.4rem 1.25rem' }}>
                                         <div
                                             className="prose prose-slate"
                                             style={{
@@ -147,10 +155,6 @@ export default function DynamicSectionsRenderer({ sections, isRtl }: DynamicSect
                                                     .replace(/<ul>/g, '<ul style="margin: 1rem 0; padding-left: 1.5rem; list-style-type: disc;">')
                                                     .replace(/<ol>/g, '<ol style="margin: 1rem 0; padding-left: 1.5rem; list-style-type: decimal;">')
                                                     .replace(/<li>/g, '<li style="margin-bottom: 0.5rem;">')
-                                                    .replace(/<table>/g, '<div style="overflow-x: auto; margin: 1.5rem 0;"><table style="width: 100%; border-collapse: collapse; font-size: 0.95rem;">')
-                                                    .replace(/<\/table>/g, '</table></div>')
-                                                    .replace(/<th>/g, '<th style="padding: 0.75rem 1rem; background-color: #f1f5f9; text-align: left; font-weight: 600; border: 1px solid #e2e8f0;">')
-                                                    .replace(/<td>/g, '<td style="padding: 0.75rem 1rem; border: 1px solid #e2e8f0;">')
                                             }}
                                         />
                                     </div>

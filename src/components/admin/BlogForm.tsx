@@ -14,14 +14,18 @@ interface BlogPostFormData {
     title_ar?: string | null;
     slug: string;
     author: string;
+    author_ar?: string | null;
     tags?: string | null;
+    tags_ar?: string | null;
     excerpt?: string | null;
     excerpt_ar?: string | null;
     content?: string | null;
     content_ar?: string | null;
     image?: string | null;
     metaTitle?: string | null;
+    metaTitle_ar?: string | null;
     metaDesc?: string | null;
+    metaDesc_ar?: string | null;
     isPublished?: boolean;
     publishedAt?: string | Date | null;
 }
@@ -41,7 +45,9 @@ export default function BlogForm({ initialData }: { initialData?: Partial<BlogPo
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [isPending, setIsPending] = useState(false);
 
-    // Parse initial tags if they exist
+    const [author, setAuthor] = useState(initialData?.author || "");
+    const [authorAr, setAuthorAr] = useState(initialData?.author_ar || "");
+    
     const defaultTags = initialData?.tags 
         ? (() => {
             try {
@@ -51,6 +57,23 @@ export default function BlogForm({ initialData }: { initialData?: Partial<BlogPo
             }
         })()
         : "";
+    const [tags, setTags] = useState(defaultTags);
+
+    const defaultTagsAr = initialData?.tags_ar 
+        ? (() => {
+            try {
+                return JSON.parse(initialData.tags_ar).join(', ');
+            } catch {
+                return initialData.tags_ar;
+            }
+        })()
+        : "";
+    const [tagsAr, setTagsAr] = useState(defaultTagsAr);
+
+    const [metaTitle, setMetaTitle] = useState(initialData?.metaTitle || "");
+    const [metaTitleAr, setMetaTitleAr] = useState(initialData?.metaTitle_ar || "");
+    const [metaDesc, setMetaDesc] = useState(initialData?.metaDesc || "");
+    const [metaDescAr, setMetaDescAr] = useState(initialData?.metaDesc_ar || "");
 
     // Auto-generate slug from title when title changes and slug hasn't been manually edited
     const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -103,6 +126,14 @@ export default function BlogForm({ initialData }: { initialData?: Partial<BlogPo
         formData.set('content_ar', contentAr);
         formData.set('image', image);
         formData.set('slug', slug);
+        formData.set('author', author);
+        formData.set('author_ar', authorAr);
+        formData.set('tags', tags);
+        formData.set('tags_ar', tagsAr);
+        formData.set('metaTitle', metaTitle);
+        formData.set('metaTitle_ar', metaTitleAr);
+        formData.set('metaDesc', metaDesc);
+        formData.set('metaDesc_ar', metaDescAr);
         
         try {
             if (initialData?.id) {
@@ -153,10 +184,11 @@ export default function BlogForm({ initialData }: { initialData?: Partial<BlogPo
                 </button>
             </div>
 
-            {/* Hidden inputs for controlled components */}
+            {/* Hidden inputs for controlled components - these are still needed for non-string values or when not directly rendered */}
             <input type="hidden" name="content" value={content} />
             <input type="hidden" name="content_ar" value={contentAr} />
             <input type="hidden" name="image" value={image} />
+            <input type="hidden" name="slug" value={slug} />
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
                 <div style={{ display: currentLang === 'en' ? 'block' : 'none' }}>
@@ -185,14 +217,16 @@ export default function BlogForm({ initialData }: { initialData?: Partial<BlogPo
                     />
                     {errors.title_ar && <p style={{ color: 'red', fontSize: '0.8rem', marginTop: '0.25rem' }}>{errors.title_ar}</p>}
                 </div>
-                {/* Hidden slug input */}
-                <input type="hidden" name="slug" value={slug} />
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
-                <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>{t('author')}</label>
-                    <input name="author" defaultValue={initialData?.author} required className="input" style={{ width: '100%' }} />
+                <div style={{ display: currentLang === 'en' ? 'block' : 'none' }}>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>{t('authorEn')}</label>
+                    <input name="author" value={author} onChange={(e) => setAuthor(e.target.value)} className="input" style={{ width: '100%' }} />
+                </div>
+                <div style={{ display: currentLang === 'ar' ? 'block' : 'none' }} dir="rtl">
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>{t('authorAr')}</label>
+                    <input name="author_ar" value={authorAr} onChange={(e) => setAuthorAr(e.target.value)} className="input" style={{ width: '100%' }} />
                 </div>
                 <div>
                     <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Publish Date</label>
@@ -207,9 +241,15 @@ export default function BlogForm({ initialData }: { initialData?: Partial<BlogPo
                 </div>
             </div>
 
-            <div style={{ marginBottom: '1.5rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>{t('tags')}</label>
-                <input name="tags" defaultValue={defaultTags} className="input" style={{ width: '100%' }} placeholder={t('tagsPlaceholder')} />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
+                <div style={{ display: currentLang === 'en' ? 'block' : 'none' }}>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>{t('tagsEn')}</label>
+                    <input name="tags" value={tags} onChange={(e) => setTags(e.target.value)} className="input" style={{ width: '100%' }} placeholder={t('tagsPlaceholderEn')} />
+                </div>
+                <div style={{ display: currentLang === 'ar' ? 'block' : 'none' }} dir="rtl">
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>{t('tagsAr')}</label>
+                    <input name="tags_ar" value={tagsAr} onChange={(e) => setTagsAr(e.target.value)} className="input" style={{ width: '100%' }} placeholder={t('tagsPlaceholderAr')} />
+                </div>
             </div>
 
             <ImageUpload 
@@ -244,14 +284,22 @@ export default function BlogForm({ initialData }: { initialData?: Partial<BlogPo
 
             <div style={{ borderTop: '1px solid var(--border)', paddingTop: '1.5rem', marginBottom: '1.5rem' }}>
                 <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>{t('seo')}</h3>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem' }}>
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.875rem' }}>{t('metaTitle')}</label>
-                        <input name="metaTitle" defaultValue={initialData?.metaTitle || ""} className="input" style={{ width: '100%' }} placeholder={t('metaTitle')} />
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <div style={{ display: currentLang === 'en' ? 'block' : 'none' }}>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.875rem' }}>{t('metaTitleEn')}</label>
+                        <input name="metaTitle" value={metaTitle} onChange={(e) => setMetaTitle(e.target.value)} className="input" style={{ width: '100%' }} placeholder={t('metaTitleEn')} />
                     </div>
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.875rem' }}>{t('metaDesc')}</label>
-                        <textarea name="metaDesc" defaultValue={initialData?.metaDesc || ""} rows={2} className="input" style={{ width: '100%', fontFamily: 'inherit' }} placeholder={t('metaDesc')} />
+                    <div style={{ display: currentLang === 'ar' ? 'block' : 'none' }} dir="rtl">
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.875rem' }}>{t('metaTitleAr')}</label>
+                        <input name="metaTitle_ar" value={metaTitleAr} onChange={(e) => setMetaTitleAr(e.target.value)} className="input" style={{ width: '100%' }} placeholder={t('metaTitleAr')} />
+                    </div>
+                    <div style={{ display: currentLang === 'en' ? 'block' : 'none' }}>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.875rem' }}>{t('metaDescEn')}</label>
+                        <textarea name="metaDesc" value={metaDesc} onChange={(e) => setMetaDesc(e.target.value)} rows={2} className="input" style={{ width: '100%', fontFamily: 'inherit' }} placeholder={t('metaDescEn')} />
+                    </div>
+                    <div style={{ display: currentLang === 'ar' ? 'block' : 'none' }} dir="rtl">
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600', fontSize: '0.875rem' }}>{t('metaDescAr')}</label>
+                        <textarea name="metaDesc_ar" value={metaDescAr} onChange={(e) => setMetaDescAr(e.target.value)} rows={2} className="input" style={{ width: '100%', fontFamily: 'inherit' }} placeholder={t('metaDescAr')} />
                     </div>
                 </div>
             </div>

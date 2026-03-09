@@ -1,7 +1,8 @@
 import prisma from "@/lib/prisma";
+import { ensureCoreCategoriesExist } from "@/lib/data";
 import { Link } from "@/navigation";
 import { getTranslations, getLocale } from 'next-intl/server';
-import { ArrowRight, Package, Beef, Rabbit } from 'lucide-react';
+import { ArrowRight, Package, Beef, Rabbit, Leaf, Sprout } from 'lucide-react';
 import Image from 'next/image';
 
 export const revalidate = 300;
@@ -13,6 +14,28 @@ interface SubcategoryCard {
   description: string;
   description_ar: string;
   productsCount: number;
+  image?: string | null;
+  icon?: string | null;
+}
+
+function renderCardIcon(icon?: string | null) {
+  const iconName = (icon || "").toLowerCase();
+  const isImageIcon =
+    !!icon &&
+    !["leaf", "sprout", "beef", "rabbit", "package"].includes(iconName) &&
+    (icon.startsWith("/") || icon.startsWith("http://") || icon.startsWith("https://"));
+  if (isImageIcon) {
+    return (
+      <div style={{ position: 'relative', width: '30px', height: '30px' }}>
+        <Image src={icon} alt="Card Icon" fill style={{ objectFit: 'cover', borderRadius: '50%' }} />
+      </div>
+    );
+  }
+  if (iconName === "beef") return <Beef style={{ width: '30px', height: '30px', color: 'white' }} />;
+  if (iconName === "rabbit") return <Rabbit style={{ width: '30px', height: '30px', color: 'white' }} />;
+  if (iconName === "leaf") return <Leaf style={{ width: '30px', height: '30px', color: 'white' }} />;
+  if (iconName === "sprout") return <Sprout style={{ width: '30px', height: '30px', color: 'white' }} />;
+  return <Package style={{ width: '30px', height: '30px', color: 'white' }} />;
 }
 
 export default async function LivestockPage() {
@@ -24,9 +47,9 @@ export default async function LivestockPage() {
   let subcategories: SubcategoryCard[] = [];
 
   try {
-    // Fetch the main category (animal-production)
-    parentCategory = await prisma.category.findUnique({
-      where: { slug: 'animal-production' },
+    await ensureCoreCategoriesExist();
+    parentCategory = await prisma.category.findFirst({
+      where: { slug: { in: ['livestock', 'animal-production'] } },
       include: {
         children: {
           where: { isActive: true },
@@ -45,7 +68,9 @@ export default async function LivestockPage() {
         slug: child.slug,
         description: child.description || '',
         description_ar: child.description_ar || '',
-        productsCount: child._count.products
+        productsCount: child._count.products,
+        image: child.image,
+        icon: child.icon
       }));
     }
   } catch (error) {
@@ -56,6 +81,19 @@ export default async function LivestockPage() {
   const categoryDesc = isAr 
     ? 'منتجات الثروة الحيوانية وحلول تغذية الحيوان' 
     : 'Veterinary products and animal nutrition solutions';
+
+  const animalProductsCard = subcategories.find((item) => item.slug === 'animal-products');
+  const byAnimalTypeCard = subcategories.find((item) => item.slug === 'by-animal-type');
+
+  const animalCardName = isAr ? (animalProductsCard?.name_ar || 'المنتجات الحيوانية') : (animalProductsCard?.name || 'Animal Products');
+  const animalCardDesc = isAr ? (animalProductsCard?.description_ar || 'منتجات عامة لصحة وتغذية الحيوان') : (animalProductsCard?.description || 'General animal health and nutrition products');
+  const animalCardImage = animalProductsCard?.image || "/images/animals-hero.png";
+  const animalCardIcon = animalProductsCard?.icon || "beef";
+
+  const byTypeCardName = isAr ? (byAnimalTypeCard?.name_ar || 'حسب نوع الحيوان') : (byAnimalTypeCard?.name || 'By Animal Type');
+  const byTypeCardDesc = isAr ? (byAnimalTypeCard?.description_ar || 'منتجات مصنفة حسب نوع الحيوان') : (byAnimalTypeCard?.description || 'Products categorized by animal type');
+  const byTypeCardImage = byAnimalTypeCard?.image || "/images/pig.jpg";
+  const byTypeCardIcon = byAnimalTypeCard?.icon || "rabbit";
 
   return (
     <div style={{ direction: isAr ? 'rtl' : 'ltr', overflowX: 'hidden' }}>
@@ -125,8 +163,8 @@ export default async function LivestockPage() {
                 boxShadow: '0 10px 40px rgba(0,0,0,0.15)'
               }}>
                 <Image
-                  src="/images/animals-hero.png"
-                  alt={isAr ? 'المنتجات الحيوانية' : 'Animal Products'}
+                  src={animalCardImage}
+                  alt={animalCardName}
                   fill
                   style={{ objectFit: 'cover' }}
                 />
@@ -149,7 +187,7 @@ export default async function LivestockPage() {
                     justifyContent: 'center',
                     marginBottom: '1rem'
                   }}>
-                    <Beef style={{ width: '30px', height: '30px', color: 'white' }} />
+                    {renderCardIcon(animalCardIcon)}
                   </div>
                   <h3 style={{
                     fontSize: '2rem',
@@ -157,16 +195,14 @@ export default async function LivestockPage() {
                     color: 'white',
                     marginBottom: '0.5rem'
                   }}>
-                    {isAr ? 'المنتجات الحيوانية' : 'Animal Products'}
+                    {animalCardName}
                   </h3>
                   <p style={{
                     fontSize: '1rem',
                     color: 'rgba(255,255,255,0.85)',
                     marginBottom: '1rem'
                   }}>
-                    {isAr 
-                      ? 'منتجات عامة لصحة وتغذية الحيوان' 
-                      : 'General animal health and nutrition products'}
+                    {animalCardDesc}
                   </p>
                   <div style={{
                     display: 'flex',
@@ -197,8 +233,8 @@ export default async function LivestockPage() {
                 boxShadow: '0 10px 40px rgba(0,0,0,0.15)'
               }}>
                 <Image
-                  src="/images/pig.jpg"
-                  alt={isAr ? 'حسب نوع الحيوان' : 'By Animal Type'}
+                  src={byTypeCardImage}
+                  alt={byTypeCardName}
                   fill
                   style={{ objectFit: 'cover' }}
                 />
@@ -221,7 +257,7 @@ export default async function LivestockPage() {
                     justifyContent: 'center',
                     marginBottom: '1rem'
                   }}>
-                    <Rabbit style={{ width: '30px', height: '30px', color: 'white' }} />
+                    {renderCardIcon(byTypeCardIcon)}
                   </div>
                   <h3 style={{
                     fontSize: '2rem',
@@ -229,16 +265,14 @@ export default async function LivestockPage() {
                     color: 'white',
                     marginBottom: '0.5rem'
                   }}>
-                    {isAr ? 'حسب نوع الحيوان' : 'By Animal Type'}
+                    {byTypeCardName}
                   </h3>
                   <p style={{
                     fontSize: '1rem',
                     color: 'rgba(255,255,255,0.85)',
                     marginBottom: '1rem'
                   }}>
-                    {isAr 
-                      ? 'منتجات مصنفة حسب نوع الحيوان' 
-                      : 'Products categorized by animal type'}
+                    {byTypeCardDesc}
                   </p>
                   <div style={{
                     display: 'flex',

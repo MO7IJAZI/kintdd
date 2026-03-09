@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { ensureCoreCategoriesExist } from "@/lib/data";
 import { Link } from "@/navigation";
 import { getTranslations, getLocale } from 'next-intl/server';
 import { ArrowRight, Package } from 'lucide-react';
@@ -14,6 +15,7 @@ interface Product {
   name: string;
   name_ar?: string | null;
   image?: string | null;
+  images?: { url: string; alt?: string | null }[];
   shortDesc?: string | null;
   shortDesc_ar?: string | null;
   order?: number;
@@ -33,6 +35,7 @@ interface CategoryData {
 export async function generateMetadata({ params }: { params: Promise<{ subcategory: string; locale: string }> }): Promise<Metadata> {
   const { subcategory, locale } = await params;
   const isAr = locale === 'ar';
+  await ensureCoreCategoriesExist();
 
   const category = await prisma.category.findUnique({
     where: { slug: subcategory },
@@ -62,6 +65,7 @@ export default async function SubcategoryPage({
 }) {
   const { subcategory, locale } = await params;
   const isAr = locale === 'ar';
+  await ensureCoreCategoriesExist();
 
   // Fetch the subcategory with its parent
   const categoryData = await prisma.category.findUnique({
@@ -69,7 +73,13 @@ export default async function SubcategoryPage({
     include: {
       products: {
         where: { isActive: true },
-        orderBy: { order: 'asc' }
+        orderBy: { order: 'asc' },
+        include: {
+          images: {
+            where: { alt: 'external-card' },
+            select: { url: true, alt: true }
+          }
+        }
       },
       parent: {
         select: { slug: true, name: true, name_ar: true }
@@ -211,6 +221,7 @@ export default async function SubcategoryPage({
               {category!.products.map((product) => {
                 const productName = isAr ? product.name_ar || product.name : product.name;
                 const productDesc = isAr ? product.shortDesc_ar || product.shortDesc : product.shortDesc;
+                const productCardImage = product.images?.[0]?.url || product.image;
 
                 return (
                   <Link
@@ -229,18 +240,18 @@ export default async function SubcategoryPage({
                       boxShadow: '0 1px 3px rgba(0,0,0,0.08)'
                     }}>
                       {/* Product Image */}
-                      {product.image && (
+                      {productCardImage && (
                         <div style={{
                           width: '100%',
-                          height: '200px',
+                          aspectRatio: '1 / 1',
                           position: 'relative',
-                          backgroundColor: '#f8fafc'
+                          backgroundColor: '#fff7ed'
                         }}>
                           <Image
-                            src={product.image}
+                            src={productCardImage}
                             alt={productName}
                             fill
-                            style={{ objectFit: 'cover' }}
+                            style={{ objectFit: 'cover', padding: '0.75rem' }}
                           />
                         </div>
                       )}

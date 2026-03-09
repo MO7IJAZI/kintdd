@@ -1,0 +1,280 @@
+/* ProductForm.css */
+
+/* Variables mapping to global theme */
+:root {
+  --pf-primary: var(--primary, #e9496c);
+  --pf-primary-hover: var(--primary-hover, #d93e60);
+  --pf-secondary: var(--secondary, #142346);
+  --pf-secondary-light: var(--secondary-light, #1c2f5d);
+  --pf-bg: #f8fafc;
+  --pf-card-bg: #ffffff;
+  --pf-border: #e2e8f0;
+  --pf-text-main: #0f172a;
+  --pf-text-muted: #64748b;
+  --pf-radius: 12px;
+  --pf-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Animations */
+@keyframes pf-fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pf-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Main Layout */
+.pf-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-bottom: 5rem;
+  animation: pf-fade-in-up 0.5s ease-out;
+}
+
+.pf-actions-bar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  position: sticky;
+  top: 1rem;
+  z-index: 40;
+}
+
+/* Cards */
+.pf-card {
+  background: var(--pf-card-bg);
+  border-radius: var(--pf-radius);
+  border: 1px solid var(--pf-border);
+  box-shadow: var(--pf-shadow);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  transition: all 0.3s ease;
+  animation: pf-scale-in 0.4s ease-out both;
+}
+
+.pf-card:hover {
+  box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08);
+  border-color: #cbd5e1;
+}
+
+.pf-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--pf-border);
+}
+
+.pf-card-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--pf-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.pf-card-title svg {
+  color: var(--pf-primary);
+}
+
+/* Form Elements */
+.pf-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--pf-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.pf-input,
+.pf-textarea,
+.pf-select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--pf-border);
+  background-color: #f8fafc;
+  color: var(--pf-text-main);
+  transition: all 0.2s;
+  font-size: 0.95rem;
+}
+
+.pf-input:focus,
+.pf-textarea:focus,
+.pf-select:focus {
+  outline: none;
+  border-color: var(--pf-primary);
+  background-color: #fff;
+  box-shadow: 0 0 0 3px rgba(233, 73, 108, 0.1);
+}
+
+/* Language Badges */
+.pf-badge-en {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  background-color: #eff6ff;
+  color: var(--pf-secondary);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-inline-end: 0.5rem;
+}
+
+.pf-badge-ar {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.5rem;
+  background-color: #fdf2f8;
+  color: var(--pf-primary);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-inline-end: 0.5rem;
+}
+
+/* Buttons */
+.pf-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.2s;
+  cursor: pointer;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.pf-btn-primary {
+  background-color: var(--pf-primary);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 12px rgba(233, 73, 108, 0.3);
+}
+
+.pf-btn-primary:hover {
+  background-color: var(--pf-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(233, 73, 108, 0.4);
+}
+
+.pf-btn-secondary {
+  background-color: white;
+  color: var(--pf-secondary);
+  border: 1px solid var(--pf-border);
+}
+
+.pf-btn-secondary:hover {
+  background-color: #f8fafc;
+  border-color: var(--pf-secondary);
+  color: var(--pf-secondary-light);
+}
+
+.pf-btn-danger {
+  background-color: #fff1f2;
+  color: #e11d48;
+  border: 1px solid #fecdd3;
+}
+
+.pf-btn-danger:hover {
+  background-color: #ffe4e6;
+}
+
+/* Language Toggle Switch */
+.pf-lang-switch {
+  display: flex;
+  background-color: #f1f5f9;
+  padding: 0.25rem;
+  border-radius: 8px;
+  border: 1px solid var(--pf-border);
+}
+
+.pf-lang-btn {
+  padding: 0.5rem 1.25rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--pf-text-muted);
+  transition: all 0.3s ease;
+  background: transparent;
+  border: none;
+}
+
+.pf-lang-btn.active {
+  background-color: white;
+  color: var(--pf-secondary);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.pf-lang-btn.active.ar {
+  color: var(--pf-primary); /* Pink for Arabic active */
+}
+
+/* Custom Checkbox/Toggle */
+.pf-toggle-wrapper {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid var(--pf-border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pf-toggle-wrapper:hover {
+  background-color: #fff0f5; /* Light pink hover */
+  border-color: var(--pf-primary);
+}
+
+.pf-toggle-checkbox {
+  width: 1.25rem;
+  height: 1.25rem;
+  accent-color: var(--pf-primary);
+  margin-inline-end: 0.75rem;
+}
+
+/* Grid System Overrides */
+.pf-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .pf-grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Helper Text */
+.pf-helper-text {
+  font-size: 0.75rem;
+  color: var(--pf-text-muted);
+  margin-top: 0.25rem;
+}
+
+.pf-error-text {
+  font-size: 0.75rem;
+  color: var(--pf-primary);
+  margin-top: 0.25rem;
+}

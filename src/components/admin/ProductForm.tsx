@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import dynamic from "next/dynamic";
 import { createProduct, updateProduct } from "@/actions/productActions";
 import { useRouter } from "next/navigation";
@@ -19,8 +19,11 @@ import {
     ArrowRightLeft,
     CheckCircle2,
     Leaf,
-    AlertCircle
+    AlertCircle,
+    Download,
+    Layers
 } from "lucide-react";
+import "./ProductForm.css"; // Import custom styles
 
 // Dynamic imports for heavy components
 const ImageUpload = dynamic(() => import("./ImageUpload"), { 
@@ -33,7 +36,7 @@ const RichTextEditor = dynamic(() => import("./RichTextEditor"), {
 });
 const DownloadsManager = dynamic(() => import("./DownloadsManager"), { ssr: false });
 const TabsManager = dynamic(() => import("./TabsManager"), { ssr: false });
-
+const ProductSectionsManager = dynamic(() => import("./ProductSectionsManager"), { ssr: false });
 
 import type { Tab } from "./TabsManager";
 
@@ -62,8 +65,10 @@ interface Category {
 interface DownloadItem {
     id?: string;
     title: string;
+    title_ar?: string;
     type: string;
     fileUrl: string;
+    fileUrl_ar?: string;
 }
 
 interface ProductData {
@@ -72,7 +77,6 @@ interface ProductData {
     name_ar?: string | null;
     slug: string;
     categoryId?: string | null;
-    sku?: string | null;
     shortDesc?: string | null;
     shortDesc_ar?: string | null;
     description?: string | null;
@@ -80,6 +84,7 @@ interface ProductData {
     tabs?: Tab[] | null;
     tabs_ar?: Tab[] | null;
     image?: string | null;
+    images?: { id?: string; url: string; alt?: string | null }[];
     downloads?: DownloadItem[];
     metaTitle?: string | null;
     metaTitle_ar?: string | null;
@@ -132,17 +137,21 @@ export default function ProductForm({
 
     // Common State
     const [image, setImage] = useState(initialData?.image || "");
-    const [slug, setSlug] = useState(initialData?.slug || "");
-    const [slugEdited, setSlugEdited] = useState(false);
+    const [externalImage, setExternalImage] = useState(
+        Array.isArray(initialData?.images)
+            ? (initialData?.images.find((img) => img.alt === "external-card")?.url || "")
+            : ""
+    );
+    // Slug is now handled automatically by the system
+    const [slug] = useState(initialData?.slug || "");
     const [downloads, setDownloads] = useState<DownloadItem[]>(initialData?.downloads || []);
     const [isFeatured, setIsFeatured] = useState(initialData?.isFeatured || false);
     const [isOrganic, setIsOrganic] = useState(initialData?.isOrganic || false);
     const [order, setOrder] = useState(initialData?.order || 0);
     const [categoryId, setCategoryId] = useState(initialData?.categoryId || "");
-    const [sku, setSku] = useState(initialData?.sku || "");
     const [colorTheme, setColorTheme] = useState(initialData?.colorTheme || "blue");
 
-    // Tab states for Description and Tabs
+    // UI State
     const [descTab, setDescTab] = useState<'en' | 'ar'>('en');
     const [tabsTab, setTabsTab] = useState<'en' | 'ar'>('en');
 
@@ -153,83 +162,72 @@ export default function ProductForm({
         if (errors.name) {
             setErrors(prev => ({ ...prev, name: '' }));
         }
-        if (!slugEdited && !initialData?.id) {
-            setSlug(generateAutoSlug(nameValue, nameAr, 'en'));
-        }
     };
 
     const handleNameArChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newNameAr = e.target.value;
         setNameAr(newNameAr);
-        if (!slugEdited && !initialData?.id && locale === 'ar') {
-            const nameValue = nameEn;
-            setSlug(generateAutoSlug(nameValue, newNameAr, 'ar'));
-        }
-    };
-
-    // Allow manual slug editing
-    const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSlugEdited(true);
-        setSlug(generateSlug(e.target.value));
-        if (errors.slug) {
-            setErrors(prev => ({ ...prev, slug: '' }));
+        if (errors.name_ar) {
+            setErrors(prev => ({ ...prev, name_ar: '' }));
         }
     };
 
     const validate = () => {
         const newErrors: Record<string, string> = {};
         
-        if (!nameEn.trim()) {
-            newErrors.name = tValidation('nameRequired');
-        }
+        if (!nameEn.trim()) newErrors.name = tValidation('nameRequired');
         
-        if (!nameAr.trim()) {
-            newErrors.name_ar = tValidation('nameArRequired');
-        }
-        
-        if (!categoryId) {
-            newErrors.categoryId = tValidation('categoryRequired');
-        }
-
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
-    async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         
         if (!validate()) {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            const firstError = Object.values(errors)[0];
+            alert(firstError || "Please check the form for errors");
             return;
         }
 
         setIsPending(true);
+        const formData = new FormData();
 
-        const formData = new FormData(e.currentTarget);
-        // Explicitly set controlled values
-        formData.set("name", nameEn);
-        formData.set("name_ar", nameAr);
-        formData.set("shortDesc", shortDescEn);
-        formData.set("shortDesc_ar", shortDescAr);
-        formData.set("description", description);
-        formData.set("description_ar", descriptionAr);
-        formData.set("image", image);
-        formData.set("slug", slug);
-        formData.set("categoryId", categoryId);
-        formData.set("sku", sku);
-        formData.set("isFeatured", String(isFeatured));
-        formData.set("isOrganic", String(isOrganic));
-        formData.set("order", String(order));
-        formData.set("colorTheme", colorTheme);
-        formData.set("metaTitle", metaTitleEn);
-        formData.set("metaTitle_ar", metaTitleAr);
-        formData.set("metaDesc", metaDescEn);
-        formData.set("metaDesc_ar", metaDescAr);
-        
-        // Serialize complex data
-        formData.set("downloads", JSON.stringify(downloads));
-        formData.set("tabs", JSON.stringify(tabs));
-        formData.set("tabs_ar", JSON.stringify(tabsAr));
+        // Common
+        formData.append("slug", slug);
+        if (categoryId) formData.append("categoryId", categoryId);
+        if (image) formData.append("image", image);
+        if (externalImage) formData.append("externalImage", externalImage);
+        formData.append("isFeatured", String(isFeatured));
+        formData.append("isOrganic", String(isOrganic));
+        formData.append("order", String(order));
+        formData.append("colorTheme", colorTheme);
+
+        // English
+        formData.append("name", nameEn);
+        formData.append("shortDesc", shortDescEn);
+        formData.append("description", description);
+        formData.append("metaTitle", metaTitleEn);
+        formData.append("metaDesc", metaDescEn);
+        formData.append("tabs", JSON.stringify(tabs));
+
+        // Arabic
+        formData.append("name_ar", nameAr);
+        formData.append("shortDesc_ar", shortDescAr);
+        formData.append("description_ar", descriptionAr);
+        formData.append("metaTitle_ar", metaTitleAr);
+        formData.append("metaDesc_ar", metaDescAr);
+        formData.append("tabs_ar", JSON.stringify(tabsAr));
+
+        // Images (External Card)
+        const imagesList = [];
+        if (externalImage) {
+            imagesList.push({ url: externalImage, alt: "external-card" });
+        }
+        formData.append("images", JSON.stringify(imagesList));
+
+        // Downloads
+        formData.append("downloads", JSON.stringify(downloads));
 
         try {
             if (initialData?.id) {
@@ -237,267 +235,282 @@ export default function ProductForm({
             } else {
                 await createProduct(formData);
             }
-
-            // Use window.location.href to force a full reload and ensure fresh data
-            // This bypasses any client-side cache that might be stale
-            window.location.href = "/admin/products";
+            router.push(`/${locale}/admin/products`);
+            router.refresh();
         } catch (error) {
             console.error("Error saving product:", error);
-            setErrors(prev => ({ 
-                ...prev, 
-                submit: error instanceof Error ? error.message : "Failed to save product" 
-            }));
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            alert(tCommon('errorOccurred'));
+        } finally {
             setIsPending(false);
         }
-    }
+    };
 
     return (
-        <form onSubmit={handleSubmit} className="card" style={{ padding: '2.5rem', maxWidth: '1200px', backgroundColor: 'white', margin: '0 auto' }}>
-            {Object.keys(errors).length > 0 && (
-                <div className="mb-8 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-3 text-red-700">
-                    <AlertCircle className="w-5 h-5 shrink-0" />
+        <form onSubmit={handleSubmit} className="pf-container space-y-8">
+            {/* Action Bar */}
+            <div className="pf-actions-bar">
+                <button
+                    type="button"
+                    onClick={() => router.back()}
+                    className="pf-btn pf-btn-secondary"
+                >
+                    <X className="w-4 h-4" />
+                    {tCommon('cancel')}
+                </button>
+                <button
+                    type="submit"
+                    disabled={isPending}
+                    className="pf-btn pf-btn-primary"
+                >
+                    {isPending ? (
+                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                        <Save className="w-4 h-4" />
+                    )}
+                    {initialData?.id ? tCommon('saveChanges') : tCommon('create')}
+                </button>
+            </div>
+
+            {/* CARD 1: Basic Information */}
+            <div className="pf-card">
+                <div className="pf-card-header">
+                    <h2 className="pf-card-title">
+                        <LayoutGrid className="w-5 h-5" />
+                        {t('sections.basicInfo')}
+                    </h2>
+                </div>
+                
+                <div className="pf-grid pf-grid-2">
+                    {/* English Name */}
                     <div>
-                        <p className="font-medium">{tValidation('fixErrors')}</p>
-                        {errors.submit && <p className="text-sm mt-1">{errors.submit}</p>}
+                        <label className="pf-label flex items-center gap-2">
+                            <span className="pf-badge-en">EN</span>
+                            {t('fields.productName')}
+                            <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            value={nameEn}
+                            onChange={handleNameChange}
+                            className={`pf-input ${errors.name ? 'border-red-300' : ''}`}
+                            placeholder="Product Name"
+                            dir="ltr"
+                        />
+                        {errors.name && <p className="pf-error-text">{errors.name}</p>}
+                    </div>
+
+                    {/* Arabic Name */}
+                    <div>
+                        <label className="pf-label flex items-center gap-2">
+                            <span className="pf-badge-ar">AR</span>
+                            {t('fields.productNameAr')}
+                        </label>
+                        <input
+                            type="text"
+                            value={nameAr}
+                            onChange={handleNameArChange}
+                            className="pf-input"
+                            placeholder="اسم المنتج"
+                            dir="rtl"
+                        />
+                    </div>
+
+                    {/* Slug - HIDDEN - Auto Generated */}
+                    {/* <div className="md:col-span-2">
+                        <label className="pf-label flex items-center gap-2">
+                            <Globe className="w-4 h-4 text-slate-400" />
+                            {t('fields.slug')}
+                            <span className="text-red-500">*</span>
+                        </label>
+                        <div className="flex rounded-lg shadow-sm">
+                            <span className="inline-flex items-center px-3 rounded-s-lg border border-e-0 border-slate-200 bg-slate-50 text-slate-500 text-sm">
+                                /product/
+                            </span>
+                            <input
+                                type="text"
+                                value={slug}
+                                onChange={handleSlugChange}
+                                className={`pf-input !rounded-s-none ${errors.slug ? 'border-red-300' : ''}`}
+                            />
+                        </div>
+                        {errors.slug && <p className="pf-error-text">{errors.slug}</p>}
+                    </div> */}
+
+                    {/* Category */}
+                    <div>
+                        <label className="pf-label">{t('fields.category')}</label>
+                        <select
+                            value={categoryId}
+                            onChange={(e) => setCategoryId(e.target.value)}
+                            className="pf-select"
+                        >
+                            <option value="">{t('selectCategory')}</option>
+                            {categories.map((cat) => (
+                                <option key={cat.id} value={cat.id}>
+                                    {isArLocale ? (cat.name_ar || cat.name) : cat.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Order */}
+                    <div>
+                        <label className="pf-label">{t('fields.displayOrder')}</label>
+                        <input
+                            type="number"
+                            value={order}
+                            onChange={(e) => setOrder(parseInt(e.target.value))}
+                            className="pf-input"
+                        />
+                    </div>
+
+                    {/* Color Theme */}
+                    <div className="md:col-span-2 space-y-2">
+                        <label className="pf-label flex items-center gap-2">
+                            <Settings className="w-4 h-4 text-slate-400" />
+                            {t('fields.colorTheme') || "Color Theme"}
+                        </label>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-3">
+                            {[
+                                { value: 'blue', label: 'Blue', color: '#3b82f6' },
+                                { value: 'green', label: 'Green', color: '#10b981' },
+                                { value: 'purple', label: 'Purple', color: '#8b5cf6' },
+                                { value: 'orange', label: 'Orange', color: '#f59e0b' },
+                                { value: 'red', label: 'Red', color: '#ef4444' },
+                                { value: 'pink', label: 'Pink', color: '#ec4899' },
+                                { value: 'primary', label: 'KINT Pink', color: '#e9496c' }, // Website Primary
+                                { value: 'secondary', label: 'KINT Navy', color: '#142346' }, // Website Secondary
+                                { value: 'dark', label: 'Dark', color: '#1e293b' },
+                                { value: 'light', label: 'Light', color: '#f8fafc', border: true },
+                            ].map((theme) => (
+                                <button
+                                    key={theme.value}
+                                    type="button"
+                                    onClick={() => setColorTheme(theme.value)}
+                                    className={`
+                                        relative flex items-center justify-start gap-2 p-2 rounded-lg border transition-all
+                                        ${colorTheme === theme.value 
+                                            ? 'border-slate-900 ring-1 ring-slate-900 bg-slate-50' 
+                                            : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                                        }
+                                    `}
+                                >
+                                    <span 
+                                        className={`w-6 h-6 rounded-full shadow-sm shrink-0 ${theme.border ? 'border border-slate-200' : ''}`}
+                                        style={{ backgroundColor: theme.color }}
+                                    />
+                                    <span className="text-sm font-medium text-slate-700 truncate">
+                                        {theme.label}
+                                    </span>
+                                    {colorTheme === theme.value && (
+                                        <div className="absolute top-1 right-1 w-2 h-2 bg-slate-900 rounded-full" />
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Toggles */}
+                    <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-100">
+                        <label className="pf-toggle-wrapper">
+                            <input
+                                type="checkbox"
+                                checked={isFeatured}
+                                onChange={(e) => setIsFeatured(e.target.checked)}
+                                className="pf-toggle-checkbox"
+                            />
+                            <div className="flex items-center gap-2">
+                                <div className="p-1.5 rounded-full bg-amber-100 text-amber-600">
+                                    <CheckCircle2 className="w-4 h-4" />
+                                </div>
+                                <span className="font-medium text-slate-700">{t('fields.featured')}</span>
+                            </div>
+                        </label>
+
+                        <label className="pf-toggle-wrapper">
+                            <input
+                                type="checkbox"
+                                checked={isOrganic}
+                                onChange={(e) => setIsOrganic(e.target.checked)}
+                                className="pf-toggle-checkbox"
+                            />
+                            <div className="flex items-center gap-2">
+                                <div className="p-1.5 rounded-full bg-green-100 text-green-600">
+                                    <Leaf className="w-4 h-4" />
+                                </div>
+                                <span className="font-medium text-slate-700">{t('fields.organic')}</span>
+                            </div>
+                        </label>
                     </div>
                 </div>
-            )}
-
-            <div className="flex justify-between items-center mb-8 border-b border-slate-200 pb-4">
-                <h1 className="text-2xl font-bold text-slate-900">
-                    {initialData?.id ? t('update') : t('create')}
-                </h1>
-                <div className="flex gap-2">
-                    <button type="submit" disabled={isPending} className="btn btn-primary px-6">
-                        {isPending ? t('processing') : t('saveChanges')}
-                    </button>
-                    <button type="button" onClick={() => router.back()} className="btn btn-outline px-6">
-                        {tCommon('cancel')}
-                    </button>
-                </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-2">
-                        {t('productName')} (EN) <span className="text-red-500">*</span>
-                    </label>
-                    <input 
-                        name="name" 
-                        value={nameEn} 
-                        onChange={handleNameChange} 
-                        className={`input w-full ${errors.name ? 'border-red-500 focus:ring-red-500' : ''}`}
-                        placeholder="e.g., Premium Tomato Seeds"
-                    />
-                    {errors.name && (
-                        <p className="mt-1 text-sm text-red-500 flex items-center gap-1">
-                            <AlertCircle className="w-4 h-4" />
-                            {errors.name}
-                        </p>
-                    )}
+            {/* CARD 2: Description */}
+            <div className="pf-card">
+                <div className="pf-card-header">
+                    <h2 className="pf-card-title">
+                        <FileText className="w-5 h-5" />
+                        {t('sections.shortDescription')}
+                    </h2>
                 </div>
-                <div dir="rtl">
-                    <label className="block text-sm font-bold text-slate-700 mb-2">
-                        {t('productName')} (AR) <span className="text-red-500">*</span>
-                    </label>
-                    <input 
-                        name="name_ar" 
-                        value={nameAr} 
-                        onChange={handleNameArChange} 
-                        className={`input w-full ${errors.name_ar ? 'border-red-500 focus:ring-red-500' : ''}`}
-                        placeholder="اسم المنتج بالعربية"
-                    />
-                    {errors.name_ar && (
-                        <p className="mt-1 text-sm text-red-500 flex items-center gap-1">
-                            <AlertCircle className="w-4 h-4" />
-                            {errors.name_ar}
-                        </p>
-                    )}
+                <div className="pf-grid pf-grid-2 mb-8">
+                    <div>
+                        <label className="pf-label flex items-center gap-2">
+                            <span className="pf-badge-en">EN</span>
+                            English
+                        </label>
+                        <textarea
+                            value={shortDescEn}
+                            onChange={(e) => setShortDescEn(e.target.value)}
+                            className="pf-textarea h-24 resize-none"
+                            dir="ltr"
+                        />
+                    </div>
+                    <div>
+                        <label className="pf-label flex items-center gap-2">
+                            <span className="pf-badge-ar">AR</span>
+                            العربية
+                        </label>
+                        <textarea
+                            value={shortDescAr}
+                            onChange={(e) => setShortDescAr(e.target.value)}
+                            className="pf-textarea h-24 resize-none"
+                            dir="rtl"
+                        />
+                    </div>
                 </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                {/* Slug field hidden to prevent manual errors */}
-                <input type="hidden" name="slug" value={slug} />
-                
-                <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-2">
-                        {t('category')} <span className="text-red-500">*</span>
-                    </label>
-                    <select 
-                        name="categoryId" 
-                        value={categoryId} 
-                        onChange={(e) => {
-                            setCategoryId(e.target.value);
-                            if (errors.categoryId) setErrors(prev => ({ ...prev, categoryId: '' }));
-                        }}
-                        className={`input w-full ${errors.categoryId ? 'border-red-500 focus:ring-red-500' : ''}`}
-                    >
-                        <option value="">{t('selectCategory')}</option>
-                        {categories.map((c) => {
-                            const label = isArLocale ? (c.name_ar || c.name) : c.name;
-                            let fullPath = label;
-                            if (c.parent) {
-                                const parentLabel = isArLocale ? (c.parent.name_ar || c.parent.name) : c.parent.name;
-                                fullPath = `${parentLabel} / ${label}`;
-                            }
-                            return (
-                                <option key={c.id} value={c.id}>
-                                    {fullPath}
-                                </option>
-                            );
-                        })}
-                    </select>
-                    {errors.categoryId && (
-                        <p className="mt-1 text-sm text-red-500 flex items-center gap-1">
-                            <AlertCircle className="w-4 h-4" />
-                            {errors.categoryId}
-                        </p>
-                    )}
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-                <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-2">
-                        {t('sku')}
-                    </label>
-                    <input 
-                        name="sku" 
-                        value={sku} 
-                        onChange={(e) => setSku(e.target.value)}
-                        className="input w-full"
-                        placeholder="PROD-001"
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-2">
-                        {t('displayOrder')}
-                    </label>
-                    <input 
-                        type="number" 
-                        value={order} 
-                        onChange={(e) => setOrder(parseInt(e.target.value) || 0)} 
-                        className="input w-full"
-                        placeholder="0"
-                    />
-                </div>
-                <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-2">
-                        {t('colorTheme')}
-                    </label>
-                    <select
-                        value={colorTheme}
-                        onChange={(e) => setColorTheme(e.target.value)}
-                        className="input w-full"
-                    >
-                        <option value="blue">Blue</option>
-                        <option value="green">Green</option>
-                        <option value="purple">Purple</option>
-                        <option value="orange">Orange</option>
-                        <option value="pink">Pink</option>
-                        <option value="slate">Slate</option>
-                    </select>
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                 <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-2">
-                        {t('summary')} (EN)
-                    </label>
-                    <textarea
-                        name="shortDesc"
-                        value={shortDescEn}
-                        onChange={(e) => setShortDescEn(e.target.value)}
-                        rows={3}
-                        className="input w-full resize-none"
-                        placeholder="Brief summary..."
-                    />
-                </div>
-                <div dir="rtl">
-                    <label className="block text-sm font-bold text-slate-700 mb-2">
-                        {t('summary')} (AR)
-                    </label>
-                    <textarea
-                        name="shortDesc_ar"
-                        value={shortDescAr}
-                        onChange={(e) => setShortDescAr(e.target.value)}
-                        rows={3}
-                        className="input w-full resize-none"
-                        placeholder="وصف مختصر..."
-                    />
-                </div>
-            </div>
-
-            <div className="mb-8">
-                <ImageUpload
-                    label={t('image')}
-                    value={image}
-                    onChange={setImage}
-                />
-            </div>
-
-            <div className="flex gap-8 mb-8 p-4 bg-slate-50 rounded-lg border border-slate-200">
-                <label className="flex items-center gap-2 cursor-pointer">
-                    <input 
-                        type="checkbox" 
-                        checked={isFeatured} 
-                        onChange={(e) => setIsFeatured(e.target.checked)}
-                        className="w-5 h-5 accent-primary"
-                    />
-                    <span className="font-bold text-slate-700">{t('showOnHomepage')}</span>
-                </label>
-
-                <label className="flex items-center gap-2 cursor-pointer">
-                    <input 
-                        type="checkbox" 
-                        checked={isOrganic} 
-                        onChange={(e) => setIsOrganic(e.target.checked)}
-                        className="w-5 h-5 accent-green-600"
-                    />
-                    <span className="font-bold text-slate-700">{t('certifiedOrganic')}</span>
-                </label>
-            </div>
-
-            {/* Description Section with Tabs */}
-            <div className="mb-8">
-                <div className="flex gap-1 mb-2 border-b border-slate-200">
-                    <button
-                        type="button"
-                        onClick={() => setDescTab('en')}
-                        className={`px-4 py-2 font-bold text-sm rounded-t-lg transition-colors ${
-                            descTab === 'en' 
-                                ? 'bg-slate-100 text-slate-900 border-t border-x border-slate-200' 
-                                : 'text-slate-500 hover:bg-slate-50'
-                        }`}
-                    >
-                        {t('descriptionEn')}
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => setDescTab('ar')}
-                        className={`px-4 py-2 font-bold text-sm rounded-t-lg transition-colors ${
-                            descTab === 'ar' 
-                                ? 'bg-slate-100 text-slate-900 border-t border-x border-slate-200' 
-                                : 'text-slate-500 hover:bg-slate-50'
-                        }`}
-                    >
-                        {t('descriptionAr')}
-                    </button>
+                <div className="pf-card-header">
+                    <h2 className="pf-card-title">
+                        <FileText className="w-5 h-5" />
+                        {t('sections.longDescription')}
+                    </h2>
+                    <div className="pf-lang-switch">
+                        <button
+                            type="button"
+                            onClick={() => setDescTab('en')}
+                            className={`pf-lang-btn ${descTab === 'en' ? 'active' : ''}`}
+                        >
+                            English
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setDescTab('ar')}
+                            className={`pf-lang-btn ar ${descTab === 'ar' ? 'active' : ''}`}
+                        >
+                            العربية
+                        </button>
+                    </div>
                 </div>
                 
                 <div className={descTab === 'en' ? 'block' : 'hidden'}>
                     <RichTextEditor
-                        label=""
                         value={description}
                         onChange={setDescription}
                     />
                 </div>
-                <div className={descTab === 'ar' ? 'block' : 'hidden'} dir="rtl">
+                <div className={descTab === 'ar' ? 'block' : 'hidden'}>
                     <RichTextEditor
-                        label=""
                         value={descriptionAr}
                         onChange={setDescriptionAr}
                         dir="rtl"
@@ -505,118 +518,188 @@ export default function ProductForm({
                 </div>
             </div>
 
-            {/* Tabs Manager Section with Tabs */}
-            <div className="mb-8">
-                <div className="flex gap-1 mb-2 border-b border-slate-200">
-                    <button
-                        type="button"
-                        onClick={() => setTabsTab('en')}
-                        className={`px-4 py-2 font-bold text-sm rounded-t-lg transition-colors ${
-                            tabsTab === 'en' 
-                                ? 'bg-slate-100 text-slate-900 border-t border-x border-slate-200' 
-                                : 'text-slate-500 hover:bg-slate-50'
-                        }`}
-                    >
-                        Additional Tabs (EN)
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => setTabsTab('ar')}
-                        className={`px-4 py-2 font-bold text-sm rounded-t-lg transition-colors ${
-                            tabsTab === 'ar' 
-                                ? 'bg-slate-100 text-slate-900 border-t border-x border-slate-200' 
-                                : 'text-slate-500 hover:bg-slate-50'
-                        }`}
-                    >
-                        Additional Tabs (AR)
-                    </button>
+            {/* CARD 3: Product Info Tabs (Features) */}
+            <div className="pf-card">
+                <div className="pf-card-header">
+                    <h2 className="pf-card-title">
+                        <LayoutGrid className="w-5 h-5" />
+                        {t('sections.features')}
+                    </h2>
+                    <div className="pf-lang-switch">
+                        <button
+                            type="button"
+                            onClick={() => setTabsTab('en')}
+                            className={`pf-lang-btn ${tabsTab === 'en' ? 'active' : ''}`}
+                        >
+                            English
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setTabsTab('ar')}
+                            className={`pf-lang-btn ar ${tabsTab === 'ar' ? 'active' : ''}`}
+                        >
+                            العربية
+                        </button>
+                    </div>
                 </div>
-                
+
                 <div className={tabsTab === 'en' ? 'block' : 'hidden'}>
-                    <TabsManager initialData={tabs} onChange={setTabs} />
+                    <TabsManager
+                        initialData={tabs}
+                        onChange={setTabs}
+                    />
                 </div>
-                <div className={tabsTab === 'ar' ? 'block' : 'hidden'} dir="rtl">
-                    <TabsManager initialData={tabsAr} onChange={setTabsAr} dir="rtl" />
+                <div className={tabsTab === 'ar' ? 'block' : 'hidden'}>
+                    <TabsManager
+                        initialData={tabsAr}
+                        onChange={setTabsAr}
+                        dir="rtl"
+                    />
                 </div>
             </div>
 
-            <div className="mb-8 border-t border-slate-200 pt-8">
-                <DownloadsManager 
+            {/* CARD 4: Images */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Main Image */}
+                <div className="pf-card">
+                    <div className="pf-card-header">
+                        <h2 className="pf-card-title">
+                            <ImageIcon className="w-5 h-5" />
+                            {t('sections.mainImage')}
+                        </h2>
+                    </div>
+                    <ImageUpload
+                        value={image}
+                        onChange={setImage}
+                    />
+                    <p className="mt-4 pf-helper-text flex items-start gap-2 bg-slate-50 p-3 rounded-lg">
+                        <AlertCircle className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
+                        {tCommon('recommendedSize')}
+                    </p>
+                </div>
+
+                {/* External Card Image */}
+                <div className="pf-card">
+                    <div className="pf-card-header">
+                        <h2 className="pf-card-title">
+                            <ImageIcon className="w-5 h-5 text-amber-600" />
+                            {t('sections.externalCardImage')}
+                        </h2>
+                    </div>
+                    <ImageUpload
+                        value={externalImage}
+                        onChange={setExternalImage}
+                    />
+                    <p className="mt-4 pf-helper-text flex items-start gap-2 bg-slate-50 p-3 rounded-lg">
+                        <AlertCircle className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
+                        {tCommon('externalCardNote')}
+                    </p>
+                </div>
+            </div>
+
+            {/* CARD 5: Downloads */}
+            <div className="pf-card">
+                <div className="pf-card-header">
+                    <h2 className="pf-card-title">
+                        <Download className="w-5 h-5" />
+                        {t('sections.downloads')}
+                    </h2>
+                </div>
+                <DownloadsManager
                     initialData={downloads}
                     onChange={setDownloads}
                 />
             </div>
 
+            {/* CARD 6: SEO */}
+            <div className="pf-card">
+                <div className="pf-card-header">
+                    <h2 className="pf-card-title">
+                        <Search className="w-5 h-5" />
+                        {t('sections.seoSettings')}
+                    </h2>
+                </div>
 
-
-            <div className="mb-8 border-t border-slate-200 pt-8">
-                <h3 className="text-lg font-bold text-slate-900 mb-4">{t('seo')}</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="pf-grid pf-grid-2 gap-8">
+                    {/* English SEO */}
                     <div className="space-y-4">
+                        <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                            <span className="pf-badge-en">EN</span>
+                            English SEO
+                        </h3>
+                        
                         <div>
-                            <label className="block text-sm font-bold text-slate-700 mb-2">
-                                {t('metaTitle')} (EN)
-                            </label>
-                            <input 
-                                name="metaTitle" 
-                                value={metaTitleEn} 
-                                onChange={(e) => setMetaTitleEn(e.target.value)} 
-                                className="input w-full"
-                                placeholder="SEO Title"
+                            <label className="pf-label">{t('fields.metaTitle')}</label>
+                            <input
+                                type="text"
+                                value={metaTitleEn}
+                                onChange={(e) => setMetaTitleEn(e.target.value)}
+                                className="pf-input"
+                                placeholder="Meta Title"
                             />
+                            <p className="pf-helper-text">Recommended length: 50-60 characters</p>
                         </div>
+
                         <div>
-                            <label className="block text-sm font-bold text-slate-700 mb-2">
-                                {t('metaDesc')} (EN)
-                            </label>
-                            <textarea 
-                                name="metaDesc" 
-                                value={metaDescEn} 
-                                onChange={(e) => setMetaDescEn(e.target.value)} 
-                                rows={3} 
-                                className="input w-full resize-none"
-                                placeholder="SEO Description"
+                            <label className="pf-label">{t('fields.metaDescription')}</label>
+                            <textarea
+                                value={metaDescEn}
+                                onChange={(e) => setMetaDescEn(e.target.value)}
+                                className="pf-textarea h-32 resize-none"
+                                placeholder="Meta Description"
                             />
+                            <p className="pf-helper-text">Recommended length: 150-160 characters</p>
                         </div>
                     </div>
-                    <div className="space-y-4" dir="rtl">
+
+                    {/* Arabic SEO */}
+                    <div className="space-y-4">
+                        <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                            <span className="pf-badge-ar">AR</span>
+                            Arabic SEO
+                        </h3>
+                        
                         <div>
-                            <label className="block text-sm font-bold text-slate-700 mb-2">
-                                {t('metaTitle')} (AR)
-                            </label>
-                            <input 
-                                name="metaTitle_ar" 
-                                value={metaTitleAr} 
-                                onChange={(e) => setMetaTitleAr(e.target.value)} 
-                                className="input w-full"
-                                placeholder="عنوان SEO"
+                            <label className="pf-label">{t('fields.metaTitleAr')}</label>
+                            <input
+                                type="text"
+                                value={metaTitleAr}
+                                onChange={(e) => setMetaTitleAr(e.target.value)}
+                                className="pf-input"
+                                placeholder="عنوان الميتا"
+                                dir="rtl"
                             />
                         </div>
+
                         <div>
-                            <label className="block text-sm font-bold text-slate-700 mb-2">
-                                {t('metaDesc')} (AR)
-                            </label>
-                            <textarea 
-                                name="metaDesc_ar" 
-                                value={metaDescAr} 
-                                onChange={(e) => setMetaDescAr(e.target.value)} 
-                                rows={3} 
-                                className="input w-full resize-none"
-                                placeholder="وصف SEO"
+                            <label className="pf-label">{t('fields.metaDescriptionAr')}</label>
+                            <textarea
+                                value={metaDescAr}
+                                onChange={(e) => setMetaDescAr(e.target.value)}
+                                className="pf-textarea h-32 resize-none"
+                                placeholder="وصف الميتا"
+                                dir="rtl"
                             />
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="flex justify-end gap-4 border-t border-slate-200 pt-8">
-                <button type="button" onClick={() => router.back()} className="btn btn-outline px-8 py-3">
-                    {tCommon('cancel')}
-                </button>
-                <button type="submit" disabled={isPending} className="btn btn-primary px-8 py-3">
-                    {isPending ? t('processing') : t('saveChanges')}
-                </button>
-            </div>
+            {/* CARD 7: Product Sections (Only in Edit Mode) - REMOVED per user request */}
+            {/* {initialData?.id && (
+                <div className="pf-card">
+                    <div className="pf-card-header">
+                        <h2 className="pf-card-title">
+                            <Layers className="w-5 h-5" />
+                            {t('sections.productSections') || "Product Sections"}
+                        </h2>
+                    </div>
+                    <ProductSectionsManager 
+                        productId={initialData.id}
+                        initialSections={initialSections}
+                    />
+                </div>
+            )} */}
         </form>
     );
 }

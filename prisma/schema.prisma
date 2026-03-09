@@ -121,7 +121,9 @@ model ProductImage {
 model Download {
   id        String   @id @default(cuid())
   title     String
+  title_ar  String?
   fileUrl   String
+  fileUrl_ar String?
   type      String   // SDS, Label, Brochure
   productId String?
   product   Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
@@ -158,7 +160,8 @@ model Catalog {
   description String?  @db.Text
   description_ar String? @db.Text
   fileUrl     String
-  category    String   // agricultural | animal
+  fileUrl_ar  String?
+  category    String   // agricultural | animal | technical
   order       Int      @default(0)
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
@@ -186,24 +189,6 @@ model Headquarter {
   @@map("headquarters")
 }
 
-// Company Data Model (Registration, VAT, etc.)
-model CompanyData {
-  id          String   @id @default(cuid())
-  companyName String   @default("KINT Kafri International")
-  companyName_ar String? @default("KINT Kafri International")
-  address     String?  @db.Text
-  address_ar  String?  @db.Text
-  courtInfo   String?  @db.Text
-  courtInfo_ar String? @db.Text
-  ncrNumber   String?  @default("0000100441")
-  vatNumber   String?  @default("PL 637-011-20-65")
-  capital     String?  @default("PLN 177 000")
-  capital_ar  String?  @default("PLN 177 000")
-  
-  updatedAt   DateTime @updatedAt
-
-  @@map("company_data")
-}
 
 // Crop Model
 model Crop {
@@ -216,6 +201,7 @@ model Crop {
   harvestSeason_ar String?
   image             String?
   pdfUrl            String?
+  pdfUrl_ar         String? // Added: PDF for Arabic
   description       String?     @db.Text
   description_ar    String?     @db.Text
   stages      CropStage[]
@@ -261,7 +247,9 @@ model BlogPost {
   content_ar  String?  @db.LongText
   image       String?
   author      String
+  author_ar   String?
   tags        String?  @db.Text // JSON array stored as text
+  tags_ar     String?  @db.Text // JSON array stored as text
   isPublished Boolean  @default(false)
   publishedAt DateTime?
   metaTitle   String?
@@ -409,41 +397,6 @@ model JobApplication {
   @@map("job_applications")
 }
 
-// Certificate Model for Gallery Images
-model Certificate {
-  id          String   @id @default(cuid())
-  title       String
-  title_ar    String?
-  description String?  @db.Text
-  description_ar String? @db.Text
-  imageUrl    String
-  order       Int      @default(0)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@index([order])
-  @@index([isActive])
-  @@map("certificates")
-}
-
-// Award Model for Gallery Images
-model Award {
-  id          String   @id @default(cuid())
-  title       String
-  title_ar    String?
-  description String?  @db.Text
-  description_ar String? @db.Text
-  imageUrl    String
-  order       Int      @default(0)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@index([order])
-  @@index([isActive])
-  @@map("awards")
-}
 
 // PDF Document Model for managing downloadable files
 model Document {
@@ -547,4 +500,3 @@ model AnimalTypeTabImage {
   @@index([order])
   @@map("animal_type_tab_images")
 }
-

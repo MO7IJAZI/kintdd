@@ -41,6 +41,10 @@ export const routing = defineRouting({
       en: '/products',
       ar: '/products'
     },
+    '/products/[slug]': {
+      en: '/products/[slug]',
+      ar: '/products/[slug]'
+    },
     '/products/livestock': {
       en: '/products/livestock',
       ar: '/products/livestock'
@@ -52,6 +56,10 @@ export const routing = defineRouting({
     '/products/livestock/by-animal-type': {
       en: '/products/livestock/by-animal-type',
       ar: '/products/livestock/by-animal-type'
+    },
+    '/products/livestock/by-animal-type/[slug]': {
+      en: '/products/livestock/by-animal-type/[slug]',
+      ar: '/products/livestock/by-animal-type/[slug]'
     },
     '/products/livestock/[slug]': {
       en: '/products/livestock/[slug]',
@@ -93,6 +101,10 @@ export const routing = defineRouting({
       en: '/catalogs',
       ar: '/catalogs'
     },
+    '/catalogs/viewer': {
+      en: '/catalogs/viewer',
+      ar: '/catalogs/viewer'
+    },
     '/about': {
       en: '/about',
       ar: '/about'
@@ -109,9 +121,9 @@ export const routing = defineRouting({
       en: '/contact',
       ar: '/contact'
     },
-    '/crop-farming': {
-      en: '/crop-farming',
-      ar: '/crop-farming'
+    '/crops': {
+      en: '/crops',
+      ar: '/crops'
     },
     '/crops/[slug]': {
       en: '/crops/[slug]',
@@ -137,33 +149,9 @@ export const routing = defineRouting({
       en: '/experts-forum/[slug]',
       ar: '/experts-forum/[slug]'
     },
-    '/about/rd-centre': {
-      en: '/about/rd-centre',
-      ar: '/about/rd-centre'
-    },
-    '/about/production-plants': {
-      en: '/about/production-plants',
-      ar: '/about/production-plants'
-    },
-    '/about/logistics-centre': {
-      en: '/about/logistics-centre',
-      ar: '/about/logistics-centre'
-    },
-    '/about/company-data': {
-      en: '/about/company-data',
-      ar: '/about/company-data'
-    },
     '/about/career': {
       en: '/about/career',
       ar: '/about/career'
-    },
-    '/about/certificates': {
-      en: '/about/certificates',
-      ar: '/about/certificates'
-    },
-    '/about/awards': {
-      en: '/about/awards',
-      ar: '/about/awards'
     },
     '/contact/headquarter': {
       en: '/contact/headquarter',
@@ -186,6 +174,10 @@ export const routing = defineRouting({
       en: '/admin/products',
       ar: '/admin/products'
     },
+    '/admin/product-cards': {
+      en: '/admin/product-cards',
+      ar: '/admin/product-cards'
+    },
     '/admin/products/new': {
       en: '/admin/products/new',
       ar: '/admin/products/new'
@@ -205,6 +197,10 @@ export const routing = defineRouting({
     '/admin/crops/[id]': {
       en: '/admin/crops/[id]',
       ar: '/admin/crops/[id]'
+    },
+    '/admin/categories': {
+      en: '/admin/categories',
+      ar: '/admin/categories'
     },
     '/admin/expert-articles': {
       en: '/admin/expert-articles',
@@ -246,21 +242,13 @@ export const routing = defineRouting({
       en: '/admin/applications',
       ar: '/admin/applications'
     },
-    '/admin/certificates': {
-      en: '/admin/certificates',
-      ar: '/admin/certificates'
-    },
-    '/admin/awards': {
-      en: '/admin/awards',
-      ar: '/admin/awards'
+    '/admin/agents': {
+      en: '/admin/agents',
+      ar: '/admin/agents'
     },
     '/admin/headquarter': {
       en: '/admin/headquarter',
       ar: '/admin/headquarter'
-    },
-    '/admin/company-data': {
-      en: '/admin/company-data',
-      ar: '/admin/company-data'
     },
     '/admin/inquiries': {
       en: '/admin/inquiries',

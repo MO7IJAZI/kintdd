@@ -14,6 +14,8 @@ interface Crop {
     description: string | null;
     description_ar?: string | null;
     image: string | null;
+    category?: string | null;
+    category_ar?: string | null;
 }
 
 export default function CropGuidesList({ initialCrops }: { initialCrops: Crop[] }) {
@@ -26,12 +28,42 @@ export default function CropGuidesList({ initialCrops }: { initialCrops: Crop[] 
     const [searchQuery, setSearchQuery] = useState('');
     const [activeTab, setActiveTab] = useState('ALL');
 
-    const tabs = [
-        { id: 'ALL', label: t('all') },
-        { id: 'ARABLE CROPS', label: t('arable') },
-        { id: 'VEGETABLE CROPS', label: t('vegetable') },
-        { id: 'FRUIT CROPS', label: t('fruit') }
-    ];
+    const categories = useMemo(() => {
+        const keyMap: Record<string, string> = {
+            vegetables: 'vegetables',
+            fruits: 'fruits',
+            legumes: 'legumes',
+            cereals: 'cereals',
+            industrial: 'industrial',
+            herbs: 'herbs'
+        };
+        const getCategoryLabel = (category: string, categoryAr?: string | null) => {
+            if (isRtl && categoryAr) return categoryAr;
+            const key = keyMap[category];
+            if (key) return t(key);
+            return category
+                .split('-')
+                .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+                .join(' ');
+        };
+        const map = new Map<string, string>();
+        initialCrops.forEach((crop) => {
+            const category = crop.category?.trim();
+            if (!category) return;
+            if (!map.has(category)) {
+                map.set(category, getCategoryLabel(category, crop.category_ar));
+                return;
+            }
+            if (isRtl && crop.category_ar) {
+                map.set(category, crop.category_ar);
+            }
+        });
+        return Array.from(map.entries()).map(([id, label]) => ({ id, label }));
+    }, [initialCrops, isRtl, t]);
+
+    const tabs = useMemo(() => {
+        return [{ id: 'ALL', label: t('all') }, ...categories];
+    }, [categories, t]);
 
     const filteredCrops = useMemo(() => {
         return initialCrops.filter(crop => {
@@ -41,7 +73,7 @@ export default function CropGuidesList({ initialCrops }: { initialCrops: Crop[] 
             // Map crop.metaTitle to tab IDs if necessary, or assume direct match
             // Assuming crop.metaTitle is stored in English in DB
             // We compare uppercase for consistency
-            const matchesTab = activeTab === 'ALL' || (crop.metaTitle?.toUpperCase() === activeTab);
+            const matchesTab = activeTab === 'ALL' || crop.category === activeTab;
             
             return matchesSearch && matchesTab;
         });
@@ -133,6 +165,19 @@ export default function CropGuidesList({ initialCrops }: { initialCrops: Crop[] 
                     }}>
                         {filteredCrops.map((crop) => {
                             const name = (isRtl && crop.name_ar) ? crop.name_ar : crop.name;
+                            const emoji = crop.category === 'fruits'
+                                ? '🍎'
+                                : crop.category === 'vegetables'
+                                ? '🥦'
+                                : crop.category === 'cereals'
+                                ? '🌾'
+                                : crop.category === 'legumes'
+                                ? '🌱'
+                                : crop.category === 'industrial'
+                                ? '⚗️'
+                                : crop.category === 'herbs'
+                                ? '🌿'
+                                : '🥦';
                             return (
                                 <Link key={crop.id} href={{pathname: '/crops/[slug]', params: {slug: crop.slug}}} className="card crop-card" style={{
                                     display: 'flex',
@@ -157,7 +202,7 @@ export default function CropGuidesList({ initialCrops }: { initialCrops: Crop[] 
                                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                                 fontSize: '4rem'
                                             }}>
-                                                {crop.metaTitle === 'Arable Crops' ? '🌾' : crop.metaTitle === 'Fruit Crops' ? '🍎' : '🥦'}
+                                                {emoji}
                                             </div>
                                         )}
                                     </div>

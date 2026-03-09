@@ -5,6 +5,10 @@ import { unstable_cache } from "next/cache";
 
 export const dynamic = 'force-dynamic';
 
+interface PageProps {
+    searchParams?: Promise<{ q?: string }>;
+}
+
 const getAdminDashboardStats = unstable_cache(
     async () => {
         const rows = await prisma.$queryRaw<Array<{
@@ -17,8 +21,6 @@ const getAdminDashboardStats = unstable_cache(
             expertArticles: bigint | number;
             jobOffers: bigint | number;
             jobApplications: bigint | number;
-            certificates: bigint | number;
-            awards: bigint | number;
             headquarter: bigint | number;
             catalogs: bigint | number;
         }>>`
@@ -32,8 +34,6 @@ const getAdminDashboardStats = unstable_cache(
                 (SELECT COUNT(*) FROM \`expert_articles\`) AS expertArticles,
                 (SELECT COUNT(*) FROM \`job_offers\`) AS jobOffers,
                 (SELECT COUNT(*) FROM \`job_applications\` WHERE \`status\` = 'pending') AS jobApplications,
-                (SELECT COUNT(*) FROM \`certificates\`) AS certificates,
-                (SELECT COUNT(*) FROM \`awards\`) AS awards,
                 (SELECT COUNT(*) FROM \`headquarters\`) AS headquarter,
                 (SELECT COUNT(*) FROM \`catalogs\`) AS catalogs
         `;
@@ -49,8 +49,6 @@ const getAdminDashboardStats = unstable_cache(
             expertArticles: Number(row?.expertArticles ?? 0),
             jobOffers: Number(row?.jobOffers ?? 0),
             jobApplications: Number(row?.jobApplications ?? 0),
-            certificates: Number(row?.certificates ?? 0),
-            awards: Number(row?.awards ?? 0),
             headquarter: Number(row?.headquarter ?? 0),
             catalogs: Number(row?.catalogs ?? 0),
         };
@@ -59,8 +57,10 @@ const getAdminDashboardStats = unstable_cache(
     { revalidate: 15 }
 );
 
-export default async function AdminDashboard() {
+export default async function AdminDashboard({ searchParams }: PageProps) {
     const t = await getTranslations('AdminDashboard');
+    const params = (await searchParams) || {};
+    const query = (params.q || '').trim().toLowerCase();
 
     let stats = {
         products: 0,
@@ -72,8 +72,6 @@ export default async function AdminDashboard() {
         expertArticles: 0,
         jobOffers: 0,
         jobApplications: 0,
-        certificates: 0,
-        awards: 0,
         headquarter: 0,
         catalogs: 0,
     };
@@ -93,11 +91,20 @@ export default async function AdminDashboard() {
         { label: t('catalogs'), value: stats.catalogs, icon: '📚', color: '#3b82f6', href: '/admin/catalogs' },
         { label: t('jobOffers'), value: stats.jobOffers, icon: '💼', color: '#ec4899', href: '/admin/career' },
         { label: t('newApplications'), value: stats.jobApplications, icon: '📬', color: '#ef4444', href: '/admin/applications' },
-        { label: t('certificates'), value: stats.certificates, icon: '🏆', color: '#f97316', href: '/admin/certificates' },
-        { label: t('awards'), value: stats.awards, icon: '🎖️', color: '#eab308', href: '/admin/awards' },
         { label: t('companyHeadquarter'), value: stats.headquarter, icon: '🏢', color: '#14b8a6', href: '/admin/headquarter' },
         { label: t('contactInquiries'), value: stats.inquiries, icon: '📧', color: '#06b6d4', href: '/admin/inquiries' },
-    ];
+    ].filter((stat) => !query || stat.label.toLowerCase().includes(query));
+
+    const quickActions = [
+        { href: '/admin/products/new', icon: '📦', label: t('addProduct') },
+        { href: '/admin/crops/new', icon: '🌾', label: t('addCropGuide') },
+        { href: '/admin/expert-articles/new', icon: '🎓', label: t('addArticle') },
+        { href: '/admin/blog/new', icon: '📝', label: t('writeBlogPost') },
+        { href: '/admin/career', icon: '💼', label: t('manageJobs') },
+        { href: '/admin/catalogs/new', icon: '📚', label: t('addCatalog') },
+        { href: '/admin/animal-types/new', icon: '🐾', label: t('addAnimalType') },
+        { href: '/admin/categories', icon: '🧩', label: t('manageCompanySections') },
+    ].filter((action) => !query || action.label.toLowerCase().includes(query));
 
     return (
         <div className="admin-dashboard">
@@ -105,6 +112,16 @@ export default async function AdminDashboard() {
                 <div>
                     <h1 style={{ marginBottom: '0.5rem' }}>{t('overview')}</h1>
                     <p>{t('welcome')}</p>
+                    <form action="/admin" method="get" style={{ marginTop: '1rem', maxWidth: '420px' }}>
+                        <input
+                            type="search"
+                            name="q"
+                            defaultValue={params.q || ''}
+                            className="input"
+                            style={{ width: '100%' }}
+                            placeholder={t('dashboardSearchPlaceholder')}
+                        />
+                    </form>
                 </div>
                 <div className="header-actions">
                     <Link href="/" target="_blank" className="btn-view-site">
@@ -131,42 +148,15 @@ export default async function AdminDashboard() {
                 <div className="card quick-actions">
                     <h3>{t('quickActions')}</h3>
                     <div className="actions-grid">
-                        <Link href="/admin/products/new" className="action-btn">
-                            <span className="action-icon">📦</span>
-                            <span>{t('addProduct')}</span>
-                        </Link>
-                        <Link href="/admin/crops/new" className="action-btn">
-                            <span className="action-icon">🌾</span>
-                            <span>{t('addCropGuide')}</span>
-                        </Link>
-                        <Link href="/admin/expert-articles/new" className="action-btn">
-                            <span className="action-icon">🎓</span>
-                            <span>{t('addArticle')}</span>
-                        </Link>
-                        <Link href="/admin/blog/new" className="action-btn">
-                            <span className="action-icon">📝</span>
-                            <span>{t('writeBlogPost')}</span>
-                        </Link>
-                        <Link href="/admin/career" className="action-btn">
-                            <span className="action-icon">💼</span>
-                            <span>{t('manageJobs')}</span>
-                        </Link>
-                        <Link href="/admin/company-data" className="action-btn">
-                            <span className="action-icon">🏦</span>
-                            <span>{t('editCompanyData')}</span>
-                        </Link>
-                        <Link href={{pathname: '/admin/documents', query: {category: 'mixing-table'}}} className="action-btn">
-                            <span className="action-icon">📑</span>
-                            <span>{t('manageMixingTablePdf')}</span>
-                        </Link>
-                        <Link href="/admin/catalogs/new" className="action-btn">
-                            <span className="action-icon">📚</span>
-                            <span>{t('addCatalog')}</span>
-                        </Link>
-                        <Link href="/admin/animal-types/new" className="action-btn">
-                            <span className="action-icon">🐾</span>
-                            <span>{t('addAnimalType')}</span>
-                        </Link>
+                        {quickActions.map((action, index) => (
+                            <Link key={index} href={action.href as any} className="action-btn">
+                                <span className="action-icon">{action.icon}</span>
+                                <span>{action.label}</span>
+                            </Link>
+                        ))}
+                        {quickActions.length === 0 && (
+                            <p className="empty-message">{t('dashboardSearchNoResults')}</p>
+                        )}
                     </div>
                 </div>
 

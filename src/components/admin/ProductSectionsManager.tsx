@@ -149,7 +149,7 @@ export default function ProductSectionsManager({
             <div className="mb-10 p-6 bg-slate-50 border border-slate-200 rounded-lg">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                     <div className="lg:col-span-2 space-y-2">
-                        <label className="block text-sm font-bold text-slate-700">
+                        <label className="pf-label">
                             {t('sectionTitleEn')}
                         </label>
                         <input
@@ -158,12 +158,12 @@ export default function ProductSectionsManager({
                             value={formData.title}
                             onChange={handleInputChange}
                             required
-                            className="input w-full"
+                            className="pf-input"
                             placeholder="e.g. Specifications"
                         />
                     </div>
                     <div className="lg:col-span-2 space-y-2">
-                        <label className="block text-sm font-bold text-slate-700">
+                        <label className="pf-label">
                             {t('sectionTitleAr')}
                         </label>
                         <input
@@ -171,13 +171,13 @@ export default function ProductSectionsManager({
                             name="title_ar"
                             value={formData.title_ar}
                             onChange={handleInputChange}
-                            className="input w-full"
+                            className="pf-input"
                             placeholder="العنوان بالعربية"
                             dir="rtl"
                         />
                     </div>
                     <div className="space-y-2">
-                        <label className="block text-sm font-bold text-slate-700">
+                        <label className="pf-label">
                             {t('order')}
                         </label>
                         <input
@@ -186,56 +186,63 @@ export default function ProductSectionsManager({
                             value={formData.order}
                             onChange={handleInputChange}
                             min="0"
-                            className="input w-full"
+                            className="pf-input"
                         />
                     </div>
                     <div className="space-y-2">
-                        <label className="block text-sm font-bold text-slate-700">
+                        <label className="pf-label">
                             Color Theme
                         </label>
-                        <div className="relative">
+                        <div className="relative space-y-2">
                             <select
                                 name="colorTheme"
                                 value={formData.colorTheme}
                                 onChange={handleInputChange}
-                                className="input w-full"
+                                className="pf-select"
                             >
                                 <option value="blue">Blue</option>
                                 <option value="green">Green</option>
                                 <option value="purple">Purple</option>
                                 <option value="orange">Orange</option>
                             </select>
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="color"
+                                    value={/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(formData.colorTheme) ? formData.colorTheme : '#e9496c'}
+                                    onChange={(e) => setFormData((prev) => ({ ...prev, colorTheme: e.target.value }))}
+                                    style={{ width: '40px', height: '36px', border: 'none', background: 'transparent', padding: 0 }}
+                                />
+                                <input
+                                    type="text"
+                                    value={formData.colorTheme}
+                                    onChange={(e) => setFormData((prev) => ({ ...prev, colorTheme: e.target.value }))}
+                                    className="pf-input"
+                                    placeholder="#e9496c"
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div className="mb-6 bg-white rounded-lg border border-slate-200 overflow-hidden">
-                    <div className="flex border-b border-slate-200 bg-slate-50 p-1 gap-1">
+                    <div className="pf-lang-switch p-1 gap-1 border-b-0 rounded-b-none">
                         <button
                             type="button"
                             onClick={() => setContentTab('en')}
-                            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium transition-colors rounded-md ${
-                                contentTab === 'en' 
-                                    ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200' 
-                                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200'
-                            }`}
+                            className={`pf-lang-btn flex-1 ${contentTab === 'en' ? 'active' : ''}`}
                         >
                             <span>English Content</span>
                         </button>
                         <button
                             type="button"
                             onClick={() => setContentTab('ar')}
-                            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium transition-colors rounded-md ${
-                                contentTab === 'ar' 
-                                    ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-200' 
-                                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200'
-                            }`}
+                            className={`pf-lang-btn ar flex-1 ${contentTab === 'ar' ? 'active' : ''}`}
                         >
                             <span>Arabic Content</span>
                         </button>
                     </div>
                     
-                    <div className="p-4">
+                    <div className="p-4 border-t border-slate-200">
                         {contentTab === 'en' ? (
                             <RichTextEditor
                                 label=""
@@ -258,9 +265,9 @@ export default function ProductSectionsManager({
                         type="button"
                         onClick={editingId ? handleUpdateSection : handleAddSection}
                         disabled={isLoading}
-                        className="btn btn-primary"
+                        className="pf-btn pf-btn-primary"
                     >
-                        {editingId ? <Edit2 className="w-4 h-4 mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
+                        {editingId ? <Edit2 className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
                         {editingId ? t('updateSection') : t('addSection')}
                     </button>
                     {editingId && (
@@ -277,7 +284,7 @@ export default function ProductSectionsManager({
                                     colorTheme: "blue",
                                 });
                             }}
-                            className="btn btn-outline"
+                            className="pf-btn pf-btn-secondary"
                         >
                             Cancel
                         </button>
@@ -309,13 +316,23 @@ export default function ProductSectionsManager({
                                     )}
                                     <div className="flex flex-wrap items-center gap-2 mt-2 text-xs font-bold uppercase tracking-wider">
                                         <span className="bg-slate-100 text-slate-500 px-2 py-1 rounded border border-slate-200">Order: {section.order}</span>
-                                        <span className={`px-2 py-1 rounded flex items-center gap-1 border ${
-                                            section.colorTheme === 'blue' ? 'bg-blue-50 text-blue-700 border-blue-100' :
-                                            section.colorTheme === 'green' ? 'bg-green-50 text-green-700 border-green-100' :
-                                            section.colorTheme === 'purple' ? 'bg-purple-50 text-purple-700 border-purple-100' :
-                                            'bg-orange-50 text-orange-700 border-orange-100'
-                                        }`}>
-                                            <span className={`w-1.5 h-1.5 rounded-full bg-current`}></span>
+                                        <span
+                                            className={`px-2 py-1 rounded flex items-center gap-1 border ${
+                                                /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(section.colorTheme)
+                                                    ? 'bg-slate-50 text-slate-700 border-slate-200'
+                                                    : section.colorTheme === 'blue'
+                                                        ? 'bg-blue-50 text-blue-700 border-blue-100'
+                                                        : section.colorTheme === 'green'
+                                                            ? 'bg-green-50 text-green-700 border-green-100'
+                                                            : section.colorTheme === 'purple'
+                                                                ? 'bg-purple-50 text-purple-700 border-purple-100'
+                                                                : 'bg-orange-50 text-orange-700 border-orange-100'
+                                            }`}
+                                        >
+                                            <span
+                                                className="w-1.5 h-1.5 rounded-full"
+                                                style={{ backgroundColor: /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(section.colorTheme) ? section.colorTheme : undefined }}
+                                            ></span>
                                             {section.colorTheme}
                                         </span>
                                     </div>
@@ -325,7 +342,7 @@ export default function ProductSectionsManager({
                             <div className="flex items-center gap-2 w-full sm:w-auto justify-end border-t sm:border-t-0 border-slate-50 pt-3 sm:pt-0">
                                 <button
                                     onClick={() => handleEditSection(section)}
-                                    className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+                                    className="p-2 text-slate-500 hover:text-[var(--primary)] hover:bg-pink-50 rounded-md transition-colors"
                                     title="Edit"
                                 >
                                     <Edit2 size={18} />

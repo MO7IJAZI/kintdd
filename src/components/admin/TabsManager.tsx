@@ -40,7 +40,7 @@ export default function TabsManager({ initialData = [], onChange, dir = 'ltr' }:
             id: generateId(),
             title: t('newTab'),
             content: "",
-            color: '#3b82f6'
+            color: '#e9496c' // Updated to primary color
         };
         const newTabs = [...tabs, newTab];
         setTabs(newTabs);
@@ -82,16 +82,16 @@ export default function TabsManager({ initialData = [], onChange, dir = 'ltr' }:
                     <button 
                         type="button" 
                         onClick={addTab}
-                        className="btn btn-primary"
+                        className="pf-btn pf-btn-primary"
                     >
-                        <Plus className="w-4 h-4 mr-2" />
+                        <Plus className="w-4 h-4" />
                         {t('add')}
                     </button>
                 </div>
             ) : (
                 <div className="bg-white rounded-lg border border-slate-200">
                     {/* Tabs Header */}
-                    <div className="flex flex-wrap gap-2 p-4 bg-slate-50 border-b border-slate-200">
+                    <div className="flex flex-wrap gap-2 p-4 bg-slate-50 border-b border-slate-200 rounded-t-lg">
                         {tabs.map(tab => (
                             <button
                                 key={tab.id}
@@ -107,7 +107,7 @@ export default function TabsManager({ initialData = [], onChange, dir = 'ltr' }:
                             >
                                 <span 
                                     className="w-3 h-3 rounded-full"
-                                    style={{ backgroundColor: tab.color || '#3b82f6' }} 
+                                    style={{ backgroundColor: tab.color || '#e9496c' }} 
                                 />
                                 {tab.title || t('untitled')}
                             </button>
@@ -115,7 +115,7 @@ export default function TabsManager({ initialData = [], onChange, dir = 'ltr' }:
                         <button 
                             type="button" 
                             onClick={addTab}
-                            className="flex items-center justify-center w-9 h-9 ml-2 bg-white border border-slate-200 rounded-md text-slate-400 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-colors"
+                            className="flex items-center justify-center w-9 h-9 ml-2 bg-white border border-slate-200 rounded-md text-slate-400 hover:text-[var(--primary)] hover:border-[var(--primary)] hover:bg-pink-50 transition-colors"
                             title={t('add')}
                         >
                             <Plus className="w-5 h-5" />
@@ -127,41 +127,58 @@ export default function TabsManager({ initialData = [], onChange, dir = 'ltr' }:
                         <div className="p-6 space-y-6">
                             <div className="grid grid-cols-1 md:grid-cols-[1fr,auto] gap-6 items-start">
                                 <div className="space-y-2">
-                                    <label className="block text-sm font-bold text-slate-700">
+                                    <label className="pf-label">
                                         {t('tabTitle')}
                                     </label>
                                     <input 
                                         value={activeTab.title} 
                                         onChange={(e) => updateTabTitle(activeTab.id, e.target.value)}
-                                        className="input w-full"
+                                        className="pf-input"
                                         placeholder={t('placeholder')}
                                         dir={dir === 'rtl' ? 'rtl' : undefined}
                                     />
                                 </div>
                                 
                                 <div className="space-y-2">
-                                    <label className="block text-sm font-bold text-slate-700">
+                                    <label className="pf-label">
                                         {t('tabColor')}
                                     </label>
-                                    <div className="flex gap-2 flex-wrap bg-slate-50 p-2 rounded-lg border border-slate-200">
-                                        {['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'].map(color => (
-                                            <button
-                                                key={color}
-                                                type="button"
-                                                onClick={() => updateTabColor(activeTab.id, color)}
-                                                className={`w-6 h-6 rounded-full transition-transform focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-400 ${
-                                                    activeTab.color === color ? 'ring-2 ring-offset-2 ring-slate-900 scale-110' : 'hover:scale-110'
-                                                }`}
-                                                style={{ backgroundColor: color }}
-                                                title={color}
+                                    <div className="space-y-2 bg-slate-50 p-2 rounded-lg border border-slate-200">
+                                        <div className="flex gap-2 flex-wrap">
+                                            {['#e9496c', '#142346', '#10b981', '#f59e0b', '#8b5cf6'].map(color => (
+                                                <button
+                                                    key={color}
+                                                    type="button"
+                                                    onClick={() => updateTabColor(activeTab.id, color)}
+                                                    className={`w-6 h-6 rounded-full transition-transform focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-400 ${
+                                                        activeTab.color === color ? 'ring-2 ring-offset-2 ring-slate-900 scale-110' : 'hover:scale-110'
+                                                    }`}
+                                                    style={{ backgroundColor: color }}
+                                                    title={color}
+                                                />
+                                            ))}
+                                        </div>
+                                        <div className="flex gap-2 items-center">
+                                            <input
+                                                type="color"
+                                                value={activeTab.color || '#e9496c'}
+                                                onChange={(e) => updateTabColor(activeTab.id, e.target.value)}
+                                                style={{ width: '40px', height: '34px', border: 'none', background: 'transparent', padding: 0 }}
                                             />
-                                        ))}
+                                            <input
+                                                type="text"
+                                                className="pf-input !py-1 !px-2 !text-xs"
+                                                value={activeTab.color || ''}
+                                                onChange={(e) => updateTabColor(activeTab.id, e.target.value)}
+                                                placeholder={t('tabColorHexPlaceholder')}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
                             <div className="space-y-2">
-                                <label className="block text-sm font-bold text-slate-700">
+                                <label className="pf-label">
                                     {t('tabContent')}
                                 </label>
                                 <RichTextEditor
@@ -176,9 +193,9 @@ export default function TabsManager({ initialData = [], onChange, dir = 'ltr' }:
                                 <button 
                                     type="button" 
                                     onClick={() => removeTab(activeTab.id)}
-                                    className="btn btn-outline text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
+                                    className="pf-btn pf-btn-danger"
                                 >
-                                    <Trash2 className="w-4 h-4 mr-2" />
+                                    <Trash2 className="w-4 h-4" />
                                     {t('remove')}
                                 </button>
                             </div>

@@ -1,5 +1,8 @@
+"use server";
+
 import prisma from "@/lib/prisma";
 import { generateSlug, generateGlobalUniqueSlug, checkSlugExistsGlobal } from "@/lib/slugUtils";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export async function listAnimalTypes() {
   return prisma.animalType.findMany({
@@ -54,22 +57,27 @@ export async function createAnimalType(data: {
   imageUrl?: string;
   icon?: string;
   order?: number;
+  isActive?: boolean;
   issues?: Array<{ title: string; title_ar?: string; description?: string; description_ar?: string; order?: number; isActive?: boolean }>;
   tabs?: TabItem[];
 }) {
   // Ensure slug is present and unique globally
   let finalSlug = data.slug;
+  
   if (!finalSlug || !finalSlug.trim()) {
+      // If no slug provided, generate a guaranteed unique one from name
       finalSlug = await generateGlobalUniqueSlug(data.name);
   } else {
+      // If slug provided, clean it
       finalSlug = generateSlug(finalSlug);
+      // Check if it exists
+      if (await checkSlugExistsGlobal(finalSlug)) {
+           // If exists, generate unique version
+           finalSlug = await generateGlobalUniqueSlug(finalSlug);
+      }
   }
 
-  if (await checkSlugExistsGlobal(finalSlug)) {
-       finalSlug = await generateGlobalUniqueSlug(finalSlug);
-  }
-
-  return prisma.animalType.create({
+  const result = await prisma.animalType.create({
     data: {
       name: data.name,
       name_ar: data.name_ar || null,
@@ -79,6 +87,7 @@ export async function createAnimalType(data: {
       imageUrl: data.imageUrl || null,
       icon: data.icon || null,
       order: data.order ?? 0,
+      isActive: data.isActive ?? true,
       issues: {
         create: (data.issues || []).map(i => ({
           title: i.title,
@@ -110,6 +119,16 @@ export async function createAnimalType(data: {
       }
     }
   });
+
+  revalidatePath("/admin/animal-types");
+  revalidatePath("/products");
+  revalidatePath("/ar/products");
+  revalidatePath("/en/products");
+  
+  // revalidateTag takes no options, just the tag name
+  // revalidateTag("animalTypes"); // Correct usage if the tag exists
+  
+  return result;
 }
 
 export async function updateAnimalType(id: string, data: {
@@ -125,31 +144,40 @@ export async function updateAnimalType(id: string, data: {
   issues?: Array<{ id?: string; title: string; title_ar?: string; description?: string; description_ar?: string; order?: number; isActive?: boolean }>;
   tabs?: TabItem[];
 }) {
+  // Fetch current state including relations to compare
+  const current = await prisma.animalType.findUnique({
+    where: { id },
+    include: {
+      issues: true,
+      tabs: { include: { images: true } }
+    }
+  });
+
+  if (!current) throw new Error("Animal Type not found");
+
+  // --- Slug Handling ---
+  let finalSlug = current.slug;
+  if (data.slug !== undefined) {
+      const incomingSlug = data.slug ? generateSlug(data.slug) : (data.name ? generateSlug(data.name) : current.slug);
+      
+      // Only run expensive global check if slug has actually changed
+      if (incomingSlug !== current.slug) {
+          if (await checkSlugExistsGlobal(incomingSlug, id)) {
+              finalSlug = await generateGlobalUniqueSlug(incomingSlug, id);
+          } else {
+              finalSlug = incomingSlug;
+          }
+      }
+  }
+
   // --- Issues --- 
-  const existingIssues = await prisma.animalIssue.findMany({ where: { animalTypeId: id } });
+  const existingIssues = current.issues;
   const existingIssueIds = new Set(existingIssues.map(e => e.id));
   const incomingIssueIds = new Set((data.issues || []).map(i => i.id).filter((id): id is string => !!id));
   const issuesToDelete = [...existingIssueIds].filter(x => !incomingIssueIds.has(x));
 
-  let finalSlug = data.slug;
-  if (finalSlug !== undefined) {
-      if (finalSlug && finalSlug.trim()) {
-          finalSlug = generateSlug(finalSlug);
-      } else if (data.name) {
-           // If slug is empty string, regenerate from name
-           finalSlug = generateSlug(data.name);
-      }
-      
-      if (finalSlug && await checkSlugExistsGlobal(finalSlug, id)) {
-           finalSlug = await generateGlobalUniqueSlug(finalSlug, id);
-      }
-  }
-
   // --- Tabs and Images ---
-  const existingTabs = await prisma.animalTypeTab.findMany({ 
-    where: { animalTypeId: id },
-    include: { images: true }
-  });
+  const existingTabs = current.tabs;
   const existingTabIds = new Set(existingTabs.map(t => t.id));
   const incomingTabIds = new Set((data.tabs || []).map(t => t.id).filter((id): id is string => !!id));
   const tabsToDelete = [...existingTabIds].filter(x => !incomingTabIds.has(x));
@@ -166,7 +194,7 @@ export async function updateAnimalType(id: string, data: {
   });
 
   // Perform transaction
-  return prisma.$transaction([
+  const result = await prisma.$transaction([
     // 1. Update the base AnimalType
     prisma.animalType.update({
       where: { id },
@@ -235,6 +263,13 @@ export async function updateAnimalType(id: string, data: {
       }
     })
   ]);
+
+  revalidatePath("/admin/animal-types");
+  revalidatePath("/products");
+  revalidatePath("/ar/products");
+  revalidatePath("/en/products");
+  
+  return result;
 }
 
 export async function listAnimalIssues(animalTypeId: string) {

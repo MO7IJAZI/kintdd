@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import JobListClient from "@/components/career/JobListClient";
 import { getTranslations, getLocale } from 'next-intl/server';
 import { Link } from '@/navigation';
+import { GraduationCap, Lightbulb, TrendingUp } from "lucide-react";
 
 export const revalidate = 300;
 
@@ -98,32 +99,31 @@ export default async function CareerPage() {
                     {/* Values */}
                     <div className="values-section" style={{ marginBottom: '4rem' }}>
                         <div className="values-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
-                            <div className="value-card" style={{ background: 'white', borderRadius: '1rem', padding: '2rem', border: '1px solid #e2e8f0', textAlign: 'center' }}>
-                                <div className="value-icon" style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>📈</div>
+                            <div className="value-card" style={{ background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)', borderRadius: '1.1rem', padding: '2rem', border: '1px solid #e2e8f0', textAlign: 'center', boxShadow: '0 8px 24px rgba(15, 23, 42, 0.06)' }}>
+                                <div style={{ width: '3.25rem', height: '3.25rem', margin: '0 auto 1rem', borderRadius: '0.95rem', background: 'linear-gradient(135deg, #142346 0%, #1f3a72 100%)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <TrendingUp size={22} />
+                                </div>
                                 <h3 style={{ fontSize: '1.2rem', color: '#142346', marginBottom: '0.75rem' }}>{t('developingTalents')}</h3>
-                                <p style={{ color: '#4a5568', lineHeight: 1.6, fontSize: '0.95rem' }}>
+                                <p style={{ color: '#4a5568', lineHeight: 1.7, fontSize: '0.95rem' }}>
                                     {t('developingTalentsText')}
                                 </p>
                             </div>
-                            <div className="value-card" style={{ background: 'white', borderRadius: '1rem', padding: '2rem', border: '1px solid #e2e8f0', textAlign: 'center' }}>
-                                <div className="value-icon" style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🎓</div>
+                            <div className="value-card" style={{ background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)', borderRadius: '1.1rem', padding: '2rem', border: '1px solid #e2e8f0', textAlign: 'center', boxShadow: '0 8px 24px rgba(15, 23, 42, 0.06)' }}>
+                                <div style={{ width: '3.25rem', height: '3.25rem', margin: '0 auto 1rem', borderRadius: '0.95rem', background: 'linear-gradient(135deg, #142346 0%, #1f3a72 100%)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <GraduationCap size={22} />
+                                </div>
                                 <h3 style={{ fontSize: '1.2rem', color: '#142346', marginBottom: '0.75rem' }}>{t('workforceDevelopment')}</h3>
-                                <p style={{ color: '#4a5568', lineHeight: 1.6, fontSize: '0.95rem' }}>
+                                <p style={{ color: '#4a5568', lineHeight: 1.7, fontSize: '0.95rem' }}>
                                     {t('workforceDevelopmentText')}
                                 </p>
                             </div>
-                            <div className="value-card" style={{ background: 'white', borderRadius: '1rem', padding: '2rem', border: '1px solid #e2e8f0', textAlign: 'center' }}>
-                                <div className="value-icon" style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>💡</div>
+                            <div className="value-card" style={{ background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)', borderRadius: '1.1rem', padding: '2rem', border: '1px solid #e2e8f0', textAlign: 'center', boxShadow: '0 8px 24px rgba(15, 23, 42, 0.06)' }}>
+                                <div style={{ width: '3.25rem', height: '3.25rem', margin: '0 auto 1rem', borderRadius: '0.95rem', background: 'linear-gradient(135deg, #142346 0%, #1f3a72 100%)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <Lightbulb size={22} />
+                                </div>
                                 <h3 style={{ fontSize: '1.2rem', color: '#142346', marginBottom: '0.75rem' }}>{t('recognizingInnovation')}</h3>
-                                <p style={{ color: '#4a5568', lineHeight: 1.6, fontSize: '0.95rem' }}>
+                                <p style={{ color: '#4a5568', lineHeight: 1.7, fontSize: '0.95rem' }}>
                                     {t('recognizingInnovationText')}
-                                </p>
-                            </div>
-                            <div className="value-card" style={{ background: 'white', borderRadius: '1rem', padding: '2rem', border: '1px solid #e2e8f0', textAlign: 'center' }}>
-                                <div className="value-icon" style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🤝</div>
-                                <h3 style={{ fontSize: '1.2rem', color: '#142346', marginBottom: '0.75rem' }}>{t('engagingSuccess')}</h3>
-                                <p style={{ color: '#4a5568', lineHeight: 1.6, fontSize: '0.95rem' }}>
-                                    {t('engagingSuccessText')}
                                 </p>
                             </div>
                         </div>

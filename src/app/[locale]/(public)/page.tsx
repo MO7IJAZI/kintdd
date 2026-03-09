@@ -8,6 +8,7 @@ import MissionSection from "@/components/home/MissionSection";
 import AgentsMarquee from "@/components/home/AgentsMarquee";
 import ArticlesSection from "@/components/home/ArticlesSection";
 import WhyUsSection from "@/components/home/WhyUsSection";
+import { getAgents } from "@/actions/agentActions";
 
 export const revalidate = 300;
 
@@ -35,9 +36,10 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
 
   let news: any[] = [];
   let featuredProducts: any[] = [];
+  let agents: any[] = [];
 
   try {
-    [news, featuredProducts] = await Promise.all([
+    [news, featuredProducts, agents] = await Promise.all([
       prisma.blogPost.findMany({
         where: { isPublished: true },
         orderBy: { publishedAt: 'desc' },
@@ -47,8 +49,9 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
         where: { isActive: true, isFeatured: true },
         orderBy: { order: 'asc' },
         take: 8,
-        include: { category: true }
-      })
+        include: { category: true, images: true }
+      }),
+      getAgents()
     ]);
   } catch (error) {
     console.error("Homepage data load failed:", error);
@@ -85,7 +88,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
       <WhyUsSection />
 
       {/* 11. Agents Section */}
-      <AgentsMarquee />
+      <AgentsMarquee agents={agents} />
     </div>
   );
 }

@@ -130,7 +130,7 @@ export default async function ExpertsForumPage({ params }: { params: Promise<{ l
                     <nav style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: '#64748b' }}>
                         <Link href={`/`} style={{ textDecoration: 'none', color: 'inherit' }}>{t('home')}</Link>
                         {isRtl ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
-                        <Link href={`/crop-farming`} style={{ textDecoration: 'none', color: 'inherit' }}>{t('cropFarming')}</Link>
+                        <Link href={{ pathname: '/crops' }} style={{ textDecoration: 'none', color: 'inherit' }}>{t('cropFarming')}</Link>
                         {isRtl ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
                         <span style={{ color: '#e9496c', fontWeight: 600 }}>{t('title')}</span>
                     </nav>

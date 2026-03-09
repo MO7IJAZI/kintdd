@@ -71,8 +71,8 @@ export default function ImageUpload({ value, onChange, label }: ImageUploadProps
                         </button>
                     </div>
                 ) : (
-                    <div className="relative border-2 border-dashed border-slate-300 rounded-lg p-8 text-center hover:bg-slate-50 hover:border-blue-400 transition-colors cursor-pointer flex flex-col items-center justify-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400">
+                    <div className="relative border-2 border-dashed border-slate-300 rounded-lg p-8 text-center hover:bg-slate-50 hover:border-[var(--primary)] transition-colors cursor-pointer flex flex-col items-center justify-center gap-3">
+                        <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 group-hover:text-[var(--primary)]">
                             <ImageIcon className="w-6 h-6" />
                         </div>
                         <div className="space-y-1">
@@ -93,8 +93,8 @@ export default function ImageUpload({ value, onChange, label }: ImageUploadProps
                         {isUploading && (
                             <div className="absolute inset-0 bg-white/80 flex items-center justify-center rounded-lg">
                                 <div className="flex flex-col items-center gap-2">
-                                    <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                                    <span className="text-xs font-bold text-blue-600">Uploading...</span>
+                                    <div className="w-6 h-6 border-2 border-[var(--primary)] border-t-transparent rounded-full animate-spin"></div>
+                                    <span className="text-xs font-bold text-[var(--primary)]">Uploading...</span>
                                 </div>
                             </div>
                         )}
@@ -105,7 +105,7 @@ export default function ImageUpload({ value, onChange, label }: ImageUploadProps
                     <div className="relative">
                         <button
                             type="button"
-                            className="w-full py-2 px-4 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm flex items-center justify-center gap-2"
+                            className="pf-btn pf-btn-secondary w-full"
                         >
                             <Upload className="w-4 h-4" />
                             {t('changeImage') || "Change Image"}

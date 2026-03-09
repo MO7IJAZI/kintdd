@@ -20,10 +20,14 @@ export async function createBlogPost(formData: FormData) {
     const content = formData.get("content") as string;
     const content_ar = formData.get("content_ar") as string;
     const author = formData.get("author") as string;
+    const author_ar = formData.get("author_ar") as string;
     const image = formData.get("image") as string;
     const tagsRaw = formData.get("tags") as string;
+    const tagsRaw_ar = formData.get("tags_ar") as string;
     const metaTitle = formData.get("metaTitle") as string;
+    const metaTitle_ar = formData.get("metaTitle_ar") as string;
     const metaDesc = formData.get("metaDesc") as string;
+    const metaDesc_ar = formData.get("metaDesc_ar") as string;
     const isPublished = formData.get("isPublished") === "true";
     const publishedAtDate = formData.get("publishedAt") as string;
 
@@ -44,6 +48,9 @@ export async function createBlogPost(formData: FormData) {
     const tags = tagsRaw 
         ? JSON.stringify(tagsRaw.split(',').map(t => t.trim()).filter(Boolean))
         : "[]";
+    const tags_ar = tagsRaw_ar
+        ? JSON.stringify(tagsRaw_ar.split(',').map(t => t.trim()).filter(Boolean))
+        : "[]";
 
     await prisma.blogPost.create({
         data: {
@@ -55,10 +62,14 @@ export async function createBlogPost(formData: FormData) {
             content,
             content_ar,
             author,
+            author_ar,
             image,
             tags,
+            tags_ar,
             metaTitle,
+            metaTitle_ar,
             metaDesc,
+            metaDesc_ar,
             isPublished,
             publishedAt: publishedAtDate ? new Date(publishedAtDate) : (isPublished ? new Date() : null),
         },
@@ -83,10 +94,14 @@ export async function updateBlogPost(id: string, formData: FormData) {
     const content = formData.get("content") as string;
     const content_ar = formData.get("content_ar") as string;
     const author = formData.get("author") as string;
+    const author_ar = formData.get("author_ar") as string;
     const image = formData.get("image") as string;
     const tagsRaw = formData.get("tags") as string;
+    const tagsRaw_ar = formData.get("tags_ar") as string;
     const metaTitle = formData.get("metaTitle") as string;
+    const metaTitle_ar = formData.get("metaTitle_ar") as string;
     const metaDesc = formData.get("metaDesc") as string;
+    const metaDesc_ar = formData.get("metaDesc_ar") as string;
     const isPublished = formData.get("isPublished") === "true";
     const publishedAtDate = formData.get("publishedAt") as string;
 
@@ -107,6 +122,9 @@ export async function updateBlogPost(id: string, formData: FormData) {
     const tags = tagsRaw 
         ? JSON.stringify(tagsRaw.split(',').map(t => t.trim()).filter(Boolean))
         : "[]";
+    const tags_ar = tagsRaw_ar
+        ? JSON.stringify(tagsRaw_ar.split(',').map(t => t.trim()).filter(Boolean))
+        : "[]";
 
     const post = await prisma.blogPost.findUnique({ where: { id } });
 
@@ -121,10 +139,14 @@ export async function updateBlogPost(id: string, formData: FormData) {
             content,
             content_ar,
             author,
+            author_ar,
             image,
             tags,
+            tags_ar,
             metaTitle,
+            metaTitle_ar,
             metaDesc,
+            metaDesc_ar,
             isPublished,
             publishedAt: publishedAtDate ? new Date(publishedAtDate) : (isPublished && !post?.publishedAt ? new Date() : post?.publishedAt),
         },

@@ -8,8 +8,10 @@ import { FileText, Plus, Trash2, Download } from "lucide-react";
 interface DownloadItem {
     id?: string;
     title: string;
+    title_ar?: string;
     type: string;
     fileUrl: string;
+    fileUrl_ar?: string;
 }
 
 interface DownloadsManagerProps {
@@ -17,12 +19,19 @@ interface DownloadsManagerProps {
     onChange: (data: DownloadItem[]) => void;
 }
 
-export default function DownloadsManager({ initialData = [], onChange }: DownloadsManagerProps) {
+export default function DownloadsManager({ initialData, onChange }: DownloadsManagerProps) {
     const t = useTranslations('AdminDownloads');
-    const [downloads, setDownloads] = useState<DownloadItem[]>(initialData || []);
+    // Ensure initialData is an array to avoid map errors
+    const [downloads, setDownloads] = useState<DownloadItem[]>(Array.isArray(initialData) ? initialData : []);
 
     const addDownload = () => {
-        const newDownload: DownloadItem = { title: "", type: "Label", fileUrl: "" };
+        const newDownload: DownloadItem = { 
+            title: "", 
+            title_ar: "",
+            type: "Label", 
+            fileUrl: "",
+            fileUrl_ar: ""
+        };
         const updated = [...downloads, newDownload];
         setDownloads(updated);
         onChange(updated);
@@ -58,16 +67,16 @@ export default function DownloadsManager({ initialData = [], onChange }: Downloa
                         <button 
                             type="button"
                             onClick={addDownload}
-                            className="btn btn-primary"
+                            className="pf-btn pf-btn-primary"
                         >
-                            <Plus className="w-4 h-4 mr-2" />
+                            <Plus className="w-4 h-4" />
                             {t('add')}
                         </button>
                     </div>
                 ) : (
                     <div className="space-y-4">
                         {downloads.map((item, index) => (
-                            <div key={index} className="p-6 bg-white border border-slate-200 rounded-lg relative">
+                            <div key={index} className="p-6 bg-white border border-slate-200 rounded-lg relative transition-all hover:shadow-md hover:border-slate-300">
                                 <button 
                                     type="button"
                                     onClick={() => removeDownload(index)}
@@ -77,25 +86,40 @@ export default function DownloadsManager({ initialData = [], onChange }: Downloa
                                     <Trash2 className="w-5 h-5" />
                                 </button>
 
-                                <div className="grid grid-cols-1 md:grid-cols-[1fr,200px] gap-6 mb-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                     <div className="space-y-2">
-                                        <label className="block text-sm font-bold text-slate-700">
-                                            {t('docTitle')}
+                                        <label className="pf-label">
+                                            {t('docTitle')} (EN)
                                         </label>
                                         <input 
-                                            className="input w-full"
-                                            placeholder={t('placeholder')}
+                                            className="pf-input"
+                                            placeholder="Document title in English"
                                             value={item.title}
                                             onChange={(e) => updateDownload(index, 'title', e.target.value)}
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <label className="block text-sm font-bold text-slate-700">
+                                        <label className="pf-label">
+                                            {t('docTitle')} (AR)
+                                        </label>
+                                        <input 
+                                            dir="rtl"
+                                            className="pf-input"
+                                            placeholder="عنوان المستند بالعربية"
+                                            value={item.title_ar || ''}
+                                            onChange={(e) => updateDownload(index, 'title_ar', e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+                                
+                                <div className="mb-6">
+                                    <div className="space-y-2">
+                                        <label className="pf-label">
                                             {t('type')}
                                         </label>
                                         <div className="relative">
                                             <select 
-                                                className="input w-full"
+                                                className="pf-select"
                                                 value={item.type}
                                                 onChange={(e) => updateDownload(index, 'type', e.target.value)}
                                             >
@@ -109,12 +133,23 @@ export default function DownloadsManager({ initialData = [], onChange }: Downloa
                                     </div>
                                 </div>
 
-                                <div className="bg-slate-50 rounded-lg border border-slate-200 p-4">
-                                    <FileUpload 
-                                        label=""
-                                        value={item.fileUrl}
-                                        onChange={(url) => updateDownload(index, 'fileUrl', url)}
-                                    />
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="bg-slate-50 rounded-lg border border-slate-200 p-4">
+                                        <p className="text-sm font-semibold text-slate-600 mb-2">English File (PDF)</p>
+                                        <FileUpload 
+                                            label=""
+                                            value={item.fileUrl}
+                                            onChange={(url) => updateDownload(index, 'fileUrl', url)}
+                                        />
+                                    </div>
+                                    <div className="bg-slate-50 rounded-lg border border-slate-200 p-4">
+                                        <p className="text-sm font-semibold text-slate-600 mb-2">Arabic File (PDF)</p>
+                                        <FileUpload 
+                                            label=""
+                                            value={item.fileUrl_ar || ''}
+                                            onChange={(url) => updateDownload(index, 'fileUrl_ar', url)}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         ))}

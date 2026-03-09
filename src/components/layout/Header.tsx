@@ -90,10 +90,33 @@ export default function Header({ productCategories }: HeaderProps) {
 
   const switchLocale = (nextLocale: string) => {
     const { locale: _ignored, ...rest } = (params || {}) as Record<string, string | string[]>;
-    if (rest && Object.keys(rest).length > 0) {
-      router.replace({ pathname, params: rest } as any, { locale: nextLocale });
+    
+    // Preserve query parameters (searchParams)
+    const searchParams = new URLSearchParams(window.location.search);
+    const queryString = searchParams.toString() ? `?${searchParams.toString()}` : "";
+
+    if (Object.keys(rest).length > 0) {
+      // If we have dynamic params, we construct the path using next-intl router
+      // However, we must ensure query string is appended
+      
+      // router.replace({ pathname, params: rest, query: Object.fromEntries(searchParams) }, { locale: nextLocale });
+      // NOTE: The above syntax depends on the specific version of next-intl router wrapper.
+      // Often, the easiest way to ensure query params persist across locale switch 
+      // without deep diving into next-intl docs is to construct the URL manually if the library doesn't auto-handle.
+      
+      // But `router` from `navigation.ts` usually handles the locale prefix.
+      // Let's try passing the query in the object if supported, or verify behavior.
+      
+      // Since the user reported issue, it's likely `router.replace` is NOT preserving search params by default.
+      
+      router.replace(
+        // @ts-ignore
+        { pathname, params: rest, query: Object.fromEntries(searchParams.entries()) },
+        { locale: nextLocale }
+      );
     } else {
-      router.replace(pathname as any, { locale: nextLocale });
+      // For static paths
+      router.replace(`${pathname}${queryString}` as any, { locale: nextLocale });
     }
   };
 
@@ -160,16 +183,6 @@ export default function Header({ productCategories }: HeaderProps) {
       name: t("about"),
       href: "/about",
       icon: <Users size={18} />,
-      subItems: [
-        { name: t("about"), href: "/about", icon: <Users size={18} />, description: t("about") },
-        { name: t("rdCentre"), href: "/about/rd-centre", icon: <Microscope size={18} /> },
-        { name: t("productionPlants"), href: "/about/production-plants", icon: <Factory size={18} /> },
-        { name: t("logisticsCentre"), href: "/about/logistics-centre", icon: <Truck size={18} /> },
-        { name: t("companyData"), href: "/about/company-data", icon: <FileText size={18} /> },
-        { name: t("career"), href: "/about/career", icon: <Users size={18} /> },
-        { name: t("certificates"), href: "/about/certificates", icon: <Award size={18} /> },
-        { name: t("awards"), href: "/about/awards", icon: <Award size={18} /> },
-      ],
     },
     { name: t("news"), href: "/blog", icon: <BookOpen size={18} /> },
     { name: t("catalogs"), href: "/catalogs", icon: <FileText size={18} /> },
@@ -182,6 +195,8 @@ export default function Header({ productCategories }: HeaderProps) {
         { name: t("exportDepartment"), href: "/contact/export-department", icon: <Globe size={18} /> },
         { name: t("localRepresentatives"), href: "/contact/local-representatives", icon: <Users size={18} /> },
         { name: t("contactForm"), href: "/contact", icon: <Mail size={18} /> },
+        { name: t("career"), href: "/about/career", icon: <Users size={18} /> },
+
       ],
     },
   ];

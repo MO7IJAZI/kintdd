@@ -1,5 +1,3 @@
-import prisma from "@/lib/prisma";
-
 // Utility function to generate URL-friendly slugs with Arabic support
 export function generateSlug(text: string): string {
     return text
@@ -64,6 +62,7 @@ export async function generateUniqueSlug(text: string, checkExists: (slug: strin
 // Global slug check across all relevant models
 
 export async function checkSlugExistsGlobal(slug: string, excludeId?: string): Promise<boolean> {
+    const { default: prisma } = await import("@/lib/prisma");
     // Check all models that use slugs
     const checks = [
         prisma.product.findUnique({ where: { slug }, select: { id: true } }),

@@ -144,24 +144,6 @@
   transform: translateY(-1px);
 }
 
-.langBtnActive::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 0.55rem;
-  width: 0.45rem;
-  height: 0.45rem;
-  border-radius: 999px;
-  transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.14);
-}
-
-:global([dir="rtl"]) .langBtnActive::before {
-  left: auto;
-  right: 0.55rem;
-}
-
 @media (min-width: 640px) {
   .langSwitch {
     display: flex;

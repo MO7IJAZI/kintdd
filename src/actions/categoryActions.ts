@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma";
 import { revalidatePath, revalidateTag } from "next/cache";
 import { auth } from "@/auth";
+import { ensureCoreCategoriesExist, isProtectedCategorySlug } from "@/lib/data";
 
 import { generateSlug, generateGlobalUniqueSlug, checkSlugExistsGlobal } from "@/lib/slugUtils";
 
@@ -53,6 +54,8 @@ export async function createCategory(formData: FormData) {
         revalidateTag("categories", { expire: 0 } as any);
         revalidatePath("/", "layout");
         revalidatePath("/admin/categories");
+        revalidatePath("/en/admin/categories");
+        revalidatePath("/ar/admin/categories");
     } catch (error: any) {
         console.error("Create Category Error:", error);
         throw new Error(error.message || "Failed to create category");
@@ -91,6 +94,15 @@ export async function updateCategory(id: string, formData: FormData) {
          slug = await generateGlobalUniqueSlug(slug, id);
     }
 
+    const currentCategory = await prisma.category.findUnique({
+        where: { id },
+        select: { slug: true },
+    });
+
+    if (isProtectedCategorySlug(currentCategory?.slug)) {
+        throw new Error("Core categories cannot be modified");
+    }
+
     await prisma.category.update({
         where: { id },
         data: {
@@ -105,6 +117,8 @@ export async function updateCategory(id: string, formData: FormData) {
     });
 
     revalidatePath("/admin/categories");
+    revalidatePath("/en/admin/categories");
+    revalidatePath("/ar/admin/categories");
     revalidateTag("categories", { expire: 0 } as any);
     revalidatePath("/", "layout");
 }
@@ -115,17 +129,40 @@ export async function deleteCategory(id: string) {
         throw new Error("Unauthorized");
     }
 
+    const category = await prisma.category.findUnique({
+        where: { id },
+        select: {
+            slug: true,
+            parent: {
+                select: {
+                    slug: true,
+                },
+            },
+        },
+    });
+
+    if (!category) {
+        throw new Error("Category not found");
+    }
+
+    if (isProtectedCategorySlug(category.slug) || isProtectedCategorySlug(category.parent?.slug)) {
+        throw new Error("Core categories cannot be deleted");
+    }
+
     await prisma.category.delete({
         where: { id },
     });
 
     revalidatePath("/admin/categories");
+    revalidatePath("/en/admin/categories");
+    revalidatePath("/ar/admin/categories");
     revalidateTag("categories", { expire: 0 } as any);
     revalidatePath("/", "layout");
 }
 
 export async function getCategories() {
     try {
+        await ensureCoreCategoriesExist();
         return await prisma.category.findMany({
             include: {
                 parent: true,

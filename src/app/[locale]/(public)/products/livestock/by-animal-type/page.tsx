@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma";
 import Image from "next/image";
 import { getLocale } from "next-intl/server";
+import { Link } from "@/navigation";
 
 export const revalidate = 300;
 
@@ -54,17 +55,23 @@ export default async function ByAnimalTypePage() {
               const title = isAr ? type.name_ar || type.name : type.name;
               const desc = isAr ? type.description_ar || type.description : type.description;
               return (
-                <div key={type.id} className="card" style={{ overflow: 'hidden' }}>
-                  {type.imageUrl && (
-                    <div style={{ position: 'relative', height: '160px', background: '#f8fafc' }}>
-                      <Image src={type.imageUrl} alt={title} fill style={{ objectFit: 'cover' }} />
+                <Link
+                  key={type.id}
+                  href={{ pathname: '/products/livestock/by-animal-type/[slug]', params: { slug: type.slug } } as any}
+                  style={{ textDecoration: 'none', color: 'inherit' }}
+                >
+                  <div className="card hover-card" style={{ overflow: 'hidden', height: '100%' }}>
+                    {type.imageUrl && (
+                      <div style={{ position: 'relative', aspectRatio: '1 / 1', background: '#ffffff', borderBottom: '1px solid #f1f5f9' }}>
+                        <Image src={type.imageUrl} alt={title} fill style={{ objectFit: 'contain', padding: '0.85rem' }} />
+                      </div>
+                    )}
+                    <div style={{ padding: '1rem' }}>
+                      <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#142346', marginBottom: '0.5rem' }}>{title}</h3>
+                      {desc && <p style={{ color: '#64748b', fontSize: '0.95rem', lineHeight: 1.6 }}>{desc}</p>}
                     </div>
-                  )}
-                  <div style={{ padding: '1rem' }}>
-                    <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#142346', marginBottom: '0.5rem' }}>{title}</h3>
-                    {desc && <p style={{ color: '#64748b', fontSize: '0.95rem', lineHeight: 1.6 }}>{desc}</p>}
                   </div>
-                </div>
+                </Link>
               )
             })}
           </div>

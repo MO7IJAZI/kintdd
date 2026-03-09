@@ -114,7 +114,7 @@ export default function Footer() {
                         <h4 style={{ fontSize: '1.2rem', marginBottom: '2rem', fontWeight: '700' }}>{tNav('products')}</h4>
                         <ul style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             <li><Link href="/products/plant-wealth" style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }} className="hover:text-primary">{tNav('agriculturalProducts')}</Link></li>
-                            <li><Link href="/products/plant-wealth/crops" style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }} className="hover:text-primary">{tNav('cropGuides')}</Link></li>
+                            <li><Link href={{ pathname: '/crops' }} style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }} className="hover:text-primary">{tNav('cropGuides')}</Link></li>
                             <li><Link href="/products/livestock" style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }} className="hover:text-primary">{tNav('animalProducts')}</Link></li>
                             <li><Link href="/products/livestock/by-animal-type" style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }} className="hover:text-primary">{tNav('byAnimalType')}</Link></li>
                         </ul>

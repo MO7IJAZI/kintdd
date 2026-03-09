@@ -58,7 +58,9 @@ interface UsageRow {
 interface DownloadItem {
     id: string;
     fileUrl: string;
+    fileUrl_ar?: string | null;
     title: string;
+    title_ar?: string | null;
 }
 
 interface ProductDetailData {
@@ -66,7 +68,6 @@ interface ProductDetailData {
     name: string;
     name_ar?: string | null;
     slug: string;
-    sku?: string | null;
     image?: string | null;
     shortDesc?: string | null;
     shortDesc_ar?: string | null;
@@ -97,6 +98,11 @@ const colorThemes: Record<string, { primary: string; secondary: string; light: s
     orange: { primary: '#ea580c', secondary: '#c2410c', light: '#fff7ed', gradient: 'linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)' },
     pink: { primary: '#db2777', secondary: '#be185d', light: '#fdf2f8', gradient: 'linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%)' },
     slate: { primary: '#475569', secondary: '#334155', light: '#f8fafc', gradient: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)' },
+    red: { primary: '#ef4444', secondary: '#b91c1c', light: '#fef2f2', gradient: 'linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)' },
+    primary: { primary: '#e9496c', secondary: '#c03554', light: '#fff0f3', gradient: 'linear-gradient(135deg, #fff0f3 0%, #ffe4e9 100%)' }, // KINT Pink
+    secondary: { primary: '#142346', secondary: '#0f1a35', light: '#f1f5f9', gradient: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)' }, // KINT Navy
+    dark: { primary: '#1e293b', secondary: '#0f172a', light: '#f1f5f9', gradient: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)' },
+    light: { primary: '#94a3b8', secondary: '#64748b', light: '#ffffff', gradient: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)' },
 };
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string, locale: string }> }) {
@@ -147,7 +153,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             isActive: true
         },
         take: 3,
-        include: { category: true }
+        include: { category: true, images: true }
     }) : [];
 
     // Process related products for localization
@@ -161,6 +167,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             categoryName: (isAr && pData.category?.name_ar) ? pData.category?.name_ar : p.category?.name
         };
     });
+
+    const compositionRows = Array.isArray(compTable) ? compTable : [];
 
     // 6. Technical Table Data (Composition + Usage)
     const technicalTable = [];
@@ -189,6 +197,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         color: tab.color, // Pass the specific tab color
         order: index
     })) : [];
+    const additionalSections = [...tabsAsSections, ...(product.sections || [])].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
     return (
         <div style={{ backgroundColor: '#ffffff', minHeight: '100vh', direction: isAr ? 'rtl' : 'ltr' }}>
@@ -243,22 +252,6 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                                 {name}
                             </h1>
 
-                            {product.sku && (
-                                <div style={{ 
-                                    marginBottom: '1.5rem', 
-                                    fontSize: '0.9rem', 
-                                    fontWeight: 700, 
-                                    color: '#64748b',
-                                    display: 'inline-block',
-                                    padding: '0.25rem 0.75rem',
-                                    backgroundColor: 'rgba(255,255,255,0.5)',
-                                    borderRadius: '4px',
-                                    border: '1px solid rgba(0,0,0,0.05)'
-                                }}>
-                                    SKU: {product.sku}
-                                </div>
-                            )}
-
                             <div style={{ 
                                 fontSize: '1.25rem', 
                                 lineHeight: 1.6, 
@@ -307,15 +300,6 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
                         {/* Hero Image */}
                         <div className="animate-fade-in" style={{ position: 'relative', height: '500px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                            <div style={{ 
-                                position: 'absolute', 
-                                width: '80%', 
-                                height: '80%', 
-                                backgroundColor: 'white', 
-                                borderRadius: '2rem', 
-                                boxShadow: '0 25px 50px -12px rgba(0,0,0,0.1)',
-                                zIndex: 0 
-                            }} />
                             <Image
                                 src={product.image || '/images/cat-biostimulants.png'}
                                 alt={name || product.name}
@@ -377,24 +361,43 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                                 </div>
                             )}
 
-                            {/* Render Tabs as Accordions */}
-                            {tabsAsSections.length > 0 && (
-                                <div style={{ marginTop: '2rem' }}>
-                                    <DynamicSectionsRenderer sections={tabsAsSections} isRtl={isAr} />
-                                </div>
-                            )}
-
-                            {/* Render Dynamic Sections as Accordions */}
-                            {product.sections && product.sections.length > 0 && (
-                                <div style={{ marginTop: '2rem' }}>
-                                    <DynamicSectionsRenderer sections={product.sections} isRtl={isAr} />
-                                </div>
-                            )}
                         </div>
 
                         {/* Sidebar: Downloads & Support */}
                         <aside>
                             <div style={{ position: 'sticky', top: '100px' }}>
+                                {compositionRows.length > 0 && (
+                                    <div style={{
+                                        padding: '2rem',
+                                        backgroundColor: 'white',
+                                        borderRadius: '1.5rem',
+                                        boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
+                                        border: '1px solid #fed7aa',
+                                        marginBottom: '1.5rem'
+                                    }}>
+                                        <h3 style={{ fontSize: '1.15rem', fontWeight: 800, marginBottom: '1rem', borderBottom: '2px solid #ffedd5', paddingBottom: '0.85rem', color: '#c2410c' }}>
+                                            {t('composition')}
+                                        </h3>
+                                        <div style={{ overflowX: 'auto' }}>
+                                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                                <thead>
+                                                    <tr style={{ borderBottom: '1px solid #fed7aa' }}>
+                                                        <th style={{ textAlign: isAr ? 'right' : 'left', padding: '0.65rem 0.5rem', fontSize: '0.75rem', color: '#9a3412', fontWeight: 800 }}>{t('nutrient')}</th>
+                                                        <th style={{ textAlign: isAr ? 'right' : 'left', padding: '0.65rem 0.5rem', fontSize: '0.75rem', color: '#9a3412', fontWeight: 800 }}>{t('value')}</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {compositionRows.map((row, i) => (
+                                                        <tr key={i} style={{ borderBottom: i === compositionRows.length - 1 ? 'none' : '1px solid #ffedd5' }}>
+                                                            <td style={{ padding: '0.65rem 0.5rem', fontSize: '0.85rem', color: '#7c2d12', fontWeight: 700 }}>{row.name}</td>
+                                                            <td style={{ padding: '0.65rem 0.5rem', fontSize: '0.85rem', color: '#ea580c', fontWeight: 800 }}>{row.value}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                )}
                                 <div style={{ 
                                     padding: '2.5rem', 
                                     backgroundColor: 'white', 
@@ -406,32 +409,39 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                                         {t('technicalDocuments')}
                                     </h3>
                                     <div style={{ display: 'grid', gap: '1rem' }}>
-                                        {(product.downloads?.length ?? 0) > 0 ? product.downloads?.map((dl) => (
-                                            <a
-                                                key={dl.id}
-                                                href={dl.fileUrl}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                style={{
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    gap: '1rem',
-                                                    padding: '1rem 1.5rem',
-                                                    backgroundColor: '#f8fafc',
-                                                    borderRadius: '1rem',
-                                                    textDecoration: 'none',
-                                                    color: '#475569',
-                                                    fontWeight: 700,
-                                                    fontSize: '0.9rem',
-                                                    transition: 'all 0.2s ease',
-                                                    border: '1px solid transparent'
-                                                }}
-                                                className="hover-card"
-                                            >
-                                                <span style={{ fontSize: '1.5rem' }}>📄</span>
-                                                {dl.title.toUpperCase()}
-                                            </a>
-                                        )) : (
+                                        {(product.downloads?.length ?? 0) > 0 ? product.downloads?.map((dl) => {
+                                            // Determine file URL and title based on locale
+                                            const fileUrl = (isAr && dl.fileUrl_ar) ? dl.fileUrl_ar : dl.fileUrl;
+                                            const title = (isAr && dl.title_ar) ? dl.title_ar : dl.title;
+                                            
+                                            // Skip if no file URL for current language (unless it falls back to default)
+                                            if (!fileUrl) return null;
+
+                                            return (
+                                                <a
+                                                    key={dl.id}
+                                                    href={`/${locale}/catalogs/viewer?source=${encodeURIComponent(fileUrl)}&title=${encodeURIComponent(title)}`}
+                                                    style={{
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '1rem',
+                                                        padding: '1rem 1.5rem',
+                                                        backgroundColor: '#f8fafc',
+                                                        borderRadius: '1rem',
+                                                        textDecoration: 'none',
+                                                        color: '#475569',
+                                                        fontWeight: 700,
+                                                        fontSize: '0.9rem',
+                                                        transition: 'all 0.2s ease',
+                                                        border: '1px solid transparent'
+                                                    }}
+                                                    className="hover-card"
+                                                >
+                                                    <span style={{ fontSize: '1.5rem' }}>📄</span>
+                                                    {title.toUpperCase()}
+                                                </a>
+                                            );
+                                        }) : (
                                             <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>{t('noDocuments')}</p>
                                         )}
                                     </div>
@@ -441,6 +451,12 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                     </div>
                 </div>
             </section>
+
+            {additionalSections.length > 0 && (
+                <div id="additional-info">
+                    <DynamicSectionsRenderer sections={additionalSections as any} isRtl={isAr} />
+                </div>
+            )}
 
             {/* 3. TECHNICAL TABLE SECTION */}
             {technicalTable.length > 0 && (
@@ -533,43 +549,48 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                         </div>
                         
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2rem' }}>
-                            {relatedProducts.map((related: any) => (
-                                <Link key={related.id} href={`/product/${related.slug}`} className="card" style={{ border: 'none', boxShadow: '0 10px 30px -10px rgba(0,0,0,0.1)', transition: 'transform 0.3s ease', backgroundColor: 'white' }}>
-                                    <div style={{ position: 'relative', height: '240px', backgroundColor: '#fff', padding: '2rem', borderBottom: '1px solid #f1f5f9' }}>
-                                        <Image 
-                                            src={related.image || '/images/cat-biostimulants.png'} 
-                                            alt={related.name} 
-                                            fill 
-                                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                                            style={{ objectFit: 'contain', padding: '1rem' }}
-                                            loading="lazy"
-                                        />
-                                    </div>
-                                    <div style={{ padding: '2rem' }}>
+                            {relatedProducts.map((related: any) => {
+                                const externalImage = related.images?.find((img: any) => img.alt === 'external-card')?.url;
+                                const displayImage = externalImage || related.image || '/images/cat-biostimulants.png';
+                                return (
+                                <Link key={related.id} href={`/product/${related.slug}`} className="card" style={{
+                                    overflow: 'hidden', borderRadius: '1.5rem', backgroundColor: 'white',
+                                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)', 
+                                    border: '1px solid #e2e8f0',
+                                    textDecoration: 'none', color: 'inherit',
+                                    display: 'flex', flexDirection: 'column', height: '100%'
+                                }}>
+                                    <div style={{ position: 'relative', height: '260px', backgroundColor: '#fff', padding: '0' }}>
+                                          <Image 
+                                              src={displayImage} 
+                                              alt={related.name} 
+                                              fill 
+                                              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                                              style={{ objectFit: 'contain' }}
+                                              loading="lazy"
+                                          />
+                                      </div>
+                                    <div style={{ padding: '2rem', flex: 1, display: 'flex', flexDirection: 'column', borderTop: '1px solid #e2e8f0' }}>
                                         <span style={{
-                                            backgroundColor: '#f1f5f9',
-                                            color: '#64748b',
-                                            fontSize: '0.7rem',
-                                            padding: '0.35rem 0.75rem',
-                                            borderRadius: '2rem',
-                                            textTransform: 'uppercase',
-                                            fontWeight: '700',
-                                            display: 'inline-block',
-                                            marginBottom: '1rem',
-                                            letterSpacing: '0.05em'
+                                            backgroundColor: '#fff0f3', color: '#e9496c',
+                                            fontSize: '0.75rem', padding: '0.4rem 0.8rem', borderRadius: '50px',
+                                            textTransform: 'uppercase', fontWeight: '800', display: 'inline-block',
+                                            marginBottom: '1rem', width: 'fit-content'
                                         }}>
                                             {related.categoryName || 'Product'}
                                         </span>
-                                        <h3 style={{ marginBottom: '0.75rem', fontSize: '1.25rem', fontWeight: '700', color: 'var(--secondary)' }}>{related.name}</h3>
-                                        <p style={{ color: '#64748b', fontSize: '0.9rem', lineHeight: '1.6', marginBottom: '1.5rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                                        <h3 style={{ fontSize: '1.25rem', marginBottom: '1rem', fontWeight: 800, lineHeight: 1.3, color: '#142346' }}>{related.name}</h3>
+                                        <p style={{ fontSize: '0.95rem', color: '#64748b', lineHeight: 1.6, marginBottom: '1.5rem', flex: 1, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                                             {related.shortDesc || (related.description ? related.description.replace(/<[^>]*>?/gm, '').substring(0, 100) + "..." : "Learn more about this product.")}
                                         </p>
-                                        <div style={{ color: theme.primary, fontWeight: '700', fontSize: '0.85rem', letterSpacing: '0.05em' }}>
-                                            {t('viewDetails').toUpperCase()} {isAr ? '←' : '→'}
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
+                                            <span style={{ color: '#e9496c', fontWeight: 800, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                                {t('viewDetails').toUpperCase()} {isAr ? '←' : '→'}
+                                            </span>
                                         </div>
                                     </div>
                                 </Link>
-                            ))}
+                            )})}
                         </div>
                     </div>
                 </section>

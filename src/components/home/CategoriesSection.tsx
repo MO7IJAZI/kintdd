@@ -20,6 +20,10 @@ interface Product {
         name: string;
         name_ar?: string | null;
     } | null;
+    images?: {
+        url: string;
+        alt: string;
+    }[] | null;
 }
 
 interface CategoriesSectionProps {
@@ -87,21 +91,12 @@ export default function CategoriesSection({ products = [] }: CategoriesSectionPr
                 fill 
                 style={{ objectFit: 'cover' }} 
               />
-              <div style={{ 
-                position: 'absolute', inset: 0,
-                background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)'
-              }} />
-              <div style={{ 
-                position: 'absolute', bottom: '2rem', left: isAr ? 'auto' : '2.5rem', right: isAr ? '2.5rem' : 'auto',
-                backgroundColor: 'white', padding: '1.25rem', borderRadius: 'var(--radius-xl)', boxShadow: 'var(--shadow-md)',
-                color: 'var(--primary)', display: 'flex', alignItems: 'center', gap: 'var(--space-4)'
-              }}>
-                <PlantIcon size={32} />
-                <span style={{ fontWeight: 800, fontSize: '1.2rem', color: 'var(--secondary)' }}>{tHomeNew('prodPlant')}</span>
-              </div>
             </div>
             <div style={{ padding: '3.5rem', textAlign: isAr ? 'right' : 'left', flex: 1, display: 'flex', flexDirection: 'column' }}>
-              <h3 style={{ fontSize: '2.2rem', marginBottom: 'var(--space-4)', fontWeight: 900, color: 'var(--secondary)' }}>{tHomeNew('prodPlant')}</h3>
+              <h3 style={{ fontSize: '2.2rem', marginBottom: 'var(--space-4)', fontWeight: 900, color: 'var(--secondary)', display: 'flex', alignItems: 'center', gap: '0.75rem', justifyContent: isAr ? 'flex-end' : 'flex-start' }}>
+                <PlantIcon size={30} />
+                <span>{tHomeNew('prodPlant')}</span>
+              </h3>
               <p style={{ color: 'var(--muted-foreground)', marginBottom: 'var(--space-12)', lineHeight: 1.8, fontSize: '1.1rem' }}>
                 {tHomeNew('agriculturalDesc')}
               </p>
@@ -124,21 +119,12 @@ export default function CategoriesSection({ products = [] }: CategoriesSectionPr
                 fill 
                 style={{ objectFit: 'cover' }} 
               />
-              <div style={{ 
-                position: 'absolute', inset: 0,
-                background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)'
-              }} />
-              <div style={{ 
-                position: 'absolute', bottom: '2rem', left: isAr ? 'auto' : '2.5rem', right: isAr ? '2.5rem' : 'auto',
-                backgroundColor: 'white', padding: '1.25rem', borderRadius: 'var(--radius-xl)', boxShadow: 'var(--shadow-md)',
-                color: 'var(--secondary)', display: 'flex', alignItems: 'center', gap: 'var(--space-4)'
-              }}>
-                <CowIcon size={32} />
-                <span style={{ fontWeight: 800, fontSize: '1.2rem', color: 'var(--secondary)' }}>{tHomeNew('prodAnimal')}</span>
-              </div>
             </div>
             <div style={{ padding: '3.5rem', textAlign: isAr ? 'right' : 'left', flex: 1, display: 'flex', flexDirection: 'column' }}>
-              <h3 style={{ fontSize: '2.2rem', marginBottom: 'var(--space-4)', fontWeight: 900, color: 'var(--secondary)' }}>{tHomeNew('prodAnimal')}</h3>
+              <h3 style={{ fontSize: '2.2rem', marginBottom: 'var(--space-4)', fontWeight: 900, color: 'var(--secondary)', display: 'flex', alignItems: 'center', gap: '0.75rem', justifyContent: isAr ? 'flex-end' : 'flex-start' }}>
+                <CowIcon size={30} />
+                <span>{tHomeNew('prodAnimal')}</span>
+              </h3>
               <p style={{ color: 'var(--muted-foreground)', marginBottom: 'var(--space-12)', lineHeight: 1.8, fontSize: '1.1rem' }}>
                 {tHomeNew('animalDesc')}
               </p>
@@ -191,6 +177,8 @@ export default function CategoriesSection({ products = [] }: CategoriesSectionPr
                     {products.map((product) => {
                         const title = isAr && product.name_ar ? product.name_ar : product.name;
                         const catName = isAr && product.category?.name_ar ? product.category.name_ar : product.category?.name;
+                        const externalImage = product.images?.find((img) => img.alt === 'external-card')?.url;
+                        const displayImage = externalImage || product.image;
                         
                         return (
                             <Link key={product.id} href={`/product/${product.slug}`} style={{ 
@@ -205,9 +193,9 @@ export default function CategoriesSection({ products = [] }: CategoriesSectionPr
                                     display: 'flex', flexDirection: 'column', height: '100%',
                                     transition: 'transform 0.3s ease, box-shadow 0.3s ease'
                                 }}>
-                                    <div style={{ position: 'relative', height: '220px', backgroundColor: '#fff', padding: '1.5rem' }}>
-                                        {product.image && (
-                                            <Image src={product.image} alt={title} fill style={{ objectFit: 'contain', padding: '1rem' }} />
+                                    <div style={{ position: 'relative', height: '220px', backgroundColor: '#fff', padding: '0' }}>
+                                        {displayImage && (
+                                            <Image src={displayImage} alt={title} fill style={{ objectFit: 'contain' }} />
                                         )}
                                     </div>
                                     <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column', borderTop: '1px solid var(--border)' }}>

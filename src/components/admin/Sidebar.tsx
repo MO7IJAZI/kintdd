@@ -22,6 +22,8 @@ export default function Sidebar() {
     const menuItems = [
         { name: t('dashboard'), href: '/admin', icon: '📊' },
         { name: t('products'), href: '/admin/products', icon: '📦' },
+        { name: t('productCards'), href: '/admin/product-cards', icon: '🖼️' },
+        { name: t('categories'), href: '/admin/categories', icon: '🧩' },
         { name: t('animalTypes'), href: '/admin/animal-types', icon: '🐾' },
         { name: t('cropGuides'), href: '/admin/crops', icon: '🌾' },
         { name: t('expertArticles'), href: '/admin/expert-articles', icon: '🎓' },
@@ -29,10 +31,10 @@ export default function Sidebar() {
         { name: t('catalogs'), href: '/admin/catalogs', icon: '📚' },
         { name: t('career'), href: '/admin/career', icon: '💼' },
         { name: t('applications'), href: '/admin/applications', icon: '📬' },
-        { name: t('certificates'), href: '/admin/certificates', icon: '🏆' },
-        { name: t('awards'), href: '/admin/awards', icon: '🎖️' },
+        { name: t('agents'), href: '/admin/agents', icon: '🤝' },
         { name: t('headquarter'), href: '/admin/headquarter', icon: '🏢' },
         { name: t('contactInquiries'), href: '/admin/inquiries', icon: '📧' },
+        { name: t('pages'), href: '/admin/pages', icon: '📄' },
         { name: t('settings'), href: '/admin/settings', icon: '⚙️' },
     ];
 

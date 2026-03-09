@@ -51,7 +51,7 @@ export default async function ExpertArticlePage({ params }: { params: Promise<{ 
                     }}>
                         <Link href={`/`} style={{ textDecoration: 'none', color: 'inherit' }}>{t('home')}</Link>
                         {isRtl ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
-                        <Link href={`/crop-farming`} style={{ textDecoration: 'none', color: 'inherit' }}>{t('cropFarming')}</Link>
+                        <Link href={`/crops`} style={{ textDecoration: 'none', color: 'inherit' }}>{t('cropFarming')}</Link>
                         {isRtl ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
                         <Link href={`/experts-forum`} style={{ textDecoration: 'none', color: 'inherit' }}>{t('title')}</Link>
                         {isRtl ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}

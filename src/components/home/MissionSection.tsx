@@ -50,14 +50,12 @@ export default function MissionSection() {
                 width: '120px', height: '120px', backgroundColor: 'white', borderRadius: '50%',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 boxShadow: '0 0 40px rgba(233, 73, 108, 0.4)',
-                margin: '0 auto 1.5rem'
+                margin: '0 auto'
               }}>
                 <div style={{ position: 'relative', width: '80px', height: '80px' }}>
                   <Image src="/images/logo.png" alt="KINT Logo" fill style={{ objectFit: 'contain' }} />
                 </div>
               </div>
-              <h3 style={{ color: 'white', fontSize: '1.5rem', fontWeight: 700, letterSpacing: '2px' }}>KINT</h3>
-              <p style={{ color: 'var(--primary)', fontSize: '0.9rem', letterSpacing: '1px' }}>INTERNATIONAL</p>
             </div>
 
             {/* Orbiting Elements */}

@@ -1,11 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
 import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { createAnimalType, updateAnimalType } from "@/actions/animalTypeActions";
 import ImageUpload from "./ImageUpload";
 import { generateSlug } from "@/lib/slugUtils";
+
+const RichTextEditor = dynamic(() => import("./RichTextEditor"), { ssr: false });
 
 interface IssueItem {
   id?: string;
@@ -274,8 +277,21 @@ export default function AnimalTypeForm({ initialData }: { initialData?: InitialD
                     <div className="form-field"><label>{t('TitleAR')}</label><input value={tab.title_ar || ''} onChange={e => updateTab(tabIdx, { title_ar: e.target.value })} className="input" dir="rtl" /></div>
                   </div>
                   <div className="form-group-grid">
-                    <div className="form-field"><label>{t('DescriptionEN')}</label><textarea value={tab.description || ''} onChange={e => updateTab(tabIdx, { description: e.target.value })} rows={3} className="input" /></div>
-                    <div className="form-field"><label>{t('DescriptionAR')}</label><textarea value={tab.description_ar || ''} onChange={e => updateTab(tabIdx, { description_ar: e.target.value })} rows={3} className="input" dir="rtl" /></div>
+                    <div className="form-field">
+                        <label>{t('DescriptionEN')}</label>
+                        <RichTextEditor 
+                            value={tab.description || ''} 
+                            onChange={val => updateTab(tabIdx, { description: val })} 
+                        />
+                    </div>
+                    <div className="form-field" dir="rtl">
+                        <label>{t('DescriptionAR')}</label>
+                        <RichTextEditor 
+                            value={tab.description_ar || ''} 
+                            onChange={val => updateTab(tabIdx, { description_ar: val })} 
+                            dir="rtl"
+                        />
+                    </div>
                   </div>
                   <div className="form-field"><label>{t('Order')}</label><input type="number" value={tab.order ?? tabIdx} onChange={e => updateTab(tabIdx, { order: parseInt(e.target.value || '0') })} className="input issue-order-input" /></div>
                   

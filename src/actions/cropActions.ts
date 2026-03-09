@@ -100,6 +100,12 @@ interface StageInput {
     products: string[];
 }
 
+function normalizeUploadedAssetUrl(url: string) {
+    const value = (url || "").trim();
+    if (!value) return "";
+    return value.replace(/^\/(en|ar)(?=\/uploads\/)/, "");
+}
+
 export async function createCrop(formData: FormData) {
     const session = await auth();
     if (!session) {
@@ -121,7 +127,10 @@ export async function createCrop(formData: FormData) {
     const harvestSeason_ar_raw = formData.get("harvestSeason_ar");
     const harvestSeason_ar = typeof harvestSeason_ar_raw === "string" && harvestSeason_ar_raw.trim() ? harvestSeason_ar_raw : null;
     const image = formData.get("image") as string;
-    const pdfUrl = formData.get("pdfUrl") as string;
+    const rawPdfUrl = formData.get("pdfUrl");
+    const pdfUrl = normalizeUploadedAssetUrl(typeof rawPdfUrl === "string" ? rawPdfUrl : "");
+    const rawPdfUrlAr = formData.get("pdfUrl_ar");
+    const pdfUrl_ar = normalizeUploadedAssetUrl(typeof rawPdfUrlAr === "string" ? rawPdfUrlAr : "");
     const metaTitle = formData.get("metaTitle") as string;
     const metaTitle_ar = formData.get("metaTitle_ar") as string;
     
@@ -181,6 +190,7 @@ export async function createCrop(formData: FormData) {
                 harvestSeason_ar,
                 image,
                 pdfUrl,
+                pdfUrl_ar,
                 metaTitle,
                 metaTitle_ar,
                 recommendedProducts: {
@@ -229,6 +239,7 @@ export async function createCrop(formData: FormData) {
                     harvestSeason_ar,
                     image,
                     pdfUrl,
+                    pdfUrl_ar,
                     metaTitle,
                     metaTitle_ar,
                     recommendedProducts: {
@@ -264,7 +275,13 @@ export async function createCrop(formData: FormData) {
     }
 
     revalidatePath("/admin/crops");
-    revalidatePath("/crop-farming");
+    revalidatePath("/crops");
+    revalidatePath("/en/crops");
+    revalidatePath("/ar/crops");
+    revalidatePath("/en/crops");
+    revalidatePath("/ar/crops");
+    revalidatePath(`/en/crops/${finalSlug}`);
+    revalidatePath(`/ar/crops/${finalSlug}`);
     revalidateTag("crops", { expire: 0 });
 }
 
@@ -323,7 +340,13 @@ export async function getCropBySlug(slug: string) {
     return getCropBySlugCached(slug);
 }
 export async function getCropById(id: string) {
-    return getCropByIdCached(id);
+    return prisma.crop.findUnique({
+        where: { id },
+        include: {
+            stages: { orderBy: { order: "asc" } },
+            recommendedProducts: true,
+        },
+    });
 }
 
 export async function updateCrop(id: string, formData: FormData) {
@@ -347,7 +370,10 @@ export async function updateCrop(id: string, formData: FormData) {
     const harvestSeason_ar_raw = formData.get("harvestSeason_ar");
     const harvestSeason_ar = typeof harvestSeason_ar_raw === "string" && harvestSeason_ar_raw.trim() ? harvestSeason_ar_raw : null;
     const image = formData.get("image") as string;
-    const pdfUrl = formData.get("pdfUrl") as string;
+    const rawPdfUrl = formData.get("pdfUrl");
+    const pdfUrl = normalizeUploadedAssetUrl(typeof rawPdfUrl === "string" ? rawPdfUrl : "");
+    const rawPdfUrlAr = formData.get("pdfUrl_ar");
+    const pdfUrl_ar = normalizeUploadedAssetUrl(typeof rawPdfUrlAr === "string" ? rawPdfUrlAr : "");
     const metaTitle = formData.get("metaTitle") as string;
     const metaTitle_ar = formData.get("metaTitle_ar") as string;
     
@@ -407,6 +433,7 @@ export async function updateCrop(id: string, formData: FormData) {
             harvestSeason_ar,
             image,
             pdfUrl,
+            pdfUrl_ar,
             metaTitle,
             metaTitle_ar,
             recommendedProducts: {
@@ -439,8 +466,13 @@ export async function updateCrop(id: string, formData: FormData) {
     });
 
     revalidatePath("/admin/crops");
-    revalidatePath("/crop-farming");
-    revalidatePath(`/crops/${safeSlug}`);
+    revalidatePath("/crops");
+    revalidatePath("/en/crops");
+    revalidatePath("/ar/crops");
+    revalidatePath("/en/crops");
+    revalidatePath("/ar/crops");
+    revalidatePath(`/en/crops/${safeSlug}`);
+    revalidatePath(`/ar/crops/${safeSlug}`);
     revalidateTag("crops", { expire: 0 });
 }
 
@@ -455,6 +487,10 @@ export async function deleteCrop(id: string) {
     });
 
     revalidatePath("/admin/crops");
-    revalidatePath("/crop-farming");
+    revalidatePath("/crops");
+    revalidatePath("/en/crops");
+    revalidatePath("/ar/crops");
+    revalidatePath("/en/crops");
+    revalidatePath("/ar/crops");
     revalidateTag("crops", { expire: 0 });
 }

@@ -5,72 +5,28 @@ import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { generateSlug, generateGlobalUniqueSlug, checkSlugExistsGlobal } from "@/lib/slugUtils";
 
 export async function createPage(formData: FormData) {
-    const title = formData.get("title") as string;
-    const title_ar = formData.get("title_ar") as string;
-    let slug = formData.get("slug") as string;
-    const content = formData.get("content") as string;
-    const content_ar = formData.get("content_ar") as string;
-    const template = formData.get("template") as string;
-    const isActive = formData.get("isActive") === "true";
-
-    // Ensure slug is present and unique globally
-    if (!slug || !slug.trim()) {
-        slug = await generateGlobalUniqueSlug(title);
-    } else {
-        slug = generateSlug(slug);
-    }
-
-    if (await checkSlugExistsGlobal(slug)) {
-         slug = await generateGlobalUniqueSlug(slug);
-    }
-
-    await prisma.page.create({
-        data: {
-            title,
-            title_ar,
-            slug,
-            content,
-            content_ar,
-            template,
-            isActive,
-        },
-    });
-
-    revalidatePath("/admin/pages");
-    revalidatePath(`/${slug}`);
-    revalidatePath(`/page/${slug}`);
-    revalidateTag("pages", { expire: 0 });
+    // Disabled creation by admin request
+    throw new Error("Page creation is disabled.");
 }
 
 export async function updatePage(id: string, formData: FormData) {
     const title = formData.get("title") as string;
     const title_ar = formData.get("title_ar") as string;
-    let slug = formData.get("slug") as string;
+    // let slug = formData.get("slug") as string; // Slug update disabled
     const content = formData.get("content") as string;
     const content_ar = formData.get("content_ar") as string;
     const template = formData.get("template") as string;
     const isActive = formData.get("isActive") === "true";
 
-    const page = await prisma.page.findUnique({ where: { id } });
-
-    // Ensure slug is valid and unique (excluding current page)
-    if (slug && slug.trim()) {
-        slug = generateSlug(slug);
-    } else {
-         // If slug is empty, regenerate from title
-         slug = generateSlug(title);
-    }
-
-    if (await checkSlugExistsGlobal(slug, id)) {
-         slug = await generateGlobalUniqueSlug(slug, id);
-    }
+    // We don't update slug anymore to keep pages fixed
+    // const page = await prisma.page.findUnique({ where: { id } });
 
     await prisma.page.update({
         where: { id },
         data: {
             title,
             title_ar,
-            slug,
+            // slug, // Do not update slug
             content,
             content_ar,
             template,
@@ -79,27 +35,14 @@ export async function updatePage(id: string, formData: FormData) {
     });
 
     revalidatePath("/admin/pages");
-    revalidatePath(`/${slug}`);
-    revalidatePath(`/page/${slug}`);
-    if (page?.slug && page.slug !== slug) {
-        revalidatePath(`/${page.slug}`);
-    }
+    // revalidatePath(`/${slug}`);
+    // revalidatePath(`/page/${slug}`);
     revalidateTag("pages", { expire: 0 });
 }
 
 export async function deletePage(id: string) {
-    const page = await prisma.page.findUnique({ where: { id } });
-    
-    await prisma.page.delete({
-        where: { id },
-    });
-
-    revalidatePath("/admin/pages");
-    if (page) {
-        revalidatePath(`/${page.slug}`);
-        revalidatePath(`/page/${page.slug}`);
-    }
-    revalidateTag("pages", { expire: 0 });
+    // Disabled deletion by admin request
+    throw new Error("Page deletion is disabled.");
 }
 
 const getPagesCached = unstable_cache(

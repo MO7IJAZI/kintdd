@@ -13,8 +13,8 @@
     "node": ">=20.0.0"
   },
   "scripts": {
-    "dev": "next dev --webpack",
-    "dev:turbo": "next dev --turbo",
+    "dev": "cross-env NODE_OPTIONS=--max-old-space-size=3072 next dev --webpack",
+    "dev:turbo": "cross-env NODE_OPTIONS=--max-old-space-size=3072 next dev --turbo",
     "build": "node scripts/fix-permissions.js && prisma generate && prisma migrate deploy && prisma db seed && npx tsx prisma/seed-categories.ts && cross-env NODE_OPTIONS=--max-old-space-size=4096 NEXT_IGNORE_ESLINT=1 NEXT_IGNORE_TYPE_CHECKS=1 next build && node scripts/post-build.js",
     "start": "node .next/standalone/server.js",
     "free-port": "node scripts/free-port.js",
@@ -37,6 +37,7 @@
   },
   "dependencies": {
     "@prisma/client": "5.16.0",
+    "@tinymce/tinymce-react": "^5.1.1",
     "@tiptap/extension-color": "^3.20.0",
     "@tiptap/extension-image": "^3.20.0",
     "@tiptap/extension-link": "^3.20.0",
@@ -60,10 +61,13 @@
     "next": "^16.1.6",
     "next-auth": "5.0.0-beta.30",
     "next-intl": "^4.8.1",
+    "pdfjs-dist": "^4.10.38",
     "prisma": "5.16.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
+    "react-pageflip": "^2.0.3",
     "sharp": "^0.34.5",
+    "tinymce": "^7.7.1",
     "tsx": "^4.19.2",
     "typescript": "5.9.3"
   },

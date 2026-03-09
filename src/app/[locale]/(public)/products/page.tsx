@@ -202,22 +202,11 @@ async function ProductsPageContent() {
                                     fill 
                                     style={{ objectFit: 'cover' }} 
                                 />
-                                <div style={{ 
-                                    position: 'absolute', inset: 0,
-                                    background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)'
-                                }} />
-                                <div style={{ 
-                                    position: 'absolute', bottom: '1.5rem', left: isAr ? 'auto' : '1.5rem', right: isAr ? '1.5rem' : 'auto',
-                                    backgroundColor: 'white', padding: '1rem 1.5rem', borderRadius: '1rem', boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                                    color: '#142346', display: 'flex', alignItems: 'center', gap: '1rem'
-                                }}>
-                                    <PlantIcon size={28} />
-                                    <span style={{ fontWeight: 800, fontSize: '1.1rem' }}>{translateHome('prodPlant', 'Plant Wealth')}</span>
-                                </div>
                             </div>
                             <div style={{ padding: '2.5rem', textAlign: isAr ? 'right' : 'left', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                                <h3 style={{ fontSize: '1.75rem', marginBottom: '1rem', fontWeight: 800, color: '#142346' }}>
-                                    {translateHome('prodPlant', 'Plant Wealth')}
+                                <h3 style={{ fontSize: '1.75rem', marginBottom: '1rem', fontWeight: 800, color: '#142346', display: 'flex', alignItems: 'center', gap: '0.75rem', justifyContent: isAr ? 'flex-end' : 'flex-start' }}>
+                                    <PlantIcon size={28} />
+                                    <span>{translateHome('prodPlant', 'Plant Wealth')}</span>
                                 </h3>
                                 <p style={{ color: '#64748b', marginBottom: '2rem', lineHeight: 1.7, fontSize: '1.05rem', flex: 1 }}>
                                     {translateHome('agriculturalDesc', 'Advanced solutions for crop nutrition and protection.')}
@@ -253,22 +242,11 @@ async function ProductsPageContent() {
                                     fill 
                                     style={{ objectFit: 'cover' }} 
                                 />  
-                                <div style={{ 
-                                    position: 'absolute', inset: 0,
-                                    background: 'linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%)'
-                                }} />
-                                <div style={{ 
-                                    position: 'absolute', bottom: '1.5rem', left: isAr ? 'auto' : '1.5rem', right: isAr ? '1.5rem' : 'auto',
-                                    backgroundColor: 'white', padding: '1rem 1.5rem', borderRadius: '1rem', boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                                    color: '#142346', display: 'flex', alignItems: 'center', gap: '1rem'
-                                }}>
-                                    <CowIcon size={28} />
-                                    <span style={{ fontWeight: 800, fontSize: '1.1rem' }}>{translateHome('prodAnimal', 'Animal Wealth')}</span>
-                                </div>
                             </div>
                             <div style={{ padding: '2.5rem', textAlign: isAr ? 'right' : 'left', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                                <h3 style={{ fontSize: '1.75rem', marginBottom: '1rem', fontWeight: 800, color: '#142346' }}>
-                                    {translateHome('prodAnimal', 'Animal Wealth')}
+                                <h3 style={{ fontSize: '1.75rem', marginBottom: '1rem', fontWeight: 800, color: '#142346', display: 'flex', alignItems: 'center', gap: '0.75rem', justifyContent: isAr ? 'flex-end' : 'flex-start' }}>
+                                    <CowIcon size={28} />
+                                    <span>{translateHome('prodAnimal', 'Animal Wealth')}</span>
                                 </h3>
                                 <p style={{ color: '#64748b', marginBottom: '2rem', lineHeight: 1.7, fontSize: '1.05rem', flex: 1 }}>
                                     {translateHome('animalDesc', 'Specialized health and nutrition for livestock.')}

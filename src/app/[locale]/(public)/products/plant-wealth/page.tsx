@@ -1,7 +1,8 @@
 import prisma from "@/lib/prisma";
+import { ensureCoreCategoriesExist } from "@/lib/data";
 import { Link } from "@/navigation";
 import { getTranslations, getLocale } from 'next-intl/server';
-import { ArrowRight, Package, Leaf, Sprout } from 'lucide-react';
+import { ArrowRight, Package, Leaf, Sprout, Beef, Rabbit } from 'lucide-react';
 import Image from 'next/image';
 
 export const revalidate = 300;
@@ -13,6 +14,28 @@ interface SubcategoryCard {
   description: string;
   description_ar: string;
   productsCount: number;
+  image?: string | null;
+  icon?: string | null;
+}
+
+function renderCardIcon(icon?: string | null) {
+  const iconName = (icon || "").toLowerCase();
+  const isImageIcon =
+    !!icon &&
+    !["leaf", "sprout", "beef", "rabbit", "package"].includes(iconName) &&
+    (icon.startsWith("/") || icon.startsWith("http://") || icon.startsWith("https://"));
+  if (isImageIcon) {
+    return (
+      <div style={{ position: 'relative', width: '30px', height: '30px' }}>
+        <Image src={icon} alt="Card Icon" fill style={{ objectFit: 'cover', borderRadius: '50%' }} />
+      </div>
+    );
+  }
+  if (iconName === "leaf") return <Leaf style={{ width: '30px', height: '30px', color: 'white' }} />;
+  if (iconName === "sprout") return <Sprout style={{ width: '30px', height: '30px', color: 'white' }} />;
+  if (iconName === "beef") return <Beef style={{ width: '30px', height: '30px', color: 'white' }} />;
+  if (iconName === "rabbit") return <Rabbit style={{ width: '30px', height: '30px', color: 'white' }} />;
+  return <Package style={{ width: '30px', height: '30px', color: 'white' }} />;
 }
 
 export default async function PlantWealthPage() {
@@ -24,9 +47,9 @@ export default async function PlantWealthPage() {
   let subcategories: SubcategoryCard[] = [];
 
   try {
-    // Fetch the main category (plant-production)
-    parentCategory = await prisma.category.findUnique({
-      where: { slug: 'plant-production' },
+    await ensureCoreCategoriesExist();
+    parentCategory = await prisma.category.findFirst({
+      where: { slug: { in: ['plant-wealth', 'plant-production'] } },
       include: {
         children: {
           where: { isActive: true },
@@ -45,7 +68,9 @@ export default async function PlantWealthPage() {
         slug: child.slug,
         description: child.description || '',
         description_ar: child.description_ar || '',
-        productsCount: child._count.products
+        productsCount: child._count.products,
+        image: child.image,
+        icon: child.icon
       }));
     }
   } catch (error) {
@@ -56,6 +81,19 @@ export default async function PlantWealthPage() {
   const categoryDesc = isAr 
     ? 'منتجات الثروة النباتية لتغذية وحماية المحاصيل' 
     : 'Agricultural products for crop nutrition and protection';
+
+  const plantProductsCard = subcategories.find((item) => item.slug === 'plant-products');
+  const cropsCard = subcategories.find((item) => item.slug === 'crops');
+
+  const plantCardName = isAr ? (plantProductsCard?.name_ar || 'المنتجات النباتية') : (plantProductsCard?.name || 'Plant Products');
+  const plantCardDesc = isAr ? (plantProductsCard?.description_ar || 'منتجات للعناية العامة بالنبات والتسميد') : (plantProductsCard?.description || 'Products for general plant care and fertilization');
+  const plantCardImage = plantProductsCard?.image || "/images/cat-fertilizers.png";
+  const plantCardIcon = plantProductsCard?.icon || "leaf";
+
+  const cropsCardName = isAr ? (cropsCard?.name_ar || 'المحاصيل') : (cropsCard?.name || 'Crops');
+  const cropsCardDesc = isAr ? (cropsCard?.description_ar || 'حلول متخصصة خاصة بالمحاصيل') : (cropsCard?.description || 'Specialized crop-specific solutions');
+  const cropsCardImage = cropsCard?.image || "/images/cat-biostimulants.png";
+  const cropsCardIcon = cropsCard?.icon || "sprout";
 
   return (
     <div style={{ direction: isAr ? 'rtl' : 'ltr', overflowX: 'hidden' }}>
@@ -125,8 +163,8 @@ export default async function PlantWealthPage() {
                 boxShadow: '0 10px 40px rgba(0,0,0,0.15)'
               }}>
                 <Image
-                  src="/images/cat-fertilizers.png"
-                  alt={isAr ? 'المنتجات النباتية' : 'Plant Products'}
+                  src={plantCardImage}
+                  alt={plantCardName}
                   fill
                   style={{ objectFit: 'cover' }}
                 />
@@ -149,7 +187,7 @@ export default async function PlantWealthPage() {
                     justifyContent: 'center',
                     marginBottom: '1rem'
                   }}>
-                    <Leaf style={{ width: '30px', height: '30px', color: 'white' }} />
+                    {renderCardIcon(plantCardIcon)}
                   </div>
                   <h3 style={{
                     fontSize: '2rem',
@@ -157,16 +195,14 @@ export default async function PlantWealthPage() {
                     color: 'white',
                     marginBottom: '0.5rem'
                   }}>
-                    {isAr ? 'المنتجات النباتية' : 'Plant Products'}
+                    {plantCardName}
                   </h3>
                   <p style={{
                     fontSize: '1rem',
                     color: 'rgba(255,255,255,0.85)',
                     marginBottom: '1rem'
                   }}>
-                    {isAr 
-                      ? 'منتجات للعناية العامة بالنبات والتسميد' 
-                      : 'Products for general plant care and fertilization'}
+                    {plantCardDesc}
                   </p>
                   <div style={{
                     display: 'flex',
@@ -185,7 +221,7 @@ export default async function PlantWealthPage() {
 
             {/* Crops Card */}
             <Link
-              href="/products/plant-wealth/crops"
+              href={{ pathname: "/crops" }}
               style={{ textDecoration: 'none', color: 'inherit' }}
             >
               <div style={{
@@ -197,8 +233,8 @@ export default async function PlantWealthPage() {
                 boxShadow: '0 10px 40px rgba(0,0,0,0.15)'
               }}>
                 <Image
-                  src="/images/cat-biostimulants.png"
-                  alt={isAr ? 'المحاصيل' : 'Crops'}
+                  src={cropsCardImage}
+                  alt={cropsCardName}
                   fill
                   style={{ objectFit: 'cover' }}
                 />
@@ -221,7 +257,7 @@ export default async function PlantWealthPage() {
                     justifyContent: 'center',
                     marginBottom: '1rem'
                   }}>
-                    <Sprout style={{ width: '30px', height: '30px', color: 'white' }} />
+                    {renderCardIcon(cropsCardIcon)}
                   </div>
                   <h3 style={{
                     fontSize: '2rem',
@@ -229,16 +265,14 @@ export default async function PlantWealthPage() {
                     color: 'white',
                     marginBottom: '0.5rem'
                   }}>
-                    {isAr ? 'المحاصيل' : 'Crops'}
+                    {cropsCardName}
                   </h3>
                   <p style={{
                     fontSize: '1rem',
                     color: 'rgba(255,255,255,0.85)',
                     marginBottom: '1rem'
                   }}>
-                    {isAr 
-                      ? 'حلول متخصصة خاصة بالمحاصيل' 
-                      : 'Specialized crop-specific solutions'}
+                    {cropsCardDesc}
                   </p>
                   <div style={{
                     display: 'flex',

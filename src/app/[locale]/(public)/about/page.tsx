@@ -50,20 +50,20 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
 
             {/* Section 1: Who We Are */}
             <section style={{ padding: '6rem 0', backgroundColor: 'white' }}>
-                <div className="container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '4rem', alignItems: 'center' }}>
-                    <div className={isRtl ? 'fade-in-right' : 'fade-in-left'}>
+                <div className="container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 'clamp(2rem, 5vw, 4rem)', alignItems: 'center' }}>
+                    <div className={isRtl ? 'fade-in-right' : 'fade-in-left'} style={{ order: 2 }}>
                          <h4 style={{ color: 'var(--primary)', fontWeight: 700, marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
                             {t('whoWeAre.title')}
                         </h4>
                         <h2 style={{ fontSize: '2.5rem', fontWeight: 800, color: '#1e293b', marginBottom: '1.5rem', lineHeight: 1.2 }}>
                             {t('whoWeAre.subtitle')}
                         </h2>
-                        <p style={{ fontSize: '1.1rem', color: '#64748b', lineHeight: 1.8, whiteSpace: 'pre-line' }}>
+                        <p style={{ fontSize: '1.1rem', color: '#64748b', lineHeight: 1.8, whiteSpace: 'pre-line', textAlign: 'justify', textAlignLast: isRtl ? 'right' : 'left' }}>
                             {t('whoWeAre.description')}
                         </p>
                     </div>
-                     <div className={isRtl ? 'fade-in-left' : 'fade-in-right'}>
-                        <div style={{ position: 'relative', height: '500px', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}>
+                     <div className={isRtl ? 'fade-in-left' : 'fade-in-right'} style={{ order: 1 }}>
+                        <div style={{ position: 'relative', height: 'clamp(300px, 40vw, 500px)', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}>
                             <Image 
                                 src="/images/about/company-overview.webp" 
                                 alt={t('whoWeAre.title')} 
@@ -77,20 +77,20 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
 
             {/* Section 2: Mission */}
             <section style={{ padding: '6rem 0', backgroundColor: '#f0f9ff' }}>
-                 <div className="container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '4rem', alignItems: 'center' }}>
-                    <div style={{ order: isRtl ? 1 : 2 }} className={isRtl ? 'fade-in-left' : 'fade-in-right'}>
+                 <div className="container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 'clamp(2rem, 5vw, 4rem)', alignItems: 'center' }}>
+                    <div style={{ order: 1 }} className={isRtl ? 'fade-in-left' : 'fade-in-right'}>
                          <h4 style={{ color: 'var(--primary)', fontWeight: 700, marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
                             {t('mission.title')}
                         </h4>
                         <h2 style={{ fontSize: '2.5rem', fontWeight: 800, color: '#1e293b', marginBottom: '1.5rem', lineHeight: 1.2 }}>
                             {t('mission.subtitle')}
                         </h2>
-                        <p style={{ fontSize: '1.1rem', color: '#64748b', lineHeight: 1.8, whiteSpace: 'pre-line' }}>
+                        <p style={{ fontSize: '1.1rem', color: '#64748b', lineHeight: 1.8, whiteSpace: 'pre-line', textAlign: 'justify', textAlignLast: isRtl ? 'right' : 'left' }}>
                             {t('mission.description')}
                         </p>
                     </div>
-                    <div style={{ order: isRtl ? 2 : 1 }} className={isRtl ? 'fade-in-right' : 'fade-in-left'}>
-                         <div style={{ position: 'relative', height: '500px', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}>
+                    <div style={{ order: 2 }} className={isRtl ? 'fade-in-right' : 'fade-in-left'}>
+                         <div style={{ position: 'relative', height: 'clamp(300px, 40vw, 500px)', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}>
                             <Image 
                                 src="/images/about/abouts us.jpg" 
                                 alt={t('mission.title')} 
@@ -104,20 +104,20 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
 
             {/* Section 3: Ambition */}
              <section style={{ padding: '6rem 0', backgroundColor: 'white' }}>
-                <div className="container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '4rem', alignItems: 'center' }}>
-                    <div className={isRtl ? 'fade-in-right' : 'fade-in-left'}>
+                <div className="container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 'clamp(2rem, 5vw, 4rem)', alignItems: 'center' }}>
+                    <div className={isRtl ? 'fade-in-right' : 'fade-in-left'} style={{ order: 2 }}>
                          <h4 style={{ color: 'var(--primary)', fontWeight: 700, marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
                             {t('ambition.title')}
                         </h4>
                         <h2 style={{ fontSize: '2.5rem', fontWeight: 800, color: '#1e293b', marginBottom: '1.5rem', lineHeight: 1.2 }}>
                             {t('ambition.subtitle')}
                         </h2>
-                        <p style={{ fontSize: '1.1rem', color: '#64748b', lineHeight: 1.8, whiteSpace: 'pre-line' }}>
+                        <p style={{ fontSize: '1.1rem', color: '#64748b', lineHeight: 1.8, whiteSpace: 'pre-line', textAlign: 'justify', textAlignLast: isRtl ? 'right' : 'left' }}>
                             {t('ambition.description')}
                         </p>
                     </div>
-                     <div className={isRtl ? 'fade-in-left' : 'fade-in-right'}>
-                        <div style={{ position: 'relative', height: '500px', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}>
+                     <div className={isRtl ? 'fade-in-left' : 'fade-in-right'} style={{ order: 1 }}>
+                        <div style={{ position: 'relative', height: 'clamp(300px, 40vw, 500px)', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}>
                             <Image 
                                 src="/images/banners/laboratory-research.jpg" 
                                 alt={t('ambition.title')} 

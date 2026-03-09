@@ -54,9 +54,9 @@ const AdminPages = async ({ searchParams }: { searchParams: any }) => {
                     </p>
                 </div>
 
-                <Link href="/admin/pages/new" className="btn btn-primary">
+                {/* <Link href="/admin/pages/new" className="btn btn-primary">
                     {t('newPage')}
-                </Link>
+                </Link> */}
             </div>
 
             {/* Table */}
@@ -121,7 +121,7 @@ const AdminPages = async ({ searchParams }: { searchParams: any }) => {
                                     >
                                         {t('edit')}
                                     </Link>
-                                    <DeleteButton id={page.id} type="page" />
+                                    {/* <DeleteButton id={page.id} type="page" /> */}
                                 </td>
                             </tr>
                         ))}

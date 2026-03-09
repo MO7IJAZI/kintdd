@@ -6,11 +6,27 @@ import { auth } from "@/auth";
 
 interface DownloadInput {
     title: string;
+    title_ar?: string;
     type: string;
     fileUrl: string;
+    fileUrl_ar?: string;
 }
 
 import { generateSlug, generateGlobalUniqueSlug, checkSlugExistsGlobal } from "@/lib/slugUtils";
+
+async function generateUniqueProductSku() {
+    for (let attempt = 0; attempt < 10; attempt++) {
+        const candidate = `PRD-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
+        const existing = await prisma.product.findUnique({
+            where: { sku: candidate },
+            select: { id: true },
+        });
+        if (!existing) {
+            return candidate;
+        }
+    }
+    throw new Error("Failed to generate unique product SKU");
+}
 
 export async function createProduct(formData: FormData) {
     try {
@@ -22,7 +38,6 @@ export async function createProduct(formData: FormData) {
 
         const name = formData.get("name") as string;
         let slug = formData.get("slug") as string;
-        const sku = formData.get("sku") as string;
         const description = formData.get("description") as string;
         const shortDesc = formData.get("shortDesc") as string;
         const categoryId = formData.get("categoryId") as string;
@@ -43,12 +58,14 @@ export async function createProduct(formData: FormData) {
              // If provided slug exists, append a number
              slug = await generateGlobalUniqueSlug(slug);
         }
+        const sku = await generateUniqueProductSku();
 
         const isFeatured = formData.get("isFeatured") === "true";
         const isOrganic = formData.get("isOrganic") === "true";
         const order = parseInt(formData.get("order") as string) || 0;
         const colorTheme = (formData.get("colorTheme") as string) || "blue";
         const image = formData.get("image") as string;
+        const externalImage = formData.get("externalImage") as string;
         const benefits = formData.get("benefits") as string;
         const usage = formData.get("usage") as string;
         const metaTitle = formData.get("metaTitle") as string;
@@ -99,15 +116,17 @@ export async function createProduct(formData: FormData) {
         }
         
         // Parse downloads carefully
-        let downloads: DownloadInput[] = [];
+        let downloads: any[] = [];
         try {
             if (downloadsStr) {
                 const parsed = JSON.parse(downloadsStr);
                 if (Array.isArray(parsed)) {
                     downloads = parsed.map((d: any) => ({
                         title: String(d.title || ''),
+                        title_ar: String(d.title_ar || ''),
                         type: String(d.type || 'Document'),
-                        fileUrl: String(d.fileUrl || '')
+                        fileUrl: String(d.fileUrl || ''),
+                        fileUrl_ar: String(d.fileUrl_ar || '')
                     })).filter(d => d.title && d.fileUrl);
                 }
             }
@@ -130,6 +149,11 @@ export async function createProduct(formData: FormData) {
                 order,
                 colorTheme,
                 image,
+                images: externalImage && externalImage.trim()
+                    ? {
+                        create: [{ url: externalImage.trim(), alt: "external-card", order: 0 }]
+                    }
+                    : undefined,
                 benefits,
                 usage,
                 usageTable,
@@ -185,7 +209,6 @@ export async function updateProduct(id: string, formData: FormData) {
 
     const name = formData.get("name") as string;
     let slug = formData.get("slug") as string;
-    const sku = formData.get("sku") as string;
     const description = formData.get("description") as string;
     const shortDesc = formData.get("shortDesc") as string;
     const categoryId = formData.get("categoryId") as string;
@@ -205,11 +228,20 @@ export async function updateProduct(id: string, formData: FormData) {
          // If slug exists on ANOTHER record, generate a unique one
          slug = await generateGlobalUniqueSlug(slug, id);
     }
+    const existingProduct = await prisma.product.findUnique({
+        where: { id },
+        select: { sku: true },
+    });
+    if (!existingProduct) {
+        throw new Error("Product not found");
+    }
+    const sku = existingProduct.sku || await generateUniqueProductSku();
     const isFeatured = formData.get("isFeatured") === "true";
     const isOrganic = formData.get("isOrganic") === "true";
     const order = parseInt(formData.get("order") as string) || 0;
     const colorTheme = (formData.get("colorTheme") as string) || "blue";
     const image = formData.get("image") as string;
+    const externalImage = formData.get("externalImage") as string;
     const benefits = formData.get("benefits") as string;
     const usage = formData.get("usage") as string;
     const metaTitle = formData.get("metaTitle") as string;
@@ -243,6 +275,25 @@ export async function updateProduct(id: string, formData: FormData) {
     const compTable_ar = compTableArStr ? JSON.parse(compTableArStr) : null;
     const tabs_ar = tabsArStr ? JSON.parse(tabsArStr) : null;
 
+    // We need to recreate downloads, so delete existing ones
+    await prisma.download.deleteMany({
+        where: { productId: id }
+    });
+
+    // Then create new ones
+    if (downloads && downloads.length > 0) {
+        await prisma.download.createMany({
+            data: downloads.map((d: any) => ({
+                productId: id,
+                title: d.title,
+                title_ar: d.title_ar,
+                type: d.type,
+                fileUrl: d.fileUrl,
+                fileUrl_ar: d.fileUrl_ar
+            }))
+        });
+    }
+
     await prisma.product.update({
         where: { id },
         data: {
@@ -257,6 +308,12 @@ export async function updateProduct(id: string, formData: FormData) {
             order,
             colorTheme,
             image,
+            images: {
+                deleteMany: { alt: "external-card" },
+                create: externalImage && externalImage.trim()
+                    ? [{ url: externalImage.trim(), alt: "external-card", order: 0 }]
+                    : []
+            },
             benefits,
             usage,
             usageTable,
@@ -275,14 +332,6 @@ export async function updateProduct(id: string, formData: FormData) {
             tabs_ar,
             metaTitle_ar,
             metaDesc_ar,
-            downloads: {
-                deleteMany: {},
-                create: downloads.map((d) => ({
-                    title: d.title,
-                    type: d.type,
-                    fileUrl: d.fileUrl
-                }))
-            }
         },
     });
 
@@ -350,6 +399,7 @@ const getProductByIdCached = unstable_cache(
             include: {
                 category: true,
                 downloads: true,
+                images: true,
             },
         }),
     ["products:by-id"],

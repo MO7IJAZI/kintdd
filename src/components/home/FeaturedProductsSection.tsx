@@ -17,6 +17,10 @@ interface Product {
         name: string;
         name_ar?: string | null;
     } | null;
+    images?: {
+        url: string;
+        alt: string;
+    }[] | null;
 }
 
 interface FeaturedProductsSectionProps {
@@ -47,6 +51,9 @@ export default function FeaturedProductsSection({ products }: FeaturedProductsSe
                         const desc = isAr && product.shortDesc_ar ? product.shortDesc_ar : product.shortDesc;
                         const catName = isAr && product.category?.name_ar ? product.category.name_ar : product.category?.name;
                         
+                        const externalImage = product.images?.find((img) => img.alt === 'external-card')?.url;
+                        const displayImage = externalImage || product.image;
+
                         return (
                             <Link key={product.id} href={`/product/${product.slug}`} className="card" style={{
                                 overflow: 'hidden', borderRadius: 'var(--radius-2xl)', backgroundColor: 'white',
@@ -54,9 +61,9 @@ export default function FeaturedProductsSection({ products }: FeaturedProductsSe
                                 textDecoration: 'none', color: 'inherit',
                                 display: 'flex', flexDirection: 'column', height: '100%'
                             }}>
-                                <div style={{ position: 'relative', height: '260px', backgroundColor: '#fff', padding: '1.5rem' }}>
-                                    {product.image && (
-                                        <Image src={product.image} alt={title} fill style={{ objectFit: 'contain', padding: '2rem' }} />
+                                <div style={{ position: 'relative', height: '260px', backgroundColor: '#fff', padding: '0' }}>
+                                    {displayImage && (
+                                        <Image src={displayImage} alt={title} fill style={{ objectFit: 'contain' }} />
                                     )}
                                 </div>
                                 <div style={{ padding: '2rem', flex: 1, display: 'flex', flexDirection: 'column', borderTop: '1px solid var(--border)' }}>
