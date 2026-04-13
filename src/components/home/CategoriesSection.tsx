@@ -148,7 +148,7 @@ export default function CategoriesSection({ products = [], categories = [] }: Ca
                                display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                      {categoryDesc}
                    </p>
-                   <Link href={`/products/${category.slug}`} className="btn btn-primary" style={{ alignSelf: 'flex-start', borderRadius: 'var(--radius-2xl)', padding: '1rem 2.5rem', fontSize: '1.1rem', fontWeight: 600 }}>
+                   <Link href={`/products/${category.slug}`} className="btn btn-primary" style={{ alignSelf: 'flex-start', borderRadius: 'var(--radius-2xl)', padding: '1rem 2.5rem', fontSize: '1.1rem', fontWeight: 600, marginTop: 'auto' }}>
                      {tHomeNew('viewProducts')} <ArrowRight size={20} style={{ marginLeft: isAr ? 0 : '0.5rem', marginRight: isAr ? '0.5rem' : 0 }} />
                    </Link>
                  </div>
