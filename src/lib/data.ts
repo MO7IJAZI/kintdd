@@ -154,6 +154,7 @@ export const getCachedProductCategories = unstable_cache(
                     description: true,
                     description_ar: true,
                     image: true,
+                    parentId: true,
                     children: {
                         where: { isActive: true },
                         orderBy: [{ order: 'asc' }, { name: 'asc' }],

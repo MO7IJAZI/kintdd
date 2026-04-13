@@ -19,24 +19,40 @@ interface Crop {
   harvestSeason_ar?: string | null;
 }
 
-async function getCropsData() {
+async function getCropsData(category?: string) {
   const t = await getTranslations('CropGuides');
   const locale = await getLocale();
   const isAr = locale === 'ar';
 
+  const where: any = { isActive: true };
+  if (category) {
+    where.category = category;
+  }
+
   const crops = await prisma.crop.findMany({
-    where: { isActive: true },
+    where,
     orderBy: { name: 'asc' }
   }) as Crop[];
 
   return { crops, t, isAr };
 }
 
-export default async function CropsPage() {
-  const { crops, t, isAr } = await getCropsData();
+export default async function CropsPage({
+  params,
+  searchParams
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ category?: string }>
+}) {
+  const { category: activeCategory } = await searchParams;
+  const { crops, t, isAr } = await getCropsData(activeCategory);
 
-  // Get unique categories from crops
-  const categories = [...new Set(crops.map(crop => crop.category).filter(Boolean))];
+  // Get ALL unique categories from all active crops to show in filter
+  const allCrops = await prisma.crop.findMany({
+    where: { isActive: true },
+    select: { category: true }
+  });
+  const categories = [...new Set(allCrops.map(crop => crop.category).filter(Boolean))];
   
   const toPlainText = (html?: string | null) => {
     if (!html) return '';
@@ -147,18 +163,19 @@ export default async function CropsPage() {
           justifyContent: 'center'
         }}>
           <Link
-            href="/products/plant-wealth/crops"
+            href="/crops"
             style={{
               padding: '0.5rem 1.25rem',
               borderRadius: '2rem',
-              background: 'var(--primary)',
-              color: 'white',
+              background: !activeCategory ? 'var(--primary)' : 'var(--muted)',
+              color: !activeCategory ? 'white' : 'var(--foreground)',
               textDecoration: 'none',
               fontWeight: '600',
               fontSize: '0.95rem',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem'
+              gap: '0.5rem',
+              transition: 'all 0.2s ease'
             }}
           >
             <Leaf style={{ width: '18px', height: '18px' }} />
@@ -167,14 +184,14 @@ export default async function CropsPage() {
           {categories.map((category) => (
             <Link
               key={category}
-              href={`/products/plant-wealth/crops?category=${category}` as any}
+              href={{ pathname: '/crops', query: { category } } as any}
               style={{
                 padding: '0.5rem 1.25rem',
                 borderRadius: '2rem',
-                background: 'var(--muted)',
-                color: 'var(--foreground)',
+                background: activeCategory === category ? 'var(--primary)' : 'var(--muted)',
+                color: activeCategory === category ? 'white' : 'var(--foreground)',
                 textDecoration: 'none',
-                fontWeight: '500',
+                fontWeight: activeCategory === category ? '600' : '500',
                 fontSize: '0.95rem',
                 transition: 'all 0.2s ease'
               }}

@@ -8,6 +8,7 @@ type ProductCategoryNav = {
   name: string;
   name_ar: string | null;
   slug: string;
+  parentId?: string | null;
 };
 
 export default function Footer({ productCategories = [] }: { productCategories?: ProductCategoryNav[] }) {
@@ -17,12 +18,13 @@ export default function Footer({ productCategories = [] }: { productCategories?:
     const isRtl = locale === 'ar';
     const currentYear = new Date().getFullYear();
 
-    const fallbackCategories = [
-      { id: 'livestock', name: 'Livestock', name_ar: 'الثروة الحيوانية', slug: 'livestock' },
-      { id: 'plant-wealth', name: 'Plant Wealth', name_ar: 'الثروة النباتية', slug: 'plant-wealth' }
+    const fallbackCategories: ProductCategoryNav[] = [
+      { id: 'livestock', name: 'Livestock', name_ar: 'الثروة الحيوانية', slug: 'livestock', parentId: null },
+      { id: 'plant-wealth', name: 'Plant Wealth', name_ar: 'الثروة النباتية', slug: 'plant-wealth', parentId: null }
     ];
 
-    const categories = (productCategories && productCategories.length > 0) ? productCategories : fallbackCategories;
+    const categories = ((productCategories && productCategories.length > 0) ? productCategories : fallbackCategories)
+      .filter(category => !category.parentId);
 
     return (
         <footer style={{
