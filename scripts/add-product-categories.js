@@ -5,21 +5,21 @@ const prisma = new PrismaClient();
 
 async function addProductCategories() {
   try {
-    // Create Animal Production parent category
+    // Create Livestock parent category
     const animalProduction = await prisma.category.upsert({
-      where: { slug: 'animal-production' },
+      where: { slug: 'livestock' },
       update: {},
       create: {
-        name: 'Animal Production',
+        name: 'Livestock',
         name_ar: 'الثروة الحيوانية',
-        slug: 'animal-production',
+        slug: 'livestock',
         description: 'Veterinary products and animal nutrition solutions',
         description_ar: 'منتجات الثروة الحيوانية وحلول تغذية الحيوان',
         isActive: true,
         order: 1,
       },
     });
-    console.log('Created Animal Production category');
+    console.log('Created Livestock category');
 
     // Create Animal Products subcategory
     await prisma.category.upsert({
@@ -38,21 +38,21 @@ async function addProductCategories() {
     });
     console.log('Created Animal Products subcategory');
 
-    // Create Plant Production parent category
+    // Create Plant Wealth parent category
     const plantProduction = await prisma.category.upsert({
-      where: { slug: 'plant-production' },
+      where: { slug: 'plant-wealth' },
       update: {},
       create: {
-        name: 'Plant Production',
+        name: 'Plant Wealth',
         name_ar: 'الثروة النباتية',
-        slug: 'plant-production',
+        slug: 'plant-wealth',
         description: 'Agricultural products for crop nutrition and protection',
         description_ar: 'منتجات الثروة النباتية لتغذية وحماية المحاصيل',
         isActive: true,
         order: 2,
       },
     });
-    console.log('Created Plant Production category');
+    console.log('Created Plant Wealth category');
 
     // Create Plant Products subcategory
     await prisma.category.upsert({

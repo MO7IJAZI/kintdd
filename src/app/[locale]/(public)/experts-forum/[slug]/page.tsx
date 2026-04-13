@@ -38,53 +38,9 @@ export default async function ExpertArticlePage({ params }: { params: Promise<{ 
 
     return (
         <div style={{ minHeight: '100vh', backgroundColor: '#fff' }} dir={isRtl ? 'rtl' : 'ltr'}>
-            {/* Breadcrumb */}
-            <div style={{ backgroundColor: 'white', borderBottom: '1px solid #e2e8f0', padding: '1rem 0' }}>
-                <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1.5rem' }}>
-                    <nav style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        fontSize: '0.875rem',
-                        color: '#64748b',
-                        flexWrap: 'wrap'
-                    }}>
-                        <Link href={`/`} style={{ textDecoration: 'none', color: 'inherit' }}>{t('home')}</Link>
-                        {isRtl ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
-                        <Link href={`/crops`} style={{ textDecoration: 'none', color: 'inherit' }}>{t('cropFarming')}</Link>
-                        {isRtl ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
-                        <Link href={`/experts-forum`} style={{ textDecoration: 'none', color: 'inherit' }}>{t('title')}</Link>
-                        {isRtl ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
-                        <span style={{
-                            color: '#e9496c',
-                            fontWeight: 600,
-                            wordBreak: 'break-word',
-                            overflowWrap: 'break-word'
-                        }}>
-                            {title}
-                        </span>
-                    </nav>
-                </div>
-            </div>
-
             <article className="section" style={{ padding: '4rem 0' }}>
                 <div className="container" style={{ maxWidth: '1100px', margin: '0 auto', padding: '0 1.5rem' }}>
                     <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-                        <span style={{
-                            display: 'inline-block',
-                            padding: '0.5rem 1rem',
-                            backgroundColor: '#fce4e9',
-                            color: '#e9496c',
-                            borderRadius: '2rem',
-                            fontSize: '0.9rem',
-                            fontWeight: 700,
-                            marginBottom: '1.5rem',
-                            textTransform: 'capitalize',
-                            wordBreak: 'normal',
-                            whiteSpace: 'nowrap'
-                        }}>
-                            {t(article.category) || article.category}
-                        </span>
                         <h1 style={{
                             fontSize: 'clamp(2rem, 5vw, 3rem)',
                             fontWeight: 800,
@@ -98,7 +54,7 @@ export default async function ExpertArticlePage({ params }: { params: Promise<{ 
                             {title}
                         </h1>
                         <div style={{ color: 'var(--muted-foreground)', display: 'flex', justifyContent: 'center', gap: '2rem', fontSize: '1rem', flexWrap: 'wrap' }}>
-                            <span>{article.publishedAt ? new Date(article.publishedAt).toLocaleDateString(isRtl ? 'ar-EG' : 'en-US') : t('draft')}</span>
+                            <span>{article.publishedAt ? new Date(article.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : t('draft')}</span>
                         </div>
                     </div>
 

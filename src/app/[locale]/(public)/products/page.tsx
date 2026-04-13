@@ -1,11 +1,31 @@
 import Image from 'next/image';
 import { Link } from '@/navigation';
 import { getTranslations, getLocale } from 'next-intl/server';
-import { ArrowRight, Package } from 'lucide-react';
+import { ArrowRight, Package, Beef, Rabbit, Leaf, Sprout } from 'lucide-react';
 import styles from './products.module.css';
 import ProductsFeaturesGrid from '@/components/products/ProductsFeaturesGrid';
-import { CowIcon } from '@/components/icons/CowIcon';
-import { PlantIcon } from '@/components/icons/PlantIcon';
+import prisma from "@/lib/prisma";
+import { ensureCoreCategoriesExist } from "@/lib/data";
+
+function renderCardIcon(icon?: string | null) {
+  const iconName = (icon || "").toLowerCase();
+  const isImageIcon =
+    !!icon &&
+    !["leaf", "sprout", "beef", "rabbit", "package"].includes(iconName) &&
+    (icon.startsWith("/") || icon.startsWith("http://") || icon.startsWith("https://"));
+  if (isImageIcon) {
+    return (
+      <div style={{ position: 'relative', width: '30px', height: '30px' }}>
+        <Image src={icon} alt="Card Icon" fill style={{ objectFit: 'cover', borderRadius: '50%' }} />
+      </div>
+    );
+  }
+  if (iconName === "beef") return <Beef style={{ width: '30px', height: '30px', color: 'white' }} />;
+  if (iconName === "rabbit") return <Rabbit style={{ width: '30px', height: '30px', color: 'white' }} />;
+  if (iconName === "leaf") return <Leaf style={{ width: '30px', height: '30px', color: 'white' }} />;
+  if (iconName === "sprout") return <Sprout style={{ width: '30px', height: '30px', color: 'white' }} />;
+  return <Package style={{ width: '30px', height: '30px', color: 'white' }} />;
+}
 
 export const revalidate = 300;
 
@@ -40,8 +60,19 @@ async function ProductsPageContent() {
     let tHomeNew: any = {};
     let tNav: any = {};
     let isAr = false;
+    let rootCategories: any[] = [];
     
     try {
+        await ensureCoreCategoriesExist();
+        rootCategories = await prisma.category.findMany({
+            where: {
+                parentId: null,
+                isActive: true
+            },
+            orderBy: {
+                order: 'asc'
+            }
+        });
         locale = await getLocale();
         t = await getTranslations('ProductsPage');
         tHomeNew = await getTranslations('HomeNew');
@@ -181,86 +212,106 @@ async function ProductsPageContent() {
                         <div style={{ width: '80px', height: '4px', background: 'linear-gradient(90deg, #e9496c, #142346)', margin: '0 auto', borderRadius: '2px' }}></div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '2rem' }}>
-                        {/* Plant Wealth Card */}
-                        <div style={{ 
-                            position: 'relative',
-                            overflow: 'hidden', 
-                            borderRadius: '1.5rem', 
-                            backgroundColor: 'white', 
-                            boxShadow: '0 10px 30px rgba(0,0,0,0.05)', 
-                            border: '1px solid rgba(0,0,0,0.05)',
-                            display: 'flex', 
-                            flexDirection: 'column', 
-                            height: '100%',
-                            transition: 'transform 0.3s ease, box-shadow 0.3s ease'
-                        }} className="hover:shadow-xl hover:-translate-y-1">
-                            <div style={{ position: 'relative', height: '350px' }}>
-                                <Image 
-                                    src="/images/planet.webp" 
-                                    alt={translateHome('prodPlant', 'Plant Wealth')} 
-                                    fill 
-                                    style={{ objectFit: 'cover' }} 
-                                />
-                            </div>
-                            <div style={{ padding: '2.5rem', textAlign: isAr ? 'right' : 'left', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                                <h3 style={{ fontSize: '1.75rem', marginBottom: '1rem', fontWeight: 800, color: '#142346', display: 'flex', alignItems: 'center', gap: '0.75rem', justifyContent: isAr ? 'flex-end' : 'flex-start' }}>
-                                    <PlantIcon size={28} />
-                                    <span>{translateHome('prodPlant', 'Plant Wealth')}</span>
-                                </h3>
-                                <p style={{ color: '#64748b', marginBottom: '2rem', lineHeight: 1.7, fontSize: '1.05rem', flex: 1 }}>
-                                    {translateHome('agriculturalDesc', 'Advanced solutions for crop nutrition and protection.')}
-                                </p>
-                                <Link 
-                                    href="/products/plant-wealth" 
-                                    className="group inline-flex items-center gap-2 px-6 py-3 bg-[#e9496c] text-white rounded-xl font-semibold transition-all hover:bg-[#d63d60]"
-                                    style={{ alignSelf: 'flex-start' }}
-                                >
-                                    {translateHome('viewProducts', 'View Products')} 
-                                    <ArrowRight size={20} className={isAr ? "mr-2 rotate-180" : "ml-2"} />
-                                </Link>
-                            </div>
-                        </div>
+                    <div style={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', 
+                        gap: '2rem' 
+                    }}>
+                        {rootCategories.map((category) => {
+                            const categoryName = isAr ? (category.name_ar || category.name) : (category.name || category.name_ar);
+                            const categoryDesc = isAr ? (category.description_ar || category.description) : (category.description || category.description_ar);
+                            const categoryImage = category.image || (category.slug === 'plant-wealth' ? '/images/planet.webp' : category.slug === 'livestock' ? '/images/livestock.jpg' : '/images/banners/products-banner.png');
+                            
+                            // Default icon based on slug if none is set
+                            let categoryIcon = category.icon;
+                            if (!categoryIcon) {
+                                if (category.slug === 'plant-wealth' || category.slug === 'plant-production') categoryIcon = 'leaf';
+                                else if (category.slug === 'livestock' || category.slug === 'animal-production') categoryIcon = 'beef';
+                            }
 
-                        {/* Livestock / Animal Wealth Card */}
-                        <div style={{ 
-                            position: 'relative',
-                            overflow: 'hidden', 
-                            borderRadius: '1.5rem', 
-                            backgroundColor: 'white', 
-                            boxShadow: '0 10px 30px rgba(0,0,0,0.05)', 
-                            border: '1px solid rgba(0,0,0,0.05)',
-                            display: 'flex', 
-                            flexDirection: 'column', 
-                            height: '100%',
-                            transition: 'transform 0.3s ease, box-shadow 0.3s ease'
-                        }} className="hover:shadow-xl hover:-translate-y-1">
-                            <div style={{ position: 'relative', height: '350px' }}>
-                                <Image 
-                                    src="/images/livestock.jpg" 
-                                    alt={translateHome('prodAnimal', 'Animal Wealth')} 
-                                    fill 
-                                    style={{ objectFit: 'cover' }} 
-                                />  
-                            </div>
-                            <div style={{ padding: '2.5rem', textAlign: isAr ? 'right' : 'left', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                                <h3 style={{ fontSize: '1.75rem', marginBottom: '1rem', fontWeight: 800, color: '#142346', display: 'flex', alignItems: 'center', gap: '0.75rem', justifyContent: isAr ? 'flex-end' : 'flex-start' }}>
-                                    <CowIcon size={28} />
-                                    <span>{translateHome('prodAnimal', 'Animal Wealth')}</span>
-                                </h3>
-                                <p style={{ color: '#64748b', marginBottom: '2rem', lineHeight: 1.7, fontSize: '1.05rem', flex: 1 }}>
-                                    {translateHome('animalDesc', 'Specialized health and nutrition for livestock.')}
-                                </p>
+                            return (
                                 <Link 
-                                    href="/products/livestock" 
-                                    className="group inline-flex items-center gap-2 px-6 py-4 bg-[#e9496c] text-white rounded-xl font-semibold transition-all hover:bg-[#d63d60]"
-                                    style={{ alignSelf: 'flex-start' }}
+                                    key={category.id}
+                                    href={`/products/${category.slug}` as any}
+                                    style={{ textDecoration: 'none', color: 'inherit' }}
                                 >
-                                    {translateHome('viewProducts', 'View Products')} 
-                                    <ArrowRight size={20} className={isAr ? "mr-2 rotate-180" : "ml-2"} />
+                                    <div style={{
+                                        position: 'relative',
+                                        borderRadius: '20px',
+                                        overflow: 'hidden',
+                                        height: '350px',
+                                        cursor: 'pointer',
+                                        boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
+                                        transition: 'transform 0.3s ease, box-shadow 0.3s ease'
+                                    }} className="hover:shadow-2xl hover:-translate-y-1">
+                                        <Image 
+                                            src={categoryImage} 
+                                            alt={categoryName} 
+                                            fill 
+                                            style={{ objectFit: 'cover' }} 
+                                        />
+                                        <div style={{
+                                            position: 'absolute',
+                                            inset: 0,
+                                            background: 'linear-gradient(to top, rgba(20, 35, 70, 0.95) 0%, rgba(20, 35, 70, 0.3) 100%)',
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            justifyContent: 'flex-end',
+                                            padding: '2.5rem'
+                                        }}>
+                                            <div style={{
+                                                width: '60px',
+                                                height: '60px',
+                                                background: 'rgba(233, 73, 108, 0.9)',
+                                                borderRadius: '50%',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                marginBottom: '1.25rem',
+                                                boxShadow: '0 4px 15px rgba(233, 73, 108, 0.4)'
+                                            }}>
+                                                {renderCardIcon(categoryIcon)}
+                                            </div>
+                                            <h3 style={{
+                                                fontSize: '2rem',
+                                                fontWeight: 800,
+                                                color: 'white',
+                                                marginBottom: '0.75rem',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '0.75rem'
+                                            }}>
+                                                {categoryName}
+                                            </h3>
+                                            <p style={{
+                                                fontSize: '1.05rem',
+                                                lineHeight: 1.6,
+                                                color: 'rgba(255,255,255,0.85)',
+                                                marginBottom: '1.5rem',
+                                                display: '-webkit-box',
+                                                WebkitLineClamp: 2,
+                                                WebkitBoxOrient: 'vertical',
+                                                overflow: 'hidden',
+                                            }}>
+                                                {categoryDesc}
+                                            </p>
+                                            <div style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '0.5rem',
+                                                color: '#e9496c',
+                                                fontWeight: 600,
+                                                fontSize: '1rem',
+                                                marginTop: 'auto'
+                                            }}>
+                                                <span>{translateHome('viewProducts', isAr ? 'تصفح المنتجات' : 'Browse Products')}</span>
+                                                <ArrowRight size={20} className={isAr ? "rotate-180" : ""} />
+                                            </div>
+                                        </div>
+                                    </div>
                                 </Link>
-                            </div>
-                        </div>
+                            );
+                        })}
                     </div>
                 </div>
             </section>

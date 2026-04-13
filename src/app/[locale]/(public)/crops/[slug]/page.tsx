@@ -31,6 +31,9 @@ interface CropDetailData {
     image?: string | null;
     pdfUrl?: string | null;
     pdfUrl_ar?: string | null; // Added
+    documentTitle?: string | null;
+    documentTitle_ar?: string | null;
+    documentIcon?: string | null;
     description?: string | null;
     description_ar?: string | null;
     category?: string | null;
@@ -49,7 +52,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     try {
         const { slug, locale } = await params;
         const isRtl = locale === 'ar';
-        
+
         const crop = await prisma.crop.findUnique({
             where: { slug },
             select: {
@@ -119,11 +122,11 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
             });
 
             // Fetch products for stages
-            stageProducts = stageProductIds.size > 0 
+            stageProducts = stageProductIds.size > 0
                 ? await prisma.product.findMany({
                     where: { id: { in: Array.from(stageProductIds) } },
                     select: { id: true, name: true, slug: true }
-                  }) as Product[]
+                }) as Product[]
                 : [];
         }
     } catch (error) {
@@ -135,7 +138,7 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
         // Force logging to string for display
         const errorMsg = errorOccurred instanceof Error ? errorOccurred.message : (typeof errorOccurred === 'object' ? JSON.stringify(errorOccurred) : String(errorOccurred));
         const stack = errorOccurred instanceof Error ? errorOccurred.stack : '';
-        
+
         return (
             <div style={{ padding: '4rem', textAlign: 'center' }}>
                 <h2>Something went wrong loading this crop details.</h2>
@@ -179,11 +182,11 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
         if (cropData.category) return lookup[cropData.category] || cropData.category;
         return '';
     })();
-    
+
     // Determine the correct PDF URL based on locale
     const rawPdfUrl = (isRtl && cropData.pdfUrl_ar) ? cropData.pdfUrl_ar : cropData.pdfUrl;
     const normalizedPdfUrl = (rawPdfUrl || "").replace(/^\/(en|ar)(?=\/uploads\/)/, "");
-    
+
     const updatedAtMs = cropData.updatedAt ? new Date(cropData.updatedAt).getTime() : 0;
     const pdfPreviewUrl = normalizedPdfUrl ? `${normalizedPdfUrl}${normalizedPdfUrl.includes('?') ? '&' : '?'}v=${updatedAtMs}` : "";
 
@@ -205,10 +208,10 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
                         <Link href={`/crops` as any} style={{ color: '#999' }}> {t('title').toUpperCase()}</Link> /
                         <span style={{ color: 'var(--primary)' }}> {name.toUpperCase()}</span>
                     </nav>
-                    <h1 style={{ 
-                        fontSize: 'clamp(1.5rem, 5vw, 2.5rem)', 
-                        fontWeight: 900, 
-                        textTransform: 'uppercase', 
+                    <h1 style={{
+                        fontSize: 'clamp(1.5rem, 5vw, 2.5rem)',
+                        fontWeight: 900,
+                        textTransform: 'uppercase',
                         letterSpacing: '-0.02em',
                         marginTop: '2.25rem',
                         wordBreak: 'break-word'
@@ -261,7 +264,7 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
                                     justifyContent: 'space-between',
                                     gap: '1rem'
                                 }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexShrink: 0 }}>
                                         <div style={{
                                             width: '46px',
                                             height: '46px',
@@ -271,20 +274,21 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'center',
-                                            fontSize: '1.2rem'
+                                            fontSize: '1.2rem',
+                                            flexShrink: 0
                                         }}>
                                             📄
                                         </div>
-                                        <div>
+                                        <div style={{ minWidth: 0 }}>
                                             <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
                                                 {t('documentation')}
                                             </div>
-                                            <div style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a' }}>
-                                                {isRtl ? 'ملف دليل المحصول جاهز للعرض والتحميل' : 'Crop document is ready for preview and download'}
+                                            <div style={{ fontSize: '1rem', fontWeight: 800, color: '#0f172a', wordBreak: 'break-word' }}>
+                                                {isRtl ? (cropData.documentTitle_ar || 'ملف دليل المحصول جاهز للعرض والتحميل') : (cropData.documentTitle || 'Crop document is ready for preview and download')}
                                             </div>
                                         </div>
                                     </div>
-                                    <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                                    <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', flexShrink: 0 }}>
                                         <a
                                             href={`/${locale}/catalogs/viewer?source=${encodeURIComponent(normalizedPdfUrl)}&title=${encodeURIComponent(name)}`}
                                             style={{
@@ -298,7 +302,9 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
                                                 border: '1px solid #1e40af',
                                                 display: 'inline-flex',
                                                 alignItems: 'center',
-                                                gap: '0.45rem'
+                                                gap: '0.45rem',
+                                                whiteSpace: 'nowrap',
+                                                flexShrink: 0
                                             }}
                                         >
                                             👁 {isRtl ? 'عرض المستند' : 'Open Document'}
@@ -317,7 +323,9 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
                                                 border: '1px solid #cbd5e1',
                                                 display: 'inline-flex',
                                                 alignItems: 'center',
-                                                gap: '0.45rem'
+                                                gap: '0.45rem',
+                                                whiteSpace: 'nowrap',
+                                                flexShrink: 0
                                             }}
                                         >
                                             ⬇ {t('downloadPdf')}
@@ -385,7 +393,7 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
                                         const stageName = (isRtl && stage.name_ar) ? stage.name_ar : stage.name;
                                         const stageDesc = (isRtl && stage.description_ar) ? stage.description_ar : (stage.description || t('defaultStageDescription', { name }));
                                         const safeStageDesc = stripScripts(stageDesc);
-                                        
+
                                         return (
                                             <div key={stage.id} className="card" style={{
                                                 display: 'grid',
@@ -409,7 +417,7 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
 
                                                 <div style={{ padding: '2rem', backgroundColor: 'white' }}>
                                                     <div style={{ color: '#666', fontSize: '0.95rem', lineHeight: '1.7' }} dangerouslySetInnerHTML={{ __html: safeStageDesc }} />
-                                                    
+
                                                     {/* In a real app, recommendations would be many-to-many here too */}
                                                     <div style={{ marginTop: '1.5rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                                                         {(() => {
@@ -426,7 +434,7 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
                                                                     }}>{t('optimizedPerformance')}</span>
                                                                 );
                                                             }
-                                                            
+
                                                             return recommendation.products.map((prodId) => {
                                                                 const prod = productsMap.get(prodId);
                                                                 if (!prod) return null;

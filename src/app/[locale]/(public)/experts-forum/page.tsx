@@ -1,7 +1,7 @@
-import { getExpertArticlesByCategory } from "@/actions/expertArticleActions";
+import { getExpertArticles } from "@/actions/expertArticleActions";
 import { Link } from '@/navigation';
 import Image from 'next/image';
-import { ChevronRight, ChevronLeft, Wheat, Apple, Carrot } from 'lucide-react';
+import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 
 export const revalidate = 300;
@@ -57,86 +57,16 @@ function ArticleCard({ article, locale, t }: { article: Article, locale: string,
     );
 }
 
-function CategorySection({ 
-    title, 
-    icon, 
-    articles, 
-    color,
-    locale,
-    t
-}: { 
-    title: string; 
-    icon: React.ReactNode; 
-    articles: Article[]; 
-    color: string;
-    locale: string;
-    t: any;
-}) {
-    if (articles.length === 0) return null;
-
-    return (
-        <section style={{ marginBottom: '4rem' }}>
-            <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '1rem',
-                marginBottom: '2rem'
-            }}>
-                <div style={{
-                    width: '48px',
-                    height: '48px',
-                    background: color,
-                    borderRadius: '12px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white'
-                }}>
-                    {icon}
-                </div>
-                <h2 style={{
-                    fontSize: '1.75rem',
-                    fontWeight: 700,
-                    color: '#1e293b'
-                }}>
-                    {title}
-                </h2>
-            </div>
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-                gap: '1.5rem'
-            }}>
-                {articles.map((article) => (
-                    <ArticleCard key={article.slug} article={article} locale={locale} t={t} />
-                ))}
-            </div>
-        </section>
-    );
-}
-
 export default async function ExpertsForumPage({ params }: { params: Promise<{ locale: string }> }) {
     const { locale } = await params;
     const t = await getTranslations('ExpertsForum');
     const isRtl = locale === 'ar';
-    const { arable, fruit, vegetable } = await getExpertArticlesByCategory();
+    const articles = await getExpertArticles();
+    const publishedArticles = articles.filter((a: any) => a.isPublished);
 
     return (
         <div style={{ minHeight: '100vh', backgroundColor: '#f8fafc' }} dir={isRtl ? 'rtl' : 'ltr'}>
             
-            {/* Breadcrumb */}
-            <div style={{ backgroundColor: 'white', borderBottom: '1px solid #e2e8f0', padding: '1rem 0' }}>
-                <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 1.5rem' }}>
-                    <nav style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: '#64748b' }}>
-                        <Link href={`/`} style={{ textDecoration: 'none', color: 'inherit' }}>{t('home')}</Link>
-                        {isRtl ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
-                        <Link href={{ pathname: '/crops' }} style={{ textDecoration: 'none', color: 'inherit' }}>{t('cropFarming')}</Link>
-                        {isRtl ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
-                        <span style={{ color: '#e9496c', fontWeight: 600 }}>{t('title')}</span>
-                    </nav>
-                </div>
-            </div>
-
             {/* Hero Header */}
             <div style={{
                 background: 'linear-gradient(135deg, #7f1d1d 0%, #991b1b 50%, #b91c1c 100%)',
@@ -156,34 +86,17 @@ export default async function ExpertsForumPage({ params }: { params: Promise<{ l
             {/* Main Content */}
             <div className="container" style={{ maxWidth: '1200px', margin: '0 auto', padding: '3rem 1.5rem' }}>
                 
-                <CategorySection
-                    title={t('arable')}
-                    icon={<Wheat size={24} />}
-                    articles={arable}
-                    color="#d97706"
-                    locale={locale}
-                    t={t}
-                />
-
-                <CategorySection
-                    title={t('fruit')}
-                    icon={<Apple size={24} />}
-                    articles={fruit}
-                    color="#dc2626"
-                    locale={locale}
-                    t={t}
-                />
-
-                <CategorySection
-                    title={t('vegetable')}
-                    icon={<Carrot size={24} />}
-                    articles={vegetable}
-                    color="#16a34a"
-                    locale={locale}
-                    t={t}
-                />
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                    gap: '1.5rem'
+                }}>
+                    {publishedArticles.map((article: any) => (
+                        <ArticleCard key={article.slug} article={article} locale={locale} t={t} />
+                    ))}
+                </div>
                 
-                {arable.length === 0 && fruit.length === 0 && vegetable.length === 0 && (
+                {publishedArticles.length === 0 && (
                      <div style={{ textAlign: 'center', padding: '4rem', color: '#64748b' }}>
                         <p>{t('noArticles')}</p>
                      </div>

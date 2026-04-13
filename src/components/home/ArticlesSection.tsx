@@ -23,7 +23,7 @@ export default function ArticlesSection({ news }: ArticlesSectionProps) {
 
   const formatDate = (date: string | Date) => {
     if (!mounted) return '';
-    return new Date(date).toLocaleDateString(isAr ? 'ar-EG' : 'en-US', { 
+    return new Date(date).toLocaleDateString('en-US', { 
       year: 'numeric', 
       month: 'long', 
       day: 'numeric' 

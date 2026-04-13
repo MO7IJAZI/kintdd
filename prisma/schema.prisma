@@ -202,6 +202,9 @@ model Crop {
   image             String?
   pdfUrl            String?
   pdfUrl_ar         String? // Added: PDF for Arabic
+  documentTitle     String?
+  documentTitle_ar  String?
+  documentIcon      String?
   description       String?     @db.Text
   description_ar    String?     @db.Text
   stages      CropStage[]

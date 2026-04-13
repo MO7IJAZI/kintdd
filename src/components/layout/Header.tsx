@@ -14,7 +14,6 @@ import {
   ChevronRight,
   Factory,
   FileText,
-  Globe,
   Mail,
   Menu,
   Microscope,
@@ -90,7 +89,7 @@ export default function Header({ productCategories }: HeaderProps) {
 
   const switchLocale = (nextLocale: string) => {
     const { locale: _ignored, ...rest } = (params || {}) as Record<string, string | string[]>;
-    
+
     // Preserve query parameters (searchParams)
     const searchParams = new URLSearchParams(window.location.search);
     const queryString = searchParams.toString() ? `?${searchParams.toString()}` : "";
@@ -98,17 +97,17 @@ export default function Header({ productCategories }: HeaderProps) {
     if (Object.keys(rest).length > 0) {
       // If we have dynamic params, we construct the path using next-intl router
       // However, we must ensure query string is appended
-      
+
       // router.replace({ pathname, params: rest, query: Object.fromEntries(searchParams) }, { locale: nextLocale });
       // NOTE: The above syntax depends on the specific version of next-intl router wrapper.
       // Often, the easiest way to ensure query params persist across locale switch 
       // without deep diving into next-intl docs is to construct the URL manually if the library doesn't auto-handle.
-      
+
       // But `router` from `navigation.ts` usually handles the locale prefix.
       // Let's try passing the query in the object if supported, or verify behavior.
-      
+
       // Since the user reported issue, it's likely `router.replace` is NOT preserving search params by default.
-      
+
       router.replace(
         // @ts-ignore
         { pathname, params: rest, query: Object.fromEntries(searchParams.entries()) },
@@ -132,18 +131,18 @@ export default function Header({ productCategories }: HeaderProps) {
   // Fallback static categories if database is empty
   const fallbackCategories: ProductCategoryNav[] = [
     {
-      id: 'animal-production',
+      id: 'livestock',
       name: 'Livestock',
       name_ar: 'الثروة الحيوانية',
-      slug: 'animal-production',
+      slug: 'livestock',
       description: 'Veterinary products and animal nutrition solutions',
       description_ar: 'منتجات الثروة الحيوانية وحلول تغذية الحيوان',
     },
     {
-      id: 'plant-production',
+      id: 'plant-wealth',
       name: 'Plant Wealth',
       name_ar: 'الثروة النباتية',
-      slug: 'plant-production',
+      slug: 'plant-wealth',
       description: 'Agricultural products for crop nutrition and protection',
       description_ar: 'منتجات الثروة النباتية لتغذية وحماية المحاصيل',
     },
@@ -151,7 +150,7 @@ export default function Header({ productCategories }: HeaderProps) {
 
   // Use database categories if available, otherwise use fallback
   const categories = (productCategories && productCategories.length > 0)
-    ? productCategories.filter(c => c.slug !== 'animal-production' && c.slug !== 'plant-production')
+    ? productCategories
     : fallbackCategories;
 
   const productSubItems: NavSubItem[] = (categories).map((category) => {
@@ -161,14 +160,11 @@ export default function Header({ productCategories }: HeaderProps) {
     // Map to fixed routes based on slug
     let href = `/products/${category.slug}`;
 
-    // Hide image for specific categories to show arrow instead
-    const hideImage = ['livestock', 'plant-wealth', 'animal-production', 'plant-production'].includes(category.slug);
-
     return {
       name,
       href: href as any,
       description: description || undefined,
-      image: hideImage ? undefined : ((category as any).image || undefined),
+      image: undefined, // Always hide image in header dropdown to show arrow icon
     };
   });
 
@@ -192,11 +188,8 @@ export default function Header({ productCategories }: HeaderProps) {
       icon: <Phone size={18} />,
       subItems: [
         { name: t("companyHeadquarter"), href: "/contact/headquarter", icon: <Factory size={18} /> },
-        { name: t("exportDepartment"), href: "/contact/export-department", icon: <Globe size={18} /> },
-        { name: t("localRepresentatives"), href: "/contact/local-representatives", icon: <Users size={18} /> },
         { name: t("contactForm"), href: "/contact", icon: <Mail size={18} /> },
         { name: t("career"), href: "/about/career", icon: <Users size={18} /> },
-
       ],
     },
   ];

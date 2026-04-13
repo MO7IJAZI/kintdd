@@ -142,20 +142,14 @@ export default function DynamicSectionsRenderer({ sections, isRtl }: DynamicSect
                                 }}>
                                     <div style={{ padding: '1.4rem 1.25rem' }}>
                                         <div
-                                            className="prose prose-slate"
+                                            className="rich-content"
                                             style={{
                                                 fontSize: '1rem',
                                                 lineHeight: '1.7',
                                                 color: '#475569',
                                                 maxWidth: 'none'
                                             }}
-                                            dangerouslySetInnerHTML={{
-                                                __html: safeContent
-                                                    .replace(/<p>/g, '<p style="margin-bottom: 1rem;">')
-                                                    .replace(/<ul>/g, '<ul style="margin: 1rem 0; padding-left: 1.5rem; list-style-type: disc;">')
-                                                    .replace(/<ol>/g, '<ol style="margin: 1rem 0; padding-left: 1.5rem; list-style-type: decimal;">')
-                                                    .replace(/<li>/g, '<li style="margin-bottom: 0.5rem;">')
-                                            }}
+                                            dangerouslySetInnerHTML={{ __html: safeContent }}
                                         />
                                     </div>
                                 </div>

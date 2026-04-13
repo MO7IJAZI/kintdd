@@ -8,10 +8,10 @@ import { FileText, Plus, Trash2, Download } from "lucide-react";
 interface DownloadItem {
     id?: string;
     title: string;
-    title_ar?: string;
+    title_ar?: string | null;
     type: string;
     fileUrl: string;
-    fileUrl_ar?: string;
+    fileUrl_ar?: string | null;
 }
 
 interface DownloadsManagerProps {
@@ -127,6 +127,10 @@ export default function DownloadsManager({ initialData, onChange }: DownloadsMan
                                                 <option value="SDS">{t('types.SDS')}</option>
                                                 <option value="Brochure">{t('types.Brochure')}</option>
                                                 <option value="Certificate">{t('types.Certificate')}</option>
+                                                <option value="TDS">{t('types.TDS')}</option>
+                                                <option value="Organic">{t('types.Organic')}</option>
+                                                <option value="Analysis">{t('types.Analysis')}</option>
+                                                <option value="Mixing">{t('types.Mixing')}</option>
                                                 <option value="Other">{t('types.Other')}</option>
                                             </select>
                                         </div>

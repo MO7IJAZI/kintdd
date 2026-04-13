@@ -36,7 +36,6 @@ export default async function AdminExpertArticles() {
                     <thead>
                         <tr style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid var(--border)' }}>
                             <th style={{ padding: '1rem 1.5rem' }}>{t('tableTitle')}</th>
-                            <th style={{ padding: '1rem 1.5rem' }}>{t('tableCategory')}</th>
                             <th style={{ padding: '1rem 1.5rem' }}>{t('tableOrder')}</th>
                             <th style={{ padding: '1rem 1.5rem' }}>{t('tableStatus')}</th>
                             <th style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>{t('tableActions')}</th>
@@ -48,9 +47,6 @@ export default async function AdminExpertArticles() {
                                 <td style={{ padding: '1rem 1.5rem' }}>
                                     <div style={{ fontWeight: '600' }}>{article.title}</div>
                                     <div style={{ fontSize: '0.8125rem', color: 'var(--muted-foreground)' }}>{article.slug}</div>
-                                </td>
-                                <td style={{ padding: '1rem 1.5rem', textTransform: 'capitalize' }}>
-                                    {tForm(`categories.${article.category}` as any)}
                                 </td>
                                 <td style={{ padding: '1rem 1.5rem' }}>{article.order}</td>
                                 <td style={{ padding: '1rem 1.5rem' }}>
@@ -73,7 +69,7 @@ export default async function AdminExpertArticles() {
                         ))}
                         {articles.length === 0 && (
                             <tr>
-                                <td colSpan={5} style={{ padding: '4rem', textAlign: 'center', color: 'var(--muted-foreground)' }}>
+                                <td colSpan={4} style={{ padding: '4rem', textAlign: 'center', color: 'var(--muted-foreground)' }}>
                                     {t('noArticles')}
                                 </td>
                             </tr>

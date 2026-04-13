@@ -22,7 +22,7 @@
 }
 
 .container {
-  max-width: 80rem;
+  max-width: 100rem;
   margin: 0 auto;
   padding: 0 1rem;
 }
@@ -48,14 +48,14 @@
 
 @media (min-width: 640px) {
   .row {
-    padding: 1rem 0;
+    padding: 0.20rem 0;
   }
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 5.75rem;
 }
 
 .navDesktop {
@@ -439,8 +439,8 @@
 
 @media (min-width: 640px) {
   .logoWrap {
-    width: 184px;
-    height: 56px;
+    width: 250px;
+    height: 90px;
   }
 }
 
@@ -654,6 +654,7 @@
     transform: translate3d(0, -8px, 0) scale(0.98);
     filter: blur(2px);
   }
+
   to {
     opacity: 1;
     transform: translate3d(0, 0, 0) scale(1);
@@ -665,6 +666,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -676,6 +678,7 @@
     transform: translate3d(-10px, 0, 0) scale(0.98);
     filter: blur(2px);
   }
+
   to {
     opacity: 1;
     transform: translate3d(0, 0, 0) scale(1);
@@ -689,6 +692,7 @@
     transform: translate3d(10px, 0, 0) scale(0.98);
     filter: blur(2px);
   }
+
   to {
     opacity: 1;
     transform: translate3d(0, 0, 0) scale(1);
@@ -700,6 +704,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -711,6 +716,7 @@
     transform: translate3d(0, 6px, 0) scale(0.98);
     filter: blur(1px);
   }
+
   to {
     opacity: 1;
     transform: translate3d(0, 0, 0) scale(1);
@@ -719,6 +725,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .header,
   .logo,
   .logoImg,

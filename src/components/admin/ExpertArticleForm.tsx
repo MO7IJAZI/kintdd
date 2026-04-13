@@ -183,14 +183,6 @@ export default function ExpertArticleForm({ initialData }: { initialData?: Parti
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
                 <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>{t('category')}</label>
-                    <select name="category" defaultValue={initialData?.category || 'arable'} className="input" style={{ width: '100%' }}>
-                        <option value="arable">{t('categories.arable')}</option>
-                        <option value="fruit">{t('categories.fruit')}</option>
-                        <option value="vegetable">{t('categories.vegetable')}</option>
-                    </select>
-                </div>
-                <div>
                     <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '600' }}>Publish Date</label>
                     <input 
                         type="date" 
@@ -201,6 +193,8 @@ export default function ExpertArticleForm({ initialData }: { initialData?: Parti
                         style={{ width: '100%' }} 
                     />
                 </div>
+                {/* Hidden category input since it's required in DB but removed from UI */}
+                <input type="hidden" name="category" value="arable" />
             </div>
 
             <ImageUpload 

@@ -60,6 +60,11 @@ export default function ProductSectionsManager({
 
     const handleAddSection = async (e: React.FormEvent | React.MouseEvent) => {
         e.preventDefault();
+        
+        if (!formData.title.trim()) {
+            return; // Don't add if title is empty
+        }
+
         setIsLoading(true);
 
         const formDataObj = new FormData();
@@ -87,6 +92,11 @@ export default function ProductSectionsManager({
     const handleUpdateSection = async (e: React.FormEvent | React.MouseEvent) => {
         if (!editingId) return;
         e.preventDefault();
+
+        if (!formData.title.trim()) {
+            return; // Don't update if title is empty
+        }
+
         setIsLoading(true);
 
         const formDataObj = new FormData();
@@ -157,7 +167,6 @@ export default function ProductSectionsManager({
                             name="title"
                             value={formData.title}
                             onChange={handleInputChange}
-                            required
                             className="pf-input"
                             placeholder="e.g. Specifications"
                         />

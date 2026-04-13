@@ -42,6 +42,8 @@ interface CropInitialData {
     image?: string | null;
     pdfUrl?: string | null;
     pdfUrl_ar?: string | null; // Added
+    documentTitle?: string | null;
+    documentTitle_ar?: string | null;
     metaTitle?: string | null;
     metaTitle_ar?: string | null;
     recommendedProducts?: CropRecommendedProduct[];
@@ -73,6 +75,8 @@ export default function CropForm({ initialData, products = [] }: CropFormProps) 
     const [image, setImage] = useState(initialData?.image || "");
     const [pdfUrl, setPdfUrl] = useState(initialData?.pdfUrl || "");
     const [pdfUrl_ar, setPdfUrlAr] = useState(initialData?.pdfUrl_ar || "");
+    const [documentTitle, setDocumentTitle] = useState(initialData?.documentTitle || "");
+    const [documentTitleAr, setDocumentTitleAr] = useState(initialData?.documentTitle_ar || "");
     const [slug, setSlug] = useState(initialData?.slug || "");
     const [slugEdited, setSlugEdited] = useState(false);
     const [name, setName] = useState(initialData?.name || "");
@@ -119,6 +123,9 @@ export default function CropForm({ initialData, products = [] }: CropFormProps) 
                 description_ar?: string;
                 image?: string;
                 pdfUrl?: string;
+                pdfUrl_ar?: string;
+                documentTitle?: string;
+                documentTitle_ar?: string;
                 slug?: string;
                 selectedProducts?: string[];
                 stages?: StageFormData[];
@@ -128,6 +135,9 @@ export default function CropForm({ initialData, products = [] }: CropFormProps) 
                 if (saved.description_ar) setDescriptionAr(prev => prev || saved.description_ar!);
                 if (saved.image) setImage(prev => prev || saved.image!);
                 if (saved.pdfUrl) setPdfUrl(prev => prev || saved.pdfUrl!);
+                if (saved.pdfUrl_ar) setPdfUrlAr(prev => prev || saved.pdfUrl_ar!);
+                if (saved.documentTitle) setDocumentTitle(prev => prev || saved.documentTitle!);
+                if (saved.documentTitle_ar) setDocumentTitleAr(prev => prev || saved.documentTitle_ar!);
                 if (saved.slug) setSlug(prev => prev || saved.slug!);
                 if (Array.isArray(saved.selectedProducts) && saved.selectedProducts.length) {
                     setSelectedProducts(prev => prev.length ? prev : saved.selectedProducts as string[]);
@@ -146,13 +156,16 @@ export default function CropForm({ initialData, products = [] }: CropFormProps) 
                 description_ar,
                 image,
                 pdfUrl,
+                pdfUrl_ar,
+                documentTitle,
+                documentTitle_ar: documentTitleAr,
                 slug,
                 selectedProducts,
                 stages,
             });
             localStorage.setItem(storageKey, payload);
         } catch {}
-    }, [description, description_ar, image, pdfUrl, slug, selectedProducts, stages, storageKey]);
+    }, [description, description_ar, image, pdfUrl, pdfUrl_ar, documentTitle, documentTitleAr, slug, selectedProducts, stages, storageKey]);
 
     // Auto-generate slug from name when name changes and slug hasn't been manually edited
     const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -205,6 +218,8 @@ export default function CropForm({ initialData, products = [] }: CropFormProps) 
         formData.set("image", image);
         formData.set("pdfUrl", pdfUrl);
         formData.set("pdfUrl_ar", pdfUrl_ar);
+        formData.set("documentTitle", documentTitle);
+        formData.set("documentTitle_ar", documentTitleAr);
         formData.set("slug", slug);
         if (categoryMode === 'new') {
             formData.set("category", newCategoryEn.trim());
@@ -346,6 +361,33 @@ export default function CropForm({ initialData, products = [] }: CropFormProps) 
                     value={pdfUrl_ar}
                     onChange={setPdfUrlAr}
                 />
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '2rem', marginBottom: '2.5rem' }}>
+                <div>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.9rem' }}>
+                        {t('documentTitleEn')}
+                    </label>
+                    <input 
+                        value={documentTitle}
+                        onChange={(e) => setDocumentTitle(e.target.value)}
+                        className="input"
+                        style={{ width: '100%' }}
+                        placeholder={t('documentTitlePlaceholder')}
+                    />
+                </div>
+                <div dir="rtl">
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.9rem' }}>
+                        {t('documentTitleAr')}
+                    </label>
+                    <input 
+                        value={documentTitleAr}
+                        onChange={(e) => setDocumentTitleAr(e.target.value)}
+                        className="input"
+                        style={{ width: '100%' }}
+                        placeholder={t('documentTitleArPlaceholder')}
+                    />
+                </div>
             </div>
 
             <div style={{ marginBottom: '2rem' }}>

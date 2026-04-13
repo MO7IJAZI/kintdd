@@ -17,9 +17,7 @@ export default function ContactForm() {
     const [selectedDept, setSelectedDept] = useState("");
 
     useEffect(() => {
-        if (dept) {
-            setSelectedDept(dept === 'export' ? 'Export Department' : dept === 'local' ? 'Local Representatives' : "");
-        }
+        // removed: no more export/local-representatives depts
     }, [dept]);
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -91,8 +89,6 @@ export default function ContactForm() {
                     style={{ width: '100%', padding: '0.9rem', border: '1px solid var(--border)', borderRadius: '0.5rem' }}
                 >
                     <option value="">{t('generalInquiry')}</option>
-                    <option value="Export Department">{t('exportDepartment')}</option>
-                    <option value="Local Representatives">{t('localRepresentatives')}</option>
                     <option value="Technical Support">{t('technicalSupport')}</option>
                 </select>
             </div>

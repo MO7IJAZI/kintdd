@@ -41,7 +41,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     }}>{title}</h1>
                     <div style={{ color: 'var(--muted-foreground)', display: 'flex', justifyContent: 'center', gap: '2rem' }}>
                         <span>{t('by')} <strong>{post.author}</strong></span>
-                        <span>{post.publishedAt ? new Date(post.publishedAt).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US') : t('draft')}</span>
+                        <span>{post.publishedAt ? new Date(post.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : t('draft')}</span>
                     </div>
                 </div>
 

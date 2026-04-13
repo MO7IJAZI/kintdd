@@ -71,24 +71,10 @@ export default async function BlogPage({ params }: { params: Promise<{ locale: s
                                                     fill 
                                                     style={{ objectFit: 'cover' }} 
                                                 />
-                                                <div style={{ 
-                                                    position: 'absolute', 
-                                                    top: '1rem', 
-                                                    left: isRtl ? 'auto' : '1rem', 
-                                                    right: isRtl ? '1rem' : 'auto',
-                                                    backgroundColor: '#10b981', 
-                                                    color: 'white', 
-                                                    padding: '0.25rem 0.75rem', 
-                                                    borderRadius: '1rem',
-                                                    fontSize: '0.75rem',
-                                                    fontWeight: 600
-                                                }}>
-                                                    🎓 {tExpert('badge')}
-                                                </div>
                                             </div>
                                             <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
                                                 <div style={{ color: '#10b981', fontWeight: '600', marginBottom: '0.75rem', fontSize: '0.8rem' }}>
-                                                    {article.publishedAt ? new Date(article.publishedAt).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}
+                                                    {article.publishedAt ? new Date(article.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : ''}
                                                 </div>
                                                 <h3 style={{ fontSize: '1.35rem', marginBottom: '1rem', lineHeight: '1.3', color: '#1e293b' }}>{title}</h3>
                                                 <p style={{ color: 'var(--muted-foreground)', fontSize: '0.95rem', marginBottom: '1.5rem', flex: 1 }}>
@@ -132,7 +118,7 @@ export default async function BlogPage({ params }: { params: Promise<{ locale: s
                                     </div>
                                     <div style={{ padding: '3.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                                         <div style={{ color: 'var(--primary)', fontWeight: '600', marginBottom: '1rem', fontSize: '0.875rem' }}>
-                                            {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString(locale === 'ar' ? 'ar-EG' : 'en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : ""} | {t('by')} {post.author}
+                                            {post.publishedAt ? new Date(post.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : ""} | {t('by')} {post.author}
                                         </div>
                                         <h2 style={{ fontSize: '2.25rem', marginBottom: '1.5rem', lineHeight: '1.2' }}>{title}</h2>
                                         <p style={{ color: 'var(--muted-foreground)', fontSize: '1.1rem', marginBottom: '2.5rem' }}>

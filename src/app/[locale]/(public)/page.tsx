@@ -37,9 +37,10 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
   let news: any[] = [];
   let featuredProducts: any[] = [];
   let agents: any[] = [];
+  let rootCategories: any[] = [];
 
   try {
-    [news, featuredProducts, agents] = await Promise.all([
+    [news, featuredProducts, agents, rootCategories] = await Promise.all([
       prisma.blogPost.findMany({
         where: { isPublished: true },
         orderBy: { publishedAt: 'desc' },
@@ -51,7 +52,11 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
         take: 8,
         include: { category: true, images: true }
       }),
-      getAgents()
+      getAgents(),
+      prisma.category.findMany({
+        where: { parentId: null, isActive: true },
+        orderBy: { order: 'asc' }
+      })
     ]);
   } catch (error) {
     console.error("Homepage data load failed:", error);
@@ -74,7 +79,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
       <FeaturesSection />
 
       {/* 3. Products Categories & Slider */}
-      <CategoriesSection products={featuredProducts} />
+      <CategoriesSection products={featuredProducts} categories={rootCategories} />
 
       {/* 6. Stats Section Removed */}
 

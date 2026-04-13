@@ -32,8 +32,8 @@ export async function createProductSection(productId: string, formData: FormData
         },
     });
 
-    revalidateTag("product-sections", { expire: 0 });
-    revalidatePath(`/product/${productId}`);
+    revalidateTag("product-sections", { expire: 0 } as any);
+    revalidatePath("/", "layout");
     return section;
 }
 
@@ -57,7 +57,8 @@ export async function updateProductSection(sectionId: string, formData: FormData
         },
     });
 
-    revalidateTag("product-sections", { expire: 0 });
+    revalidateTag("product-sections", { expire: 0 } as any);
+    revalidatePath("/", "layout");
     return section;
 }
 
@@ -66,8 +67,8 @@ export async function deleteProductSection(sectionId: string, productId: string)
         where: { id: sectionId },
     });
 
-    revalidateTag("product-sections", { expire: 0 });
-    revalidatePath(`/product/${productId}`);
+    revalidatePath("/", "layout");
+    revalidateTag("product-sections", { expire: 0 } as any);
 }
 
 export async function getProductSections(productId: string) {

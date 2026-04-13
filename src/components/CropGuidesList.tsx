@@ -69,12 +69,12 @@ export default function CropGuidesList({ initialCrops }: { initialCrops: Crop[] 
         return initialCrops.filter(crop => {
             const name = (isRtl && crop.name_ar) ? crop.name_ar : crop.name;
             const matchesSearch = name.toLowerCase().includes(searchQuery.toLowerCase());
-            
+
             // Map crop.metaTitle to tab IDs if necessary, or assume direct match
             // Assuming crop.metaTitle is stored in English in DB
             // We compare uppercase for consistency
             const matchesTab = activeTab === 'ALL' || crop.category === activeTab;
-            
+
             return matchesSearch && matchesTab;
         });
     }, [initialCrops, searchQuery, activeTab, isRtl]);
@@ -117,12 +117,12 @@ export default function CropGuidesList({ initialCrops }: { initialCrops: Crop[] 
                                 boxShadow: '0 4px 6px rgba(0,0,0,0.02)'
                             }}
                         />
-                        <span style={{ 
-                            position: 'absolute', 
-                            [isRtl ? 'left' : 'right']: '2rem', 
-                            top: '50%', 
-                            transform: 'translateY(-50%)', 
-                            opacity: 0.3 
+                        <span style={{
+                            position: 'absolute',
+                            [isRtl ? 'left' : 'right']: '2rem',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            opacity: 0.3
                         }}>🔍</span>
                     </div>
                 </div>
@@ -168,18 +168,18 @@ export default function CropGuidesList({ initialCrops }: { initialCrops: Crop[] 
                             const emoji = crop.category === 'fruits'
                                 ? '🍎'
                                 : crop.category === 'vegetables'
-                                ? '🥦'
-                                : crop.category === 'cereals'
-                                ? '🌾'
-                                : crop.category === 'legumes'
-                                ? '🌱'
-                                : crop.category === 'industrial'
-                                ? '⚗️'
-                                : crop.category === 'herbs'
-                                ? '🌿'
-                                : '🥦';
+                                    ? '🥦'
+                                    : crop.category === 'cereals'
+                                        ? '🌾'
+                                        : crop.category === 'legumes'
+                                            ? '🌱'
+                                            : crop.category === 'industrial'
+                                                ? '⚗️'
+                                                : crop.category === 'herbs'
+                                                    ? '🌿'
+                                                    : '🥦';
                             return (
-                                <Link key={crop.id} href={{pathname: '/crops/[slug]', params: {slug: crop.slug}}} className="card crop-card" style={{
+                                <Link key={crop.id} href={{ pathname: '/crops/[slug]', params: { slug: crop.slug } }} className="card crop-card" style={{
                                     display: 'flex',
                                     flexDirection: 'column',
                                     border: '1px solid #eee',

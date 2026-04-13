@@ -68,6 +68,7 @@ export async function createProduct(formData: FormData) {
         const externalImage = formData.get("externalImage") as string;
         const benefits = formData.get("benefits") as string;
         const usage = formData.get("usage") as string;
+        const composition = formData.get("composition") as string;
         const metaTitle = formData.get("metaTitle") as string;
         const metaDesc = formData.get("metaDesc") as string;
 
@@ -78,6 +79,7 @@ export async function createProduct(formData: FormData) {
         const metaDesc_ar = formData.get("metaDesc_ar") as string;
         const benefits_ar = formData.get("benefits_ar") as string;
         const usage_ar = formData.get("usage_ar") as string;
+        const composition_ar = formData.get("composition_ar") as string;
 
         const usageTableStr = formData.get("usageTable") as string;
         const compTableStr = formData.get("compTable") as string;
@@ -156,6 +158,7 @@ export async function createProduct(formData: FormData) {
                     : undefined,
                 benefits,
                 usage,
+                composition,
                 usageTable,
                 compTable,
                 tabs,
@@ -167,6 +170,7 @@ export async function createProduct(formData: FormData) {
                 shortDesc_ar,
                 benefits_ar,
                 usage_ar,
+                composition_ar,
                 metaTitle_ar,
                 metaDesc_ar,
                 downloads: {
@@ -180,20 +184,12 @@ export async function createProduct(formData: FormData) {
         // Revalidate paths to refresh cache immediately
         // Wrap revalidation in try-catch to prevent 500 error if revalidation fails
         try {
-            revalidatePath("/admin/products");
-            revalidatePath("/products");
-            // session.user is guaranteed to exist because of the check above, but TS might complain
-            // Also, 'language' might not be on the default User type, so we default to 'en' safely
-            const userLang = (session?.user as any)?.language || 'en';
-            revalidatePath(`/${userLang}/products`); 
-            revalidatePath(`/en/products`);
-            revalidatePath(`/ar/products`);
-            revalidatePath(`/product/${slug}`);
-            
-            revalidateTag("products", { expire: 0 });
-            revalidateTag("categories", { expire: 0 });
-        } catch (revalError) {
-            console.error("createProduct: Error during revalidation (ignored to prevent 500):", revalError);
+            revalidateTag("products", { expire: 0 } as any);
+            revalidateTag("categories", { expire: 0 } as any);
+            revalidatePath("/", "layout");
+        } catch (error: any) {
+            console.error("createProduct: Error creating product:", error);
+            throw error;
         }
     } catch (error) {
         console.error("createProduct: Error creating product:", error);
@@ -244,6 +240,7 @@ export async function updateProduct(id: string, formData: FormData) {
     const externalImage = formData.get("externalImage") as string;
     const benefits = formData.get("benefits") as string;
     const usage = formData.get("usage") as string;
+    const composition = formData.get("composition") as string;
     const metaTitle = formData.get("metaTitle") as string;
     const metaDesc = formData.get("metaDesc") as string;
 
@@ -253,6 +250,7 @@ export async function updateProduct(id: string, formData: FormData) {
     const shortDesc_ar = formData.get("shortDesc_ar") as string;
     const benefits_ar = formData.get("benefits_ar") as string;
     const usage_ar = formData.get("usage_ar") as string;
+    const composition_ar = formData.get("composition_ar") as string;
     const metaTitle_ar = formData.get("metaTitle_ar") as string;
     const metaDesc_ar = formData.get("metaDesc_ar") as string;
 
@@ -316,6 +314,7 @@ export async function updateProduct(id: string, formData: FormData) {
             },
             benefits,
             usage,
+            composition,
             usageTable,
             compTable,
             tabs,
@@ -327,6 +326,7 @@ export async function updateProduct(id: string, formData: FormData) {
             shortDesc_ar,
             benefits_ar,
             usage_ar,
+            composition_ar,
             usageTable_ar,
             compTable_ar,
             tabs_ar,
@@ -335,10 +335,8 @@ export async function updateProduct(id: string, formData: FormData) {
         },
     });
 
-    revalidatePath("/admin/products");
-    revalidatePath("/products");
-    revalidatePath(`/product/${slug}`);
-    revalidateTag("products", { expire: 0 });
+    revalidatePath("/", "layout");
+    revalidateTag("products", { expire: 0 } as any);
 }
 
 export async function deleteProduct(id: string) {
@@ -351,9 +349,8 @@ export async function deleteProduct(id: string) {
         where: { id },
     });
 
-    revalidatePath("/admin/products");
-    revalidatePath("/products");
-    revalidateTag("products", { expire: 0 });
+    revalidatePath("/", "layout");
+    revalidateTag("products", { expire: 0 } as any);
 }
 
 const getProductsCached = unstable_cache(

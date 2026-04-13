@@ -65,10 +65,14 @@ interface Category {
 interface DownloadItem {
     id?: string;
     title: string;
-    title_ar?: string;
+    title_ar?: string | null;
     type: string;
     fileUrl: string;
-    fileUrl_ar?: string;
+    fileUrl_ar?: string | null;
+}
+
+interface TableRow {
+    [key: string]: string;
 }
 
 interface ProductData {
@@ -81,8 +85,14 @@ interface ProductData {
     shortDesc_ar?: string | null;
     description?: string | null;
     description_ar?: string | null;
+    composition?: string | null;
+    composition_ar?: string | null;
     tabs?: Tab[] | null;
     tabs_ar?: Tab[] | null;
+    usageTable?: TableRow[] | null;
+    usageTable_ar?: TableRow[] | null;
+    compTable?: TableRow[] | null;
+    compTable_ar?: TableRow[] | null;
     image?: string | null;
     images?: { id?: string; url: string; alt?: string | null }[];
     downloads?: DownloadItem[];
@@ -119,6 +129,7 @@ export default function ProductForm({
     const [nameEn, setNameEn] = useState(initialData?.name || "");
     const [shortDescEn, setShortDescEn] = useState(initialData?.shortDesc || "");
     const [description, setDescription] = useState(initialData?.description || "");
+    const [composition, setComposition] = useState(initialData?.composition || "");
     const [tabs, setTabs] = useState<Tab[]>(
         Array.isArray(initialData?.tabs) ? (initialData?.tabs as Tab[]) : []
     );
@@ -129,6 +140,7 @@ export default function ProductForm({
     const [nameAr, setNameAr] = useState(initialData?.name_ar || "");
     const [shortDescAr, setShortDescAr] = useState(initialData?.shortDesc_ar || "");
     const [descriptionAr, setDescriptionAr] = useState(initialData?.description_ar || "");
+    const [compositionAr, setCompositionAr] = useState(initialData?.composition_ar || "");
     const [tabsAr, setTabsAr] = useState<Tab[]>(
         Array.isArray(initialData?.tabs_ar) ? (initialData?.tabs_ar as Tab[]) : []
     );
@@ -207,6 +219,7 @@ export default function ProductForm({
         formData.append("name", nameEn);
         formData.append("shortDesc", shortDescEn);
         formData.append("description", description);
+        formData.append("composition", composition);
         formData.append("metaTitle", metaTitleEn);
         formData.append("metaDesc", metaDescEn);
         formData.append("tabs", JSON.stringify(tabs));
@@ -215,6 +228,7 @@ export default function ProductForm({
         formData.append("name_ar", nameAr);
         formData.append("shortDesc_ar", shortDescAr);
         formData.append("description_ar", descriptionAr);
+        formData.append("composition_ar", compositionAr);
         formData.append("metaTitle_ar", metaTitleAr);
         formData.append("metaDesc_ar", metaDescAr);
         formData.append("tabs_ar", JSON.stringify(tabsAr));
@@ -518,6 +532,46 @@ export default function ProductForm({
                 </div>
             </div>
 
+            {/* CARD 2.5: Composition */}
+            <div className="pf-card">
+                <div className="pf-card-header">
+                    <h2 className="pf-card-title">
+                        <FileText className="w-5 h-5" />
+                        {t('sections.compositionTable') || "Composition"}
+                    </h2>
+                    <div className="pf-lang-switch">
+                        <button
+                            type="button"
+                            onClick={() => setDescTab('en')}
+                            className={`pf-lang-btn ${descTab === 'en' ? 'active' : ''}`}
+                        >
+                            English
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setDescTab('ar')}
+                            className={`pf-lang-btn ar ${descTab === 'ar' ? 'active' : ''}`}
+                        >
+                            العربية
+                        </button>
+                    </div>
+                </div>
+                
+                <div className={descTab === 'en' ? 'block' : 'hidden'}>
+                    <RichTextEditor
+                        value={composition}
+                        onChange={setComposition}
+                    />
+                </div>
+                <div className={descTab === 'ar' ? 'block' : 'hidden'}>
+                    <RichTextEditor
+                        value={compositionAr}
+                        onChange={setCompositionAr}
+                        dir="rtl"
+                    />
+                </div>
+            </div>
+
             {/* CARD 3: Product Info Tabs (Features) */}
             <div className="pf-card">
                 <div className="pf-card-header">
@@ -686,7 +740,7 @@ export default function ProductForm({
             </div>
 
             {/* CARD 7: Product Sections (Only in Edit Mode) - REMOVED per user request */}
-            {/* {initialData?.id && (
+            {initialData?.id && (
                 <div className="pf-card">
                     <div className="pf-card-header">
                         <h2 className="pf-card-title">
@@ -699,7 +753,7 @@ export default function ProductForm({
                         initialSections={initialSections}
                     />
                 </div>
-            )} */}
+            )}
         </form>
     );
 }

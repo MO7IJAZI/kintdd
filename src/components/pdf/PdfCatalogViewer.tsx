@@ -87,9 +87,9 @@ type PdfOutlineEntry = {
   items?: PdfOutlineEntry[];
 };
 
-const PAGE_SCALE_MULTIPLIER = 2; // Higher value = better quality but more memory
-const CONTAINER_HEIGHT_RATIO = 0.95
-const CONTAINER_WIDTH_RATIO = 1; // 90% of available width
+const PAGE_SCALE_MULTIPLIER = 2.5; // Higher value = better quality but more memory
+const CONTAINER_HEIGHT_RATIO = 1.0; // Fill as much vertical space as possible
+const CONTAINER_WIDTH_RATIO = 1.0; // Fill as much horizontal space as possible
 
 async function renderPageToCanvas(page: PDFPageProxy, canvas: HTMLCanvasElement, targetWidth: number) {
   // Get unscaled viewport to determine scale needed
@@ -142,6 +142,8 @@ export default function PdfCatalogViewer({ source, title, texts, direction = "lt
   const [useNativeViewer, setUseNativeViewer] = useState(false);
   const [bookDimensions, setBookDimensions] = useState({ width: 400, height: 600 });
   const [pageAspectRatio, setPageAspectRatio] = useState(0.707); // Default A4 aspect ratio
+  const [isCoverOpen, setIsCoverOpen] = useState(false); // Track if cover has been flipped
+  const [isAnimatingOpen, setIsAnimatingOpen] = useState(false); // Track opening animation
 
   const addDiagnostic = useCallback((message: string) => {
     setDiagnostics((prev) => (prev.includes(message) ? prev : [...prev, message]));
@@ -149,6 +151,14 @@ export default function PdfCatalogViewer({ source, title, texts, direction = "lt
 
   // Pages array for rendering
   const pages = useMemo(() => Array.from({ length: numPages }, (_, i) => i + 1), [numPages]);
+
+  // flipIndex and pageNumber mapping — always 1:1 (scaleX handles RTL visually)
+  const flipIndexToPage = useCallback((flipIndex: number) => flipIndex + 1, []);
+  const pageToFlipIndex = useCallback((pageNumber: number) => pageNumber - 1, []);
+
+  // Pages always in natural order (1..N).
+  // RTL flip direction is handled by scaleX(-1) on the flipbook wrapper.
+  const orderedPages = useMemo(() => pages, [pages]);
 
   // Display page is 1-based index for UI
   const displayPage = currentPage + 1;
@@ -434,51 +444,45 @@ export default function PdfCatalogViewer({ source, title, texts, direction = "lt
     return () => document.removeEventListener("fullscreenchange", onFullscreenChange);
   }, []);
 
-  const goToPage = useCallback((pageIndex: number) => {
+  const goToPage = useCallback((pageNumber: number) => {
     if (!numPages) return;
-    const nextPageIndex = Math.max(0, Math.min(numPages - 1, pageIndex));
-    setCurrentPage(nextPageIndex);
+    const clampedPage = Math.max(1, Math.min(numPages, pageNumber));
+    setCurrentPage(clampedPage - 1);
     if (viewMode === "spread" && flipRef.current) {
-      flipRef.current.pageFlip().turnToPage(nextPageIndex);
+      const flipIndex = pageToFlipIndex(clampedPage);
+      flipRef.current.pageFlip().turnToPage(flipIndex);
     }
-  }, [numPages, viewMode]);
+  }, [numPages, viewMode, pageToFlipIndex]);
 
   const goPrev = useCallback(() => {
+    // scaleX(-1) already mirrors the visual direction for RTL.
+    // flipPrev always moves toward page 1 visually in both directions.
     if (viewMode === "spread" && flipRef.current) {
-      if (direction === "rtl") {
-        flipRef.current.pageFlip().flipNext();
-      } else {
-        flipRef.current.pageFlip().flipPrev();
-      }
+      flipRef.current.pageFlip().flipPrev();
     } else {
-      goToPage(currentPage - 1);
+      goToPage(currentPage); // 0-indexed; currentPage = prev page number
     }
-  }, [goToPage, currentPage, viewMode, direction]);
+  }, [goToPage, currentPage, viewMode]);
 
   const goNext = useCallback(() => {
+    // scaleX(-1) already mirrors the visual direction for RTL.
+    // flipNext always moves toward last page visually in both directions.
     if (viewMode === "spread" && flipRef.current) {
-      if (direction === "rtl") {
-        flipRef.current.pageFlip().flipPrev();
-      } else {
-        flipRef.current.pageFlip().flipNext();
-      }
+      flipRef.current.pageFlip().flipNext();
     } else {
-      goToPage(currentPage + 1);
+      goToPage(currentPage + 2); // 0-indexed; +2 = next page number
     }
-  }, [goToPage, currentPage, viewMode, direction]);
+  }, [goToPage, currentPage, viewMode]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "ArrowLeft") {
-        direction === "rtl" ? goNext() : goPrev();
-      }
-      if (event.key === "ArrowRight") {
-        direction === "rtl" ? goPrev() : goNext();
-      }
+      // scaleX(-1) mirrors visuals for RTL, so arrow keys work naturally.
+      if (event.key === "ArrowLeft") goPrev();
+      if (event.key === "ArrowRight") goNext();
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [goPrev, goNext, direction]);
+  }, [goPrev, goNext]);
 
   const toggleFullscreen = async () => {
     if (!containerRef.current) return;
@@ -507,30 +511,30 @@ export default function PdfCatalogViewer({ source, title, texts, direction = "lt
       // Force LTR to prevent PDF content mirroring in RTL mode
       // Navigation logic handles direction via props
       dir="ltr"
-      className={`relative flex h-[calc(100vh-6rem)] w-full flex-col overflow-hidden rounded-xl border border-slate-700 bg-[#1e293b] shadow-2xl transition-all duration-300 ${isFullscreen ? "fixed inset-0 z-50 h-screen rounded-none" : ""}`}
+      className={`relative flex h-[88vh] w-full flex-col overflow-hidden rounded-2xl border border-slate-300 bg-[#BFC1C2] shadow-inner transition-all duration-300 ${isFullscreen ? "fixed inset-0 z-50 h-screen rounded-none" : ""}`}
       onMouseEnter={() => setShowControls(true)}
       onMouseLeave={() => setShowControls(false)}
     >
       {/* Loading Overlay */}
       {isLoadingDoc && (
-        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#1e293b] text-white">
-          <Loader2 className="h-12 w-12 animate-spin text-white/50" />
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#BFC1C2] text-white">
+          <Loader2 className="h-12 w-12 animate-spin text-white/40" />
           <div className="mt-4 text-lg font-medium">{texts.loading} {loadProgress}%</div>
         </div>
       )}
 
       {/* Error Overlay */}
       {hasError && (
-        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#1e293b] text-white">
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#737373] text-white">
           <div className="mb-4 rounded-full bg-red-500/10 p-4 text-red-400">
             <X size={32} />
           </div>
           <h3 className="text-xl font-bold">Error Loading PDF</h3>
-          <p className="mt-2 text-white/60">Please try downloading the file instead.</p>
+          <p className="mt-2 text-white/80">Please try downloading the file instead.</p>
           <a 
             href={source} 
             download 
-            className="mt-6 rounded-lg bg-white/10 px-6 py-2 font-medium text-white transition hover:bg-white/20"
+            className="mt-6 rounded-lg bg-white/20 px-6 py-2 font-medium text-white transition hover:bg-white/30 shadow-md"
           >
             {texts.download}
           </a>
@@ -540,8 +544,8 @@ export default function PdfCatalogViewer({ source, title, texts, direction = "lt
         </div>
       )}
 
-      {/* Main Content */}
-      <div className="flex flex-1 items-center justify-center overflow-hidden p-2 md:p-4">
+      {/* Main Content Area — Symmetrical margins for all sides */}
+      <div className="flex flex-1 items-center justify-center overflow-hidden p-6 md:p-8 lg:p-10">
         {!isLoadingDoc && !hasError && (
           useNativeViewer ? (
             <iframe
@@ -550,78 +554,166 @@ export default function PdfCatalogViewer({ source, title, texts, direction = "lt
               className="h-full w-full rounded-lg shadow-lg"
             />
           ) : viewMode === "spread" ? (
-            <div 
-              className="relative flex h-full w-full items-center justify-center transition-transform duration-500 ease-in-out"
-              style={{
-                transform: `scale(${zoom}) translateX(${currentPage === 0 ? '-10%' : '0px'})`,
-                transformOrigin: "center"
+            /*
+             * Outer wrapper: centers content, applies zoom scale.
+             * Uses padding to prevent the book from being clipped during the
+             * slide-open animation.
+             */
+            <div
+              className="relative flex h-full w-full items-center justify-center"
+              style={{ 
+                transform: `scale(${zoom})`, 
+                transformOrigin: 'center center',
+                perspective: '2000px' // Add perspective for better 3D effect
               }}
             >
-               <HTMLFlipBook
-                ref={flipRef}
-                width={bookDimensions.width}
-                height={bookDimensions.height}
-                size="fixed"
-                minWidth={200}
-                maxWidth={1200}
-                minHeight={300}
-                maxHeight={1600}
-                maxShadowOpacity={0.5}
-                drawShadow={true}
-                showCover={true}
-                mobileScrollSupport={true}
-                onFlip={(e: any) => setCurrentPage(e.data)}
-                className="shadow-2xl"
-                style={{ margin: '0 auto' }}
-                startPage={0}
-                flippingTime={1000}
-                usePortrait={false}
-                startZIndex={0}
-                autoSize={false}
-                clickEventForward={true}
-                useMouseEvents={true}
-                swipeDistance={30}
-                showPageCorners={true}
-                disableFlipByClick={false}
+              <div
+                style={{
+                  transition: 'transform 700ms cubic-bezier(0.4, 0, 0.2, 1)',
+                  transform: (!isCoverOpen && !isAnimatingOpen)
+                    ? (direction === 'rtl' ? 'translateX(25%)' : 'translateX(-25%)')
+                    : 'translateX(0%)',
+                  willChange: 'transform',
+                  transformStyle: 'preserve-3d', // Ensure 3D rendering for children
+                }}
               >
-                {/* Cover Page */}
-                <div className="bg-transparent" style={{ width: bookDimensions.width, height: bookDimensions.height }}>
-                   <div className="relative h-full w-full overflow-hidden flex items-center justify-center">
-                      <canvas
-                        ref={(el) => {
-                          if (el) {
-                            pageCanvasRefs.current.set(1, el);
-                          } else {
-                            pageCanvasRefs.current.delete(1);
-                          }
-                        }}
-                        className="h-full w-full object-contain bg-white shadow-lg rounded-r-sm"
-                      />
-                   </div>
-                </div>
+                {/*
+                 * RTL mirror: scaleX(-1) on the flipbook makes it open left-to-right.
+                 * We use a dedicated wrapper with dir="ltr" to avoid coordinate confusion.
+                 */}
+                <div 
+                  dir="ltr"
+                  style={direction === 'rtl' ? { 
+                    transform: 'scaleX(-1)',
+                    transformStyle: 'preserve-3d',
+                    backfaceVisibility: 'hidden'
+                  } : { 
+                    transformStyle: 'preserve-3d',
+                    backfaceVisibility: 'hidden'
+                  }}
+                  onMouseDown={(e) => {
+                    if (direction !== 'rtl' || !flipRef.current) return;
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const width = rect.width;
+                    
+                    // In RTL (mirrored), the library's "Next" edge is logically on the right
+                    // but visually on the left.
+                    // If the user clicks the visual left edge, we manually trigger the flip
+                    // to bypass the library's LTR-fixed corner hitzones.
+                    if (x < width * 0.2) {
+                      flipRef.current.pageFlip().flipNext();
+                    } else if (x > width * 0.8) {
+                      flipRef.current.pageFlip().flipPrev();
+                    }
+                  }}
+                >
+                <HTMLFlipBook
+                  ref={flipRef}
+                  width={bookDimensions.width}
+                  height={bookDimensions.height}
+                  size="fixed"
+                  minWidth={200}
+                  maxWidth={1200}
+                  minHeight={300}
+                  maxHeight={1600}
+                  maxShadowOpacity={0.5}
+                  drawShadow={true}
+                  showCover={true}
+                  mobileScrollSupport={true}
+                  onFlip={(e: any) => {
+                    const flipIndex = e.data;
+                    // Convert flipbook index to 0-based page index for UI
+                    const pdfPage = flipIndexToPage(flipIndex);
+                    setCurrentPage(pdfPage - 1);
+                    if (!isCoverOpen && flipIndex > 0) {
+                      setIsAnimatingOpen(true);
+                      setTimeout(() => {
+                        setIsCoverOpen(true);
+                        setIsAnimatingOpen(false);
+                      }, 700);
+                    } else if (isCoverOpen && flipIndex === 0) {
+                      setIsAnimatingOpen(true);
+                      setTimeout(() => {
+                        setIsCoverOpen(false);
+                        setIsAnimatingOpen(false);
+                      }, 700);
+                    }
+                  }}
+                  className="shadow-2xl"
+                  style={{ 
+                    margin: '0 auto',
+                    backgroundColor: 'transparent'
+                  }}
+                  startPage={0}
+                  flippingTime={800}
+                  usePortrait={false}
+                  startZIndex={0}
+                  autoSize={false}
+                  clickEventForward={true}
+                  useMouseEvents={true}
+                  swipeDistance={30}
+                  showPageCorners={direction !== 'rtl'} // Disable for RTL to avoid visual artifacts
+                  disableFlipByClick={false}
+                >
+                  {/* Cover Page — always orderedPages[0] (respects RTL reversal) */}
+                  {orderedPages.length > 0 && (() => {
+                    const coverPageNumber = orderedPages[0];
+                    return (
+                      <div className="bg-transparent" style={{ width: bookDimensions.width, height: bookDimensions.height, transformStyle: 'preserve-3d' }}>
+                        <div
+                          className="relative h-full w-full overflow-hidden flex items-center justify-center"
+                          style={direction === 'rtl' ? { 
+                            transform: 'scaleX(-1)',
+                            transformStyle: 'preserve-3d',
+                            backfaceVisibility: 'hidden'
+                          } : { 
+                            transformStyle: 'preserve-3d',
+                            backfaceVisibility: 'hidden'
+                          }}
+                        >
+                          <canvas
+                            ref={(el) => {
+                              if (el) pageCanvasRefs.current.set(coverPageNumber, el);
+                              else pageCanvasRefs.current.delete(coverPageNumber);
+                            }}
+                            className="h-full w-full object-contain bg-white shadow-lg rounded-r-sm"
+                          />
+                        </div>
+                      </div>
+                    );
+                  })()}
 
-                {/* Other Pages */}
-                {pages.slice(1).map((pageNumber) => (
-                  <div key={pageNumber} className="bg-white shadow-inner" style={{ width: bookDimensions.width, height: bookDimensions.height }}>
-                    <div className="relative h-full w-full overflow-hidden">
-                      <canvas
-                        ref={(el) => {
-                          if (el) {
-                            pageCanvasRefs.current.set(pageNumber, el);
-                          } else {
-                            pageCanvasRefs.current.delete(pageNumber);
-                          }
+                  {/* Inner Pages — ordered per direction */}
+                  {orderedPages.slice(1).map((pageNumber) => (
+                    <div key={pageNumber} className="bg-white shadow-inner" style={{ width: bookDimensions.width, height: bookDimensions.height, transformStyle: 'preserve-3d' }}>
+                      <div
+                        className="relative h-full w-full overflow-hidden"
+                        style={direction === 'rtl' ? { 
+                          transform: 'scaleX(-1)',
+                          transformStyle: 'preserve-3d',
+                          backfaceVisibility: 'hidden'
+                        } : { 
+                          transformStyle: 'preserve-3d',
+                          backfaceVisibility: 'hidden'
                         }}
-                        className="h-full w-full object-contain"
-                      />
-                      {/* Page number indicator inside the page for realism */}
-                      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[10px] text-slate-400 opacity-50">
-                        {pageNumber}
+                      >
+                        <canvas
+                          ref={(el) => {
+                            if (el) pageCanvasRefs.current.set(pageNumber, el);
+                            else pageCanvasRefs.current.delete(pageNumber);
+                          }}
+                          className="h-full w-full object-contain"
+                        />
+                        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[10px] text-slate-400 opacity-50">
+                          {pageNumber}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </HTMLFlipBook>
+                  ))}
+                </HTMLFlipBook>
+                </div>{/* end RTL mirror wrapper */}
+              </div>
             </div>
           ) : (
             <div className="flex h-full w-full items-center justify-center overflow-auto p-4">
@@ -652,16 +744,17 @@ export default function PdfCatalogViewer({ source, title, texts, direction = "lt
       {/* Floating Navigation Arrows (Desktop) */}
       {!isLoadingDoc && !hasError && (
         <>
+          {/* Left arrow = prev page (scaleX-1 makes this visually correct for RTL too) */}
           <button 
-            onClick={direction === "rtl" ? goNext : goPrev} 
-            disabled={direction === "rtl" ? !canGoNext : !canGoPrev}
+            onClick={goPrev} 
+            disabled={!canGoPrev}
             className={`absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-black/20 p-3 text-white backdrop-blur-sm transition-all hover:bg-black/40 disabled:opacity-0 ${showControls ? "opacity-100" : "opacity-0"}`}
           >
             <ChevronLeft size={32} />
           </button>
           <button 
-            onClick={direction === "rtl" ? goPrev : goNext} 
-            disabled={direction === "rtl" ? !canGoPrev : !canGoNext}
+            onClick={goNext} 
+            disabled={!canGoNext}
             className={`absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-black/20 p-3 text-white backdrop-blur-sm transition-all hover:bg-black/40 disabled:opacity-0 ${showControls ? "opacity-100" : "opacity-0"}`}
           >
             <ChevronRight size={32} />

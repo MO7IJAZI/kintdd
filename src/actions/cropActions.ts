@@ -131,6 +131,9 @@ export async function createCrop(formData: FormData) {
     const pdfUrl = normalizeUploadedAssetUrl(typeof rawPdfUrl === "string" ? rawPdfUrl : "");
     const rawPdfUrlAr = formData.get("pdfUrl_ar");
     const pdfUrl_ar = normalizeUploadedAssetUrl(typeof rawPdfUrlAr === "string" ? rawPdfUrlAr : "");
+    const documentTitle = formData.get("documentTitle") as string;
+    const documentTitle_ar = formData.get("documentTitle_ar") as string;
+    const documentIcon = formData.get("documentIcon") as string;
     const metaTitle = formData.get("metaTitle") as string;
     const metaTitle_ar = formData.get("metaTitle_ar") as string;
     
@@ -191,6 +194,9 @@ export async function createCrop(formData: FormData) {
                 image,
                 pdfUrl,
                 pdfUrl_ar,
+                documentTitle,
+                documentTitle_ar,
+                documentIcon,
                 metaTitle,
                 metaTitle_ar,
                 recommendedProducts: {
@@ -218,7 +224,7 @@ export async function createCrop(formData: FormData) {
                         })
                     )
                 }
-            },
+            } as any,
         });
     } catch (error: any) {
         if (error?.code === 'P2002') {
@@ -240,6 +246,9 @@ export async function createCrop(formData: FormData) {
                     image,
                     pdfUrl,
                     pdfUrl_ar,
+                    documentTitle,
+                    documentTitle_ar,
+                    documentIcon,
                     metaTitle,
                     metaTitle_ar,
                     recommendedProducts: {
@@ -267,7 +276,7 @@ export async function createCrop(formData: FormData) {
                             })
                         )
                     }
-                },
+                } as any,
             });
         } else {
             throw error;
@@ -374,6 +383,9 @@ export async function updateCrop(id: string, formData: FormData) {
     const pdfUrl = normalizeUploadedAssetUrl(typeof rawPdfUrl === "string" ? rawPdfUrl : "");
     const rawPdfUrlAr = formData.get("pdfUrl_ar");
     const pdfUrl_ar = normalizeUploadedAssetUrl(typeof rawPdfUrlAr === "string" ? rawPdfUrlAr : "");
+    const documentTitle = formData.get("documentTitle") as string;
+    const documentTitle_ar = formData.get("documentTitle_ar") as string;
+    const documentIcon = formData.get("documentIcon") as string;
     const metaTitle = formData.get("metaTitle") as string;
     const metaTitle_ar = formData.get("metaTitle_ar") as string;
     
@@ -434,6 +446,9 @@ export async function updateCrop(id: string, formData: FormData) {
             image,
             pdfUrl,
             pdfUrl_ar,
+            documentTitle,
+            documentTitle_ar,
+            documentIcon,
             metaTitle,
             metaTitle_ar,
             recommendedProducts: {
@@ -462,7 +477,7 @@ export async function updateCrop(id: string, formData: FormData) {
                     })
                 )
             }
-        },
+        } as any,
     });
 
     revalidatePath("/admin/crops");

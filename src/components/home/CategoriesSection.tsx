@@ -26,11 +26,42 @@ interface Product {
     }[] | null;
 }
 
-interface CategoriesSectionProps {
-    products?: Product[];
+interface Category {
+    id: string;
+    slug: string;
+    name: string;
+    name_ar?: string | null;
+    description?: string | null;
+    description_ar?: string | null;
+    image?: string | null;
+    icon?: string | null;
 }
 
-export default function CategoriesSection({ products = [] }: CategoriesSectionProps) {
+interface CategoriesSectionProps {
+    products?: Product[];
+    categories?: Category[];
+}
+
+function renderCategoryIcon(icon?: string | null) {
+  const iconName = (icon || "").toLowerCase();
+  const isImageIcon =
+    !!icon &&
+    !["leaf", "sprout", "beef", "rabbit", "package"].includes(iconName) &&
+    (icon.startsWith("/") || icon.startsWith("http://") || icon.startsWith("https://"));
+    
+  if (isImageIcon) {
+    return (
+      <div style={{ position: 'relative', width: '30px', height: '30px' }}>
+        <Image src={icon!} alt="Card Icon" fill style={{ objectFit: 'contain' }} />
+      </div>
+    );
+  }
+  if (iconName === "beef") return <CowIcon size={30} />;
+  if (iconName === "leaf" || iconName === "sprout") return <PlantIcon size={30} />;
+  return <PlantIcon size={30} />;
+}
+
+export default function CategoriesSection({ products = [], categories = [] }: CategoriesSectionProps) {
   const tHomeNew = useTranslations('HomeNew');
   const locale = useLocale();
   const isAr = locale === 'ar';
@@ -78,61 +109,54 @@ export default function CategoriesSection({ products = [] }: CategoriesSectionPr
         
         {/* Categories Cards */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 'var(--space-12)', marginBottom: '6rem' }}>
-          {/* Plant Wealth Card */}
-          <div className="card" style={{ 
-            overflow: 'hidden', borderRadius: 'var(--radius-2xl)', backgroundColor: 'white', 
-            boxShadow: 'var(--shadow-lg)', border: '1px solid var(--border)',
-            display: 'flex', flexDirection: 'column', height: '100%'
-          }}>
-            <div style={{ position: 'relative', height: '400px' }}>
-              <Image 
-                src="/images/planet.webp" 
-                alt={tHomeNew('prodPlant')} 
-                fill 
-                style={{ objectFit: 'cover' }} 
-              />
-            </div>
-            <div style={{ padding: '3.5rem', textAlign: isAr ? 'right' : 'left', flex: 1, display: 'flex', flexDirection: 'column' }}>
-              <h3 style={{ fontSize: '2.2rem', marginBottom: 'var(--space-4)', fontWeight: 900, color: 'var(--secondary)', display: 'flex', alignItems: 'center', gap: '0.75rem', justifyContent: isAr ? 'flex-end' : 'flex-start' }}>
-                <PlantIcon size={30} />
-                <span>{tHomeNew('prodPlant')}</span>
-              </h3>
-              <p style={{ color: 'var(--muted-foreground)', marginBottom: 'var(--space-12)', lineHeight: 1.8, fontSize: '1.1rem' }}>
-                {tHomeNew('agriculturalDesc')}
-              </p>
-              <Link href="/products/plant-wealth" className="btn btn-primary" style={{ alignSelf: 'flex-start', borderRadius: 'var(--radius-2xl)', padding: '1rem 2.5rem', fontSize: '1.1rem', fontWeight: 600 }}>
-                {tHomeNew('viewProducts')} <ArrowRight size={20} style={{ marginLeft: isAr ? 0 : '0.5rem', marginRight: isAr ? '0.5rem' : 0 }} />
-              </Link>
-            </div>
-          </div>
+          {categories.length > 0 ? categories.map((category) => {
+             const categoryName = isAr ? (category.name_ar || category.name) : category.name;
+             const categoryDesc = isAr ? (category.description_ar || category.description) : category.description;
+             
+             let categoryImage = category.image;
+             if (!categoryImage) {
+                 categoryImage = category.slug === 'plant-wealth' || category.slug === 'plant-production' ? '/images/planet.webp' : 
+                                 category.slug === 'livestock' || category.slug === 'animal-production' ? '/images/livestock.jpg' : '/images/banners/products-banner.png';
+             }
 
-          {/* Livestock / Animal Wealth Card */}
-          <div className="card" style={{ 
-            overflow: 'hidden', borderRadius: 'var(--radius-2xl)', backgroundColor: 'white', 
-            boxShadow: 'var(--shadow-lg)', border: '1px solid var(--border)',
-            display: 'flex', flexDirection: 'column', height: '100%'
-          }}>
-            <div style={{ position: 'relative', height: '400px' }}>
-              <Image 
-                src="/images/livestock.jpg" 
-                alt={tHomeNew('prodAnimal')} 
-                fill 
-                style={{ objectFit: 'cover' }} 
-              />
-            </div>
-            <div style={{ padding: '3.5rem', textAlign: isAr ? 'right' : 'left', flex: 1, display: 'flex', flexDirection: 'column' }}>
-              <h3 style={{ fontSize: '2.2rem', marginBottom: 'var(--space-4)', fontWeight: 900, color: 'var(--secondary)', display: 'flex', alignItems: 'center', gap: '0.75rem', justifyContent: isAr ? 'flex-end' : 'flex-start' }}>
-                <CowIcon size={30} />
-                <span>{tHomeNew('prodAnimal')}</span>
-              </h3>
-              <p style={{ color: 'var(--muted-foreground)', marginBottom: 'var(--space-12)', lineHeight: 1.8, fontSize: '1.1rem' }}>
-                {tHomeNew('animalDesc')}
-              </p>
-              <Link href="/products/livestock" className="btn btn-secondary" style={{ alignSelf: 'flex-start', borderRadius: 'var(--radius-2xl)', padding: '1rem 2.5rem', fontSize: '1.1rem', fontWeight: 600 }}>
-                {tHomeNew('viewProducts')} <ArrowRight size={20} style={{ marginLeft: isAr ? 0 : '0.5rem', marginRight: isAr ? '0.5rem' : 0 }} />
-              </Link>
-            </div>
-          </div>
+             let categoryIcon = category.icon;
+             if (!categoryIcon) {
+                 if (category.slug === 'plant-wealth' || category.slug === 'plant-production') categoryIcon = 'leaf';
+                 else if (category.slug === 'livestock' || category.slug === 'animal-production') categoryIcon = 'beef';
+             }
+
+             return (
+               <div key={category.id} className="card" style={{ 
+                 overflow: 'hidden', borderRadius: 'var(--radius-2xl)', backgroundColor: 'white', 
+                 boxShadow: 'var(--shadow-lg)', border: '1px solid var(--border)',
+                 display: 'flex', flexDirection: 'column', height: '100%'
+               }}>
+                 <div style={{ position: 'relative', height: '400px' }}>
+                   <Image 
+                     src={categoryImage} 
+                     alt={categoryName} 
+                     fill 
+                     style={{ objectFit: 'cover' }} 
+                   />
+                 </div>
+                 <div style={{ padding: '3.5rem', textAlign: isAr ? 'right' : 'left', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                   <h3 style={{ fontSize: '2.2rem', marginBottom: 'var(--space-4)', fontWeight: 900, color: 'var(--secondary)', display: 'flex', alignItems: 'center', gap: '0.75rem', justifyContent: isAr ? 'flex-end' : 'flex-start' }}>
+                     {renderCategoryIcon(categoryIcon)}
+                     <span>{categoryName}</span>
+                   </h3>
+                   <p style={{ color: 'var(--muted-foreground)', marginBottom: 'var(--space-12)', lineHeight: 1.8, fontSize: '1.1rem',
+                               display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                     {categoryDesc}
+                   </p>
+                   <Link href={`/products/${category.slug}`} className="btn btn-primary" style={{ alignSelf: 'flex-start', borderRadius: 'var(--radius-2xl)', padding: '1rem 2.5rem', fontSize: '1.1rem', fontWeight: 600 }}>
+                     {tHomeNew('viewProducts')} <ArrowRight size={20} style={{ marginLeft: isAr ? 0 : '0.5rem', marginRight: isAr ? '0.5rem' : 0 }} />
+                   </Link>
+                 </div>
+               </div>
+             );
+          }) : (
+             <p style={{ textAlign: 'center', gridColumn: '1 / -1' }}>No categories found</p>
+          )}
         </div>
 
         {/* Product Slider */}

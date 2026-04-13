@@ -34,10 +34,8 @@ export async function updatePage(id: string, formData: FormData) {
         },
     });
 
-    revalidatePath("/admin/pages");
-    // revalidatePath(`/${slug}`);
-    // revalidatePath(`/page/${slug}`);
-    revalidateTag("pages", { expire: 0 });
+    revalidatePath("/", "layout");
+    revalidateTag("pages", { expire: 0 } as any);
 }
 
 export async function deletePage(id: string) {

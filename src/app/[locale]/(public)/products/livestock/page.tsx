@@ -77,7 +77,7 @@ export default async function LivestockPage() {
     console.error('Error fetching livestock categories:', error);
   }
 
-  const categoryName = isAr ? 'الثروة الحيوانية' : 'Animal Production';
+  const categoryName = isAr ? 'الثروة الحيوانية' : 'Livestock';
   const categoryDesc = isAr 
     ? 'منتجات الثروة الحيوانية وحلول تغذية الحيوان' 
     : 'Veterinary products and animal nutrition solutions';

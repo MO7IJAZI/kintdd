@@ -15,7 +15,7 @@ export default async function PublicLayout({
             <main style={{ minHeight: 'calc(100vh - 350px)' }}>
                 {children}
             </main>
-            <Footer />
+            <Footer productCategories={productCategories} />
         </>
     );
 }

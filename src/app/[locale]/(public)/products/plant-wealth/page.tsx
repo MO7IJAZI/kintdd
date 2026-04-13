@@ -77,7 +77,7 @@ export default async function PlantWealthPage() {
     console.error('Error fetching plant wealth categories:', error);
   }
 
-  const categoryName = isAr ? 'الثروة النباتية' : 'Plant Production';
+  const categoryName = isAr ? 'الثروة النباتية' : 'Plant Wealth';
   const categoryDesc = isAr 
     ? 'منتجات الثروة النباتية لتغذية وحماية المحاصيل' 
     : 'Agricultural products for crop nutrition and protection';

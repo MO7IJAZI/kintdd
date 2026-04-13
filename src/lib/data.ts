@@ -94,14 +94,7 @@ export async function ensureCoreCategoriesExist() {
         const upserted = await prisma.category.upsert({
             where: { slug: category.slug },
             update: {
-                name: category.name,
-                name_ar: category.name_ar,
-                description: category.description,
-                description_ar: category.description_ar,
                 parentId: null,
-                isActive: true,
-                order: category.order,
-                image: category.image,
             },
             create: {
                 slug: category.slug,
@@ -127,13 +120,7 @@ export async function ensureCoreCategoriesExist() {
         await prisma.category.upsert({
             where: { slug: category.slug },
             update: {
-                name: category.name,
-                name_ar: category.name_ar,
-                description: category.description,
-                description_ar: category.description_ar,
                 parentId,
-                isActive: true,
-                order: category.order,
             },
             create: {
                 slug: category.slug,
@@ -175,6 +162,13 @@ export const getCachedProductCategories = unstable_cache(
                             name: true,
                             name_ar: true,
                             slug: true,
+                            description: true,
+                            description_ar: true,
+                            image: true,
+                            parentId: true,
+                            parent: {
+                                select: { slug: true }
+                            }
                         }
                     }
                 }

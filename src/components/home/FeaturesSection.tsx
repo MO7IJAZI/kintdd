@@ -48,9 +48,9 @@ export default function FeaturesSection() {
              alignItems: 'center'
            }}>
              <div style={{ 
-               width: '90px', height: '90px', backgroundColor: '#eff6ff', 
+               width: '90px', height: '90px', backgroundColor: 'var(--primary-light)', 
                borderRadius: 'var(--radius-2xl)', display: 'flex', alignItems: 'center', justifyContent: 'center', 
-               margin: '0 auto 2rem', color: 'var(--info)',
+               margin: '0 auto 2rem', color: 'var(--primary)',
                transform: 'rotate(5deg)'
              }}>
                <ShieldCheck size={45} strokeWidth={1.5} />
@@ -71,9 +71,9 @@ export default function FeaturesSection() {
              alignItems: 'center'
            }}>
              <div style={{ 
-               width: '90px', height: '90px', backgroundColor: '#fff7ed', 
+               width: '90px', height: '90px', backgroundColor: 'var(--primary-light)', 
                borderRadius: 'var(--radius-2xl)', display: 'flex', alignItems: 'center', justifyContent: 'center', 
-               margin: '0 auto 2rem', color: 'var(--accent)',
+               margin: '0 auto 2rem', color: 'var(--primary)',
                transform: 'rotate(-5deg)'
              }}>
                <Users size={45} strokeWidth={1.5} />

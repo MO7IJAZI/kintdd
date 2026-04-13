@@ -44,15 +44,15 @@ export async function generateMetadata(
   );
 }
 
-interface CompositionRow {
-    name: string;
-    value: string;
-}
-
 interface UsageRow {
     crop: string;
     stage: string;
     dosage: string;
+}
+
+interface CompositionRow {
+    name: string;
+    value: string;
 }
 
 interface DownloadItem {
@@ -77,6 +77,8 @@ interface ProductDetailData {
     benefits_ar?: string | null;
     usage?: string | null;
     usage_ar?: string | null;
+    composition?: string | null;
+    composition_ar?: string | null;
     usageTable?: UsageRow[] | null;
     usageTable_ar?: UsageRow[] | null;
     compTable?: CompositionRow[] | null;
@@ -134,6 +136,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     const shortDesc = (isAr && product.shortDesc_ar) ? product.shortDesc_ar : product.shortDesc;
     const benefits = (isAr && product.benefits_ar) ? product.benefits_ar : product.benefits;
     const usage = (isAr && product.usage_ar) ? product.usage_ar : product.usage;
+    const composition = (isAr && product.composition_ar) ? product.composition_ar : product.composition;
     const compTable = (isAr && product.compTable_ar) ? product.compTable_ar : product.compTable;
     const usageTable = (isAr && product.usageTable_ar) ? product.usageTable_ar : product.usageTable;
     const productTabs = (isAr && product.tabs_ar && product.tabs_ar.length > 0) ? product.tabs_ar : (product.tabs && product.tabs.length > 0 ? product.tabs : []);
@@ -141,6 +144,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     const safeDescription = stripScripts(description || "");
     const safeBenefits = stripScripts(benefits || "");
     const safeUsage = stripScripts(usage || "");
+    const safeComposition = stripScripts(composition || "");
 
     const themeKey = (product.colorTheme || 'blue') as keyof typeof colorThemes;
     const theme = colorThemes[themeKey] || colorThemes.blue;
@@ -167,8 +171,6 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             categoryName: (isAr && pData.category?.name_ar) ? pData.category?.name_ar : p.category?.name
         };
     });
-
-    const compositionRows = Array.isArray(compTable) ? compTable : [];
 
     // 6. Technical Table Data (Composition + Usage)
     const technicalTable = [];
@@ -326,7 +328,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                                         {t('Description').toUpperCase()}
                                     </h2>
                                     <div 
-                                        className="prose prose-lg" 
+                                        className="rich-content" 
                                         style={{ color: '#334155', lineHeight: 1.8, fontSize: '1.1rem' }}
                                         dangerouslySetInnerHTML={{ __html: safeDescription }}
                                     />
@@ -340,7 +342,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                                         {t('benefits').toUpperCase()}
                                     </h2>
                                     <div 
-                                        className="prose prose-lg" 
+                                        className="rich-content" 
                                         style={{ color: '#334155', lineHeight: 1.8, fontSize: '1.1rem' }}
                                         dangerouslySetInnerHTML={{ __html: safeBenefits }}
                                     />
@@ -354,7 +356,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                                         {t('application').toUpperCase()}
                                     </h2>
                                     <div 
-                                        className="prose prose-lg" 
+                                        className="rich-content" 
                                         style={{ color: '#334155', lineHeight: 1.8, fontSize: '1.1rem' }}
                                         dangerouslySetInnerHTML={{ __html: safeUsage }}
                                     />
@@ -366,38 +368,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                         {/* Sidebar: Downloads & Support */}
                         <aside>
                             <div style={{ position: 'sticky', top: '100px' }}>
-                                {compositionRows.length > 0 && (
-                                    <div style={{
-                                        padding: '2rem',
-                                        backgroundColor: 'white',
-                                        borderRadius: '1.5rem',
-                                        boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
-                                        border: '1px solid #fed7aa',
-                                        marginBottom: '1.5rem'
-                                    }}>
-                                        <h3 style={{ fontSize: '1.15rem', fontWeight: 800, marginBottom: '1rem', borderBottom: '2px solid #ffedd5', paddingBottom: '0.85rem', color: '#c2410c' }}>
-                                            {t('composition')}
-                                        </h3>
-                                        <div style={{ overflowX: 'auto' }}>
-                                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                                                <thead>
-                                                    <tr style={{ borderBottom: '1px solid #fed7aa' }}>
-                                                        <th style={{ textAlign: isAr ? 'right' : 'left', padding: '0.65rem 0.5rem', fontSize: '0.75rem', color: '#9a3412', fontWeight: 800 }}>{t('nutrient')}</th>
-                                                        <th style={{ textAlign: isAr ? 'right' : 'left', padding: '0.65rem 0.5rem', fontSize: '0.75rem', color: '#9a3412', fontWeight: 800 }}>{t('value')}</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {compositionRows.map((row, i) => (
-                                                        <tr key={i} style={{ borderBottom: i === compositionRows.length - 1 ? 'none' : '1px solid #ffedd5' }}>
-                                                            <td style={{ padding: '0.65rem 0.5rem', fontSize: '0.85rem', color: '#7c2d12', fontWeight: 700 }}>{row.name}</td>
-                                                            <td style={{ padding: '0.65rem 0.5rem', fontSize: '0.85rem', color: '#ea580c', fontWeight: 800 }}>{row.value}</td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                )}
+
                                 <div style={{ 
                                     padding: '2.5rem', 
                                     backgroundColor: 'white', 
@@ -405,41 +376,85 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                                     boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
                                     border: '1px solid #f1f5f9'
                                 }}>
+                                    {safeComposition && (
+                                        <div style={{ marginBottom: '2rem' }}>
+                                            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '2rem', borderBottom: '2px solid #f1f5f9', paddingBottom: '1rem', color: '#000000' }}>
+                                                {t('composition')}
+                                            </h3>
+                                            <div 
+                                                className="rich-content" 
+                                                style={{ color: '#334155', lineHeight: 1.6, fontSize: '1rem' }}
+                                                dangerouslySetInnerHTML={{ __html: safeComposition }}
+                                            />
+                                        </div>
+                                    )}
+
                                     <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '2rem', borderBottom: '2px solid #f1f5f9', paddingBottom: '1rem' }}>
                                         {t('technicalDocuments')}
                                     </h3>
                                     <div style={{ display: 'grid', gap: '1rem' }}>
-                                        {(product.downloads?.length ?? 0) > 0 ? product.downloads?.map((dl) => {
-                                            // Determine file URL and title based on locale
+                                        {(product.downloads?.length ?? 0) > 0 ? product.downloads?.map((dl: any) => {
                                             const fileUrl = (isAr && dl.fileUrl_ar) ? dl.fileUrl_ar : dl.fileUrl;
                                             const title = (isAr && dl.title_ar) ? dl.title_ar : dl.title;
+                                            const type = dl.type || 'Other';
                                             
-                                            // Skip if no file URL for current language (unless it falls back to default)
                                             if (!fileUrl) return null;
 
                                             return (
-                                                <a
-                                                    key={dl.id}
-                                                    href={`/${locale}/catalogs/viewer?source=${encodeURIComponent(fileUrl)}&title=${encodeURIComponent(title)}`}
-                                                    style={{
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        gap: '1rem',
-                                                        padding: '1rem 1.5rem',
-                                                        backgroundColor: '#f8fafc',
-                                                        borderRadius: '1rem',
-                                                        textDecoration: 'none',
-                                                        color: '#475569',
-                                                        fontWeight: 700,
-                                                        fontSize: '0.9rem',
-                                                        transition: 'all 0.2s ease',
-                                                        border: '1px solid transparent'
-                                                    }}
-                                                    className="hover-card"
-                                                >
-                                                    <span style={{ fontSize: '1.5rem' }}>📄</span>
-                                                    {title.toUpperCase()}
-                                                </a>
+                                                <div key={dl.id} style={{ display: 'flex', gap: '0.6rem', alignItems: 'stretch' }}>
+                                                    {/* Download — small square */}
+                                                    <a
+                                                        href={fileUrl}
+                                                        download
+                                                        title={t('download')}
+                                                        style={{
+                                                            width: '46px',
+                                                            minWidth: '46px',
+                                                            height: '46px',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            borderRadius: '0.75rem',
+                                                            backgroundColor: '#f1f5f9',
+                                                            color: theme.primary,
+                                                            border: `1.5px solid ${theme.primary}2a`,
+                                                            textDecoration: 'none',
+                                                            transition: 'all 0.2s ease',
+                                                            flexShrink: 0
+                                                        }}
+                                                        className="hover-card"
+                                                    >
+                                                        <span style={{ fontSize: '1.1rem' }}>⬇️</span>
+                                                    </a>
+
+                                                    {/* View — wide rectangle */}
+                                                    <a
+                                                        href={`/${locale}/catalogs/viewer?source=${encodeURIComponent(fileUrl)}&title=${encodeURIComponent(title)}`}
+                                                        style={{
+                                                            flex: 1,
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '0.75rem',
+                                                            padding: '0 1.25rem',
+                                                            height: '46px',
+                                                            borderRadius: '0.75rem',
+                                                            backgroundColor: theme.primary,
+                                                            color: 'white',
+                                                            fontWeight: 700,
+                                                            fontSize: '0.85rem',
+                                                            textDecoration: 'none',
+                                                            transition: 'all 0.2s ease',
+                                                            boxShadow: `0 4px 12px ${theme.primary}2a`
+                                                        }}
+                                                        className="hover-card"
+                                                    >
+                                                        <span style={{ opacity: 0.9 }}>{type === 'SDS' ? '📄' : type === 'Label' ? '🏷️' : '📜'}</span>
+                                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.2 }}>
+                                                            <span style={{ fontSize: '0.7rem', opacity: 0.8, fontWeight: 500 }}>{type.toUpperCase()}</span>
+                                                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '180px' }}>{title.toUpperCase()}</span>
+                                                        </div>
+                                                    </a>
+                                                </div>
                                             );
                                         }) : (
                                             <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>{t('noDocuments')}</p>

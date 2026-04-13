@@ -2,15 +2,18 @@ import { getTranslations } from "next-intl/server";
 import { createCategory, getCategories } from "@/actions/categoryActions";
 import DeleteButton from "@/components/admin/DeleteButton";
 import { isProtectedCategorySlug } from "@/lib/data";
+import ImageUploadInput from "@/components/admin/ImageUploadInput";
 
 interface PageProps {
+  params: Promise<{ locale: string }>;
   searchParams?: Promise<{ q?: string }>;
 }
 
-export default async function CategoriesAdminPage({ searchParams }: PageProps) {
+export default async function CategoriesAdminPage({ params, searchParams }: PageProps) {
+  const { locale } = await params;
   const t = await getTranslations("AdminDashboard");
-  const params = (await searchParams) || {};
-  const query = (params.q || "").trim().toLowerCase();
+  const searchParamsValue = (await searchParams) || {};
+  const query = (searchParamsValue.q || "").trim().toLowerCase();
   const categories = await getCategories();
   const filteredCategories = categories.filter((category) =>
     !query
@@ -44,6 +47,12 @@ export default async function CategoriesAdminPage({ searchParams }: PageProps) {
           </select>
           <textarea name="description" className="input" placeholder={t("optionalDescriptionEn")} rows={2} />
           <textarea name="description_ar" className="input" placeholder={t("optionalDescriptionAr")} rows={2} dir="rtl" />
+          
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1rem' }}>
+              <ImageUploadInput name="image" label="Category Image / Banner" />
+              <ImageUploadInput name="icon" label="Category Icon SVG/Image" />
+          </div>
+
           <button type="submit" className="btn btn-primary" style={{ width: "fit-content" }}>
             {t("addCompanySection")}
           </button>
@@ -57,7 +66,7 @@ export default async function CategoriesAdminPage({ searchParams }: PageProps) {
             <input
               type="search"
               name="q"
-              defaultValue={params.q || ""}
+              defaultValue={searchParamsValue.q || ""}
               className="input"
               style={{ width: "100%" }}
               placeholder={t("dashboardSearchPlaceholder")}
@@ -87,11 +96,21 @@ export default async function CategoriesAdminPage({ searchParams }: PageProps) {
                   {category.parent ? ` · ${t("parentLabel")}: ${category.parent.name}` : ` · ${t("rootSectionOption")}`}
                 </div>
               </div>
-              {isProtectedCategorySlug(category.slug) || isProtectedCategorySlug(category.parent?.slug) ? (
-                <span style={{ color: "#0f766e", fontWeight: 600 }}>أساسي / Core</span>
-              ) : (
-                <DeleteButton id={category.id} type="category" />
-              )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                {isProtectedCategorySlug(category.slug) || isProtectedCategorySlug(category.parent?.slug) ? (
+                  <span style={{ color: "#0f766e", fontWeight: 600, fontSize: "0.85rem" }}>أساسي / Core</span>
+                ) : null}
+                <a 
+                  href={`/${locale}/admin/categories/${category.id}`} 
+                  className="btn btn-outline" 
+                  style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}
+                >
+                  تعديل / Edit
+                </a>
+                {!isProtectedCategorySlug(category.slug) && !isProtectedCategorySlug(category.parent?.slug) && (
+                  <DeleteButton id={category.id} type="category" />
+                )}
+              </div>
             </div>
           ))}
           {filteredCategories.length === 0 && <p className="empty-message">{t("dashboardSearchNoResults")}</p>}

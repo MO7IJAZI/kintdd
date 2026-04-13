@@ -3,12 +3,26 @@ import { Link } from '@/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { Facebook, Instagram, Phone, Mail, MapPin } from 'lucide-react';
 
-export default function Footer() {
+type ProductCategoryNav = {
+  id: string;
+  name: string;
+  name_ar: string | null;
+  slug: string;
+};
+
+export default function Footer({ productCategories = [] }: { productCategories?: ProductCategoryNav[] }) {
     const t = useTranslations('Footer');
     const tNav = useTranslations('Navigation');
     const locale = useLocale();
     const isRtl = locale === 'ar';
     const currentYear = new Date().getFullYear();
+
+    const fallbackCategories = [
+      { id: 'livestock', name: 'Livestock', name_ar: 'الثروة الحيوانية', slug: 'livestock' },
+      { id: 'plant-wealth', name: 'Plant Wealth', name_ar: 'الثروة النباتية', slug: 'plant-wealth' }
+    ];
+
+    const categories = (productCategories && productCategories.length > 0) ? productCategories : fallbackCategories;
 
     return (
         <footer style={{
@@ -49,11 +63,11 @@ export default function Footer() {
                             display: 'flex',
                             alignItems: 'center',
                             gap: '0.75rem',
-                            marginBottom: '2rem'
+                            marginBottom: '0.1rem'
                         }}>
                             <div style={{
-                                width: '72px',
-                                height: '72px',
+                                width: '200px',
+                                height: '100px',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
@@ -61,25 +75,25 @@ export default function Footer() {
                                 backgroundColor: 'transparent',
                                 overflow: 'hidden'
                             }}>
-                                <Image src="/images/logo.png" alt="KINT Logo" width={72} height={72} style={{ objectFit: 'contain' }} />
+                                <Image src="/images/logo_down.png" alt="KINT Logo" width={200} height={200} style={{ objectFit: 'contain' }} />
                             </div>
                         </Link>
                         <p style={{ color: 'rgba(255,255,255,0.6)', lineHeight: '1.8', marginBottom: '2.5rem', fontSize: '1rem' }}>
                             {t('description')}
                         </p>
                         <div style={{ display: 'flex', gap: '1rem' }}>
-                            <a 
-                                href="https://www.facebook.com/share/1Aa6zbV7A2/" 
-                                target="_blank" 
+                            <a
+                                href="https://www.facebook.com/share/1Aa6zbV7A2/"
+                                target="_blank"
                                 rel="noopener noreferrer"
-                                style={{ 
-                                    width: '40px', 
-                                    height: '40px', 
-                                    borderRadius: '50%', 
-                                    border: '1px solid rgba(255,255,255,0.2)', 
-                                    display: 'flex', 
-                                    alignItems: 'center', 
-                                    justifyContent: 'center', 
+                                style={{
+                                    width: '40px',
+                                    height: '40px',
+                                    borderRadius: '50%',
+                                    border: '1px solid rgba(255,255,255,0.2)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
                                     transition: '0.3s',
                                     color: 'white'
                                 }}
@@ -87,18 +101,18 @@ export default function Footer() {
                             >
                                 <Facebook size={20} />
                             </a>
-                            <a 
-                                href="https://www.instagram.com/kafri.international?igsh=MTZxdjNtYTNkemFncQ==" 
-                                target="_blank" 
+                            <a
+                                href="https://www.instagram.com/kafri.international?igsh=MTZxdjNtYTNkemFncQ=="
+                                target="_blank"
                                 rel="noopener noreferrer"
-                                style={{ 
-                                    width: '40px', 
-                                    height: '40px', 
-                                    borderRadius: '50%', 
-                                    border: '1px solid rgba(255,255,255,0.2)', 
-                                    display: 'flex', 
-                                    alignItems: 'center', 
-                                    justifyContent: 'center', 
+                                style={{
+                                    width: '40px',
+                                    height: '40px',
+                                    borderRadius: '50%',
+                                    border: '1px solid rgba(255,255,255,0.2)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
                                     transition: '0.3s',
                                     color: 'white'
                                 }}
@@ -113,10 +127,14 @@ export default function Footer() {
                     <div>
                         <h4 style={{ fontSize: '1.2rem', marginBottom: '2rem', fontWeight: '700' }}>{tNav('products')}</h4>
                         <ul style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <li><Link href="/products/plant-wealth" style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }} className="hover:text-primary">{tNav('agriculturalProducts')}</Link></li>
+                            {categories.map((category) => (
+                                <li key={category.id}>
+                                    <Link href={`/products/${category.slug}` as any} style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }} className="hover:text-primary">
+                                        {isRtl ? (category.name_ar || category.name) : category.name}
+                                    </Link>
+                                </li>
+                            ))}
                             <li><Link href={{ pathname: '/crops' }} style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }} className="hover:text-primary">{tNav('cropGuides')}</Link></li>
-                            <li><Link href="/products/livestock" style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }} className="hover:text-primary">{tNav('animalProducts')}</Link></li>
-                            <li><Link href="/products/livestock/by-animal-type" style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }} className="hover:text-primary">{tNav('byAnimalType')}</Link></li>
                         </ul>
                     </div>
 
@@ -125,8 +143,6 @@ export default function Footer() {
                         <h4 style={{ fontSize: '1.2rem', marginBottom: '2rem', fontWeight: '700' }}>{tNav('contact')}</h4>
                         <ul style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                             <li><Link href="/contact/headquarter" style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }} className="hover:text-primary">{tNav('companyHeadquarter')}</Link></li>
-                            <li><Link href="/contact/export-department" style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }} className="hover:text-primary">{tNav('exportDepartment')}</Link></li>
-                            <li><Link href="/contact/local-representatives" style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }} className="hover:text-primary">{tNav('localRepresentatives')}</Link></li>
                             <li><Link href="/contact" style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }} className="hover:text-primary">{tNav('contactForm')}</Link></li>
                         </ul>
                     </div>

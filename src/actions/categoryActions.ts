@@ -38,6 +38,8 @@ export async function createCategory(formData: FormData) {
              slug = await generateGlobalUniqueSlug(slug);
         }
 
+        const icon = formData.get("icon") as string;
+
         await prisma.category.create({
             data: {
                 name: name.trim(),
@@ -47,15 +49,13 @@ export async function createCategory(formData: FormData) {
                 name_ar: name_ar?.trim() || name.trim(), // Fallback to name if ar missing
                 description_ar: description_ar || null,
                 image: image && image.trim() ? image.trim() : null,
+                icon: icon && icon.trim() ? icon.trim() : null,
                 isActive: true, // Ensure active by default
             },
         });
 
         revalidateTag("categories", { expire: 0 } as any);
         revalidatePath("/", "layout");
-        revalidatePath("/admin/categories");
-        revalidatePath("/en/admin/categories");
-        revalidatePath("/ar/admin/categories");
     } catch (error: any) {
         console.error("Create Category Error:", error);
         throw new Error(error.message || "Failed to create category");
@@ -100,21 +100,34 @@ export async function updateCategory(id: string, formData: FormData) {
     });
 
     if (isProtectedCategorySlug(currentCategory?.slug)) {
-        throw new Error("Core categories cannot be modified");
+        // For protected categories, we allow updating names and description and image,
+        // but we absolutely prevent changing the slug or parentId.
+        await prisma.category.update({
+            where: { id },
+            data: {
+                name,
+                description,
+                name_ar: name_ar.trim(),
+                description_ar,
+                image: image && image.trim() ? image.trim() : null,
+                icon: formData.get("icon") ? (formData.get("icon") as string).trim() : null,
+            },
+        });
+    } else {
+        await prisma.category.update({
+            where: { id },
+            data: {
+                name,
+                slug,
+                description,
+                parentId: parentId || null,
+                name_ar: name_ar.trim(),
+                description_ar,
+                image: image && image.trim() ? image.trim() : null,
+                icon: formData.get("icon") ? (formData.get("icon") as string).trim() : null,
+            },
+        });
     }
-
-    await prisma.category.update({
-        where: { id },
-        data: {
-            name,
-            slug,
-            description,
-            parentId: parentId || null,
-            name_ar: name_ar.trim(),
-            description_ar,
-            image: image && image.trim() ? image.trim() : null,
-        },
-    });
 
     revalidatePath("/admin/categories");
     revalidatePath("/en/admin/categories");
