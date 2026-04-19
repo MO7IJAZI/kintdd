@@ -139,19 +139,47 @@ export default function CategoriesSection({ products = [], categories = [] }: Ca
                      style={{ objectFit: 'cover' }} 
                    />
                  </div>
-                 <div style={{ padding: '3.5rem', textAlign: isAr ? 'right' : 'left', flex: 1, display: 'flex', flexDirection: 'column', alignItems: isAr ? 'flex-end' : 'flex-start' }}>
-                   <h3 style={{ fontSize: '2.2rem', marginBottom: 'var(--space-4)', fontWeight: 900, color: 'var(--secondary)', display: 'flex', alignItems: 'center', gap: '0.75rem', justifyContent: 'flex-start', flexDirection: isAr ? 'row-reverse' : 'row' }}>
-                     {renderCategoryIcon(categoryIcon)}
-                     <span>{categoryName}</span>
-                   </h3>
-                   <p style={{ color: 'var(--muted-foreground)', marginBottom: 'var(--space-12)', lineHeight: 1.8, fontSize: '1.1rem',
-                               display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                     {categoryDesc}
-                   </p>
-                   <Link href={`/products/${category.slug}`} className="btn btn-primary" style={{ alignSelf: isAr ? 'flex-end' : 'flex-start', borderRadius: 'var(--radius-2xl)', padding: '1rem 2.5rem', fontSize: '1.1rem', fontWeight: 600, marginTop: 'auto' }}>
-                     {tHomeNew('viewProducts')} <ArrowRight size={20} style={{ marginLeft: isAr ? 0 : '0.5rem', marginRight: isAr ? '0.5rem' : 0, transform: isAr ? 'rotate(180deg)' : 'none' }} />
-                   </Link>
-                 </div>
+                  <div 
+                    dir={isAr ? 'rtl' : 'ltr'}
+                    style={{ 
+                      padding: '3.5rem', 
+                      textAlign: 'start', 
+                      flex: 1, 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      alignItems: 'stretch' 
+                    }}
+                  >
+                    <h3 style={{ 
+                      fontSize: '2.2rem', 
+                      marginBottom: 'var(--space-4)', 
+                      fontWeight: 900, 
+                      color: 'var(--secondary)', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '0.75rem',
+                      justifyContent: 'flex-start'
+                    }}>
+                      {renderCategoryIcon(categoryIcon)}
+                      <span>{categoryName}</span>
+                    </h3>
+                    <p style={{ 
+                      color: 'var(--muted-foreground)', 
+                      marginBottom: 'var(--space-12)', 
+                      lineHeight: 1.8, 
+                      fontSize: '1.1rem',
+                      display: '-webkit-box', 
+                      WebkitLineClamp: 3, 
+                      WebkitBoxOrient: 'vertical', 
+                      overflow: 'hidden',
+                      textAlign: 'start'
+                    }}>
+                      {categoryDesc}
+                    </p>
+                    <Link href={`/products/${category.slug}`} className="btn btn-primary" style={{ alignSelf: 'flex-start', borderRadius: 'var(--radius-2xl)', padding: '1rem 2.5rem', fontSize: '1.1rem', fontWeight: 600, marginTop: 'auto', width: 'fit-content' }}>
+                      {tHomeNew('viewProducts')} <ArrowRight size={20} style={{ marginLeft: isAr ? 0 : '0.5rem', marginRight: isAr ? '0.5rem' : 0, transform: isAr ? 'rotate(180deg)' : 'none' }} />
+                    </Link>
+                  </div>
                </div>
              );
           }) : (
