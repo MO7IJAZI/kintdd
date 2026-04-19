@@ -1,136 +1,330 @@
-import Image from 'next/image';
-import { Link } from '@/navigation';
+import prisma from "@/lib/prisma";
 import { getTranslations, getLocale } from 'next-intl/server';
+import { PawPrint, ArrowRight, Leaf } from 'lucide-react';
+import Image from "next/image";
+import { Link } from "@/navigation";
 
-export default async function ProductsForAnimalsPage() {
-  const t = await getTranslations('ProductsForAnimals');
+export const revalidate = 300;
+
+export default async function ProductsForAnimalsPage({
+  searchParams
+}: {
+  searchParams: Promise<{ category?: string }>
+}) {
+  const { category: activeCategory } = await searchParams;
   const locale = await getLocale();
-  const isRtl = locale === 'ar';
+  const isAr = locale === 'ar';
+  const t = await getTranslations('ProductsForAnimals');
+
+  const where: any = { isActive: true };
+  if (activeCategory) {
+    where.slug = activeCategory;
+  }
+
+  const animalTypes = await prisma.animalType.findMany({
+    where: { isActive: true },
+    orderBy: { order: 'asc' },
+  });
+
+  const toPlainText = (html?: string | null) => {
+    if (!html) return '';
+    return html.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+  };
+
+  const filteredAnimalTypes = activeCategory
+    ? animalTypes.filter(a => a.slug === activeCategory)
+    : animalTypes;
 
   return (
-    <div dir={isRtl ? 'rtl' : 'ltr'}>
-      <section className="section">
-        <div className="container" style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: '4rem', alignItems: 'center' }}>
-          <div>
-            <h1 style={{ fontSize: '3.5rem', marginBottom: '1.5rem', color: 'var(--primary)', lineHeight: '1.1' }}>{t('title')}</h1>
-            <p style={{ fontSize: '1.2rem', color: 'var(--muted-foreground)', lineHeight: '1.8' }}>
-              {t('description')}
-            </p>
+    <div style={{ minHeight: '100vh', background: 'var(--muted)' }}>
+      {/* Hero Section */}
+      <div style={{
+        background: 'linear-gradient(135deg, var(--secondary) 0%, #1c2f5d 100%)',
+        padding: '6rem 2rem 4rem',
+        textAlign: 'center',
+        color: 'white',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <div style={{
+          position: 'absolute',
+          top: 0, left: 0, right: 0, bottom: 0,
+          opacity: 0.08,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }} />
+        <div style={{ maxWidth: '900px', margin: '0 auto', position: 'relative', zIndex: 2 }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '1rem',
+            marginBottom: '1.5rem'
+          }}>
+            <PawPrint style={{ width: '48px', height: '48px' }} />
+            <h1 style={{
+              fontSize: 'clamp(2rem, 5vw, 3.5rem)',
+              fontWeight: '800',
+              margin: 0
+            }}>
+              {isAr ? 'أدلة الثروة الحيوانية' : 'Animal Guides'}
+            </h1>
           </div>
-          <div style={{ position: 'relative', height: '420px', borderRadius: '2rem', overflow: 'hidden' }}>
-            <Image src="/images/animals-hero.png" alt={t('title')} fill style={{ objectFit: 'cover' }} />
-          </div>
-        </div>
-      </section>
+          <p style={{
+            fontSize: '1.25rem',
+            opacity: 0.95,
+            maxWidth: '600px',
+            margin: '0 auto 2rem',
+            lineHeight: 1.6
+          }}>
+            {isAr
+              ? 'اكتشف برامج التغذية والرعاية الأمثل لكل نوع من الثروة الحيوانية'
+              : 'Discover optimal nutrition and care programs for each livestock type'}
+          </p>
 
-      <section className="section" style={{ paddingTop: 0 }}>
-        <div className="container">
-          <div style={{ position: 'relative', height: '320px', borderRadius: '1.5rem', overflow: 'hidden' }}>
-            <Image src="/images/animals-feature.bmp" alt="Animal nutrition" fill style={{ objectFit: 'cover' }} />
-          </div>
-        </div>
-      </section>
-
-      <section className="section">
-        <div className="container">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '2rem' }}>
-            <Link href="/products-for-animals/poultry" className="card" style={{ padding: '2rem', textDecoration: 'none', color: 'inherit' }}>
-              <div style={{ width: '72px', height: '72px', marginBottom: '1.25rem', position: 'relative', borderRadius: '1rem', overflow: 'hidden' }}>
-                <Image src="/images/chk.jpg" alt={t('poultry.title')} fill style={{ objectFit: 'cover' }} />
-              </div>
-              <h3 style={{ fontSize: '1.3rem', marginBottom: '0.5rem' }}>{t('poultry.title')}</h3>
-              <p style={{ color: 'var(--muted-foreground)' }}>{t('poultry.description')}</p>
+          {/* Breadcrumb */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem',
+            fontSize: '0.95rem',
+            opacity: 0.9
+          }}>
+            <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>
+              {isAr ? 'الرئيسية' : 'Home'}
             </Link>
-
-            <Link href="/products-for-animals/ruminants" className="card" style={{ padding: '2rem', textDecoration: 'none', color: 'inherit' }}>
-              <div style={{ width: '72px', height: '72px', marginBottom: '1.25rem', position: 'relative', borderRadius: '1rem', overflow: 'hidden' }}>
-                <Image src="/images/caow.jpg" alt={t('ruminants.title')} fill style={{ objectFit: 'cover' }} />
-              </div>
-              <h3 style={{ fontSize: '1.3rem', marginBottom: '0.5rem' }}>{t('ruminants.title')}</h3>
-              <p style={{ color: 'var(--muted-foreground)' }}>{t('ruminants.description')}</p>
+            <span>/</span>
+            <Link href="/products" style={{ color: 'inherit', textDecoration: 'none' }}>
+              {isAr ? 'المنتجات' : 'Products'}
             </Link>
-
-            <Link href="/products-for-animals/swine" className="card" style={{ padding: '2rem', textDecoration: 'none', color: 'inherit' }}>
-              <div style={{ width: '72px', height: '72px', marginBottom: '1.25rem', position: 'relative', borderRadius: '1rem', overflow: 'hidden' }}>
-                <Image src="/images/pig.jpg" alt={t('swine.title')} fill style={{ objectFit: 'cover' }} />
-              </div>
-              <h3 style={{ fontSize: '1.3rem', marginBottom: '0.5rem' }}>{t('swine.title')}</h3>
-              <p style={{ color: 'var(--muted-foreground)' }}>{t('swine.description')}</p>
-            </Link>
+            <span>/</span>
+            <span style={{ fontWeight: '600' }}>{isAr ? 'الثروة الحيوانية' : 'Animal Guides'}</span>
           </div>
         </div>
-      </section>
+      </div>
 
-      <section style={{ padding: '6rem 0', backgroundImage: "url('/images/about-bottom.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' }}>
-        <div className="container">
-          <div style={{ maxWidth: '720px', padding: '3rem', backgroundColor: 'rgba(0,0,0,0.55)', borderRadius: '1.5rem' }}>
-            <h2 style={{ fontSize: '2.5rem', marginBottom: '1rem', color: 'white' }}>{t('aboutKint.title')}</h2>
-            <p style={{ color: 'rgba(255,255,255,0.85)', fontSize: '1.1rem', lineHeight: '1.7', marginBottom: '2rem' }}>
-              {t('aboutKint.description')}
-            </p>
-            <Link href="/about" className="btn btn-primary" style={{ display: 'inline-flex' }}>
-              {t('aboutKint.button')}
+      {/* Category Filter Tabs */}
+      {animalTypes.length > 0 && (
+        <div style={{
+          background: 'var(--background)',
+          padding: '1.5rem 2rem',
+          borderBottom: '1px solid var(--border)',
+          position: 'sticky',
+          top: 0,
+          zIndex: 10,
+          boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+        }}>
+          <div style={{
+            maxWidth: '1200px',
+            margin: '0 auto',
+            display: 'flex',
+            gap: '0.75rem',
+            flexWrap: 'wrap',
+            justifyContent: 'center'
+          }}>
+            <Link
+              href="/products-for-animals"
+              style={{
+                padding: '0.5rem 1.25rem',
+                borderRadius: '2rem',
+                background: !activeCategory ? '#142346' : 'var(--muted)',
+                color: !activeCategory ? 'white' : 'var(--foreground)',
+                textDecoration: 'none',
+                fontWeight: '600',
+                fontSize: '0.95rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <Leaf style={{ width: '18px', height: '18px' }} />
+              {isAr ? 'الكل' : 'All'}
             </Link>
+            {animalTypes.map((animal) => {
+              const animalName = isAr ? (animal.name_ar || animal.name) : animal.name;
+              return (
+                <Link
+                  key={animal.id}
+                  href={{ pathname: '/products-for-animals', query: { category: animal.slug } } as any}
+                  style={{
+                    padding: '0.5rem 1.25rem',
+                    borderRadius: '2rem',
+                    background: activeCategory === animal.slug ? '#142346' : 'var(--muted)',
+                    color: activeCategory === animal.slug ? 'white' : 'var(--foreground)',
+                    textDecoration: 'none',
+                    fontWeight: activeCategory === animal.slug ? '600' : '500',
+                    fontSize: '0.95rem',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  {animalName}
+                </Link>
+              );
+            })}
           </div>
         </div>
-      </section>
+      )}
 
-      <section className="section">
-        <div className="container">
-          <h2 style={{ fontSize: '2.5rem', marginBottom: '2rem' }}>{t('commonIssues')}</h2>
-
-          <div className="card" style={{ padding: '2.5rem', marginBottom: '2rem' }}>
-            <h3 style={{ fontSize: '1.6rem', marginBottom: '0.5rem' }}>{t('poultry.title')}</h3>
-            <h4 style={{ fontSize: '1.25rem', marginBottom: '1rem', color: 'var(--primary)' }}>{t('poultry.coccidiosis')}</h4>
-            <p style={{ color: 'var(--muted-foreground)', lineHeight: '1.7' }}>
-              {t('poultry.coccidiosisDesc')}
-            </p>
-            <p style={{ color: 'var(--muted-foreground)', lineHeight: '1.7', marginTop: '1rem' }}>
-              {t('poultry.coccidiosisSolution')}
-            </p>
-            <p style={{ color: 'var(--muted-foreground)', lineHeight: '1.7', marginTop: '1rem' }}>
-              {t('poultry.coccidiosisMechanism')}
-            </p>
-            <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
-              <Link href="/products-for-animals/poultry" className="btn btn-primary">{t('more')}</Link>
-              <Link href="/contact" className="btn btn-outline">{t('contactUs')}</Link>
-            </div>
+      {/* Animal Types Grid */}
+      <div style={{ padding: '3rem 2rem', maxWidth: '1400px', margin: '0 auto' }}>
+        {filteredAnimalTypes.length === 0 ? (
+          <div style={{
+            textAlign: 'center',
+            padding: '4rem 2rem',
+            background: 'var(--background)',
+            borderRadius: '16px',
+            border: '1px solid var(--border)'
+          }}>
+            <PawPrint style={{ width: '64px', height: '64px', margin: '0 auto 1rem', opacity: 0.5, color: '#142346' }} />
+            <h3 style={{ fontSize: '1.5rem', color: 'var(--foreground)', marginBottom: '0.5rem' }}>
+              {isAr ? 'لا توجد نتائج' : 'No results found'}
+            </h3>
           </div>
+        ) : (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+            gap: '2rem'
+          }}>
+            {filteredAnimalTypes.map((animal) => {
+              const animalName = isAr ? (animal.name_ar || animal.name) : animal.name;
+              const animalDesc = toPlainText(isAr ? (animal.description_ar || animal.description) : animal.description);
 
-          <div className="card" style={{ padding: '2.5rem', marginBottom: '2rem' }}>
-            <h3 style={{ fontSize: '1.6rem', marginBottom: '0.5rem' }}>{t('ruminants.title')}</h3>
-            <h4 style={{ fontSize: '1.25rem', marginBottom: '1rem', color: 'var(--primary)' }}>{t('ruminants.ketosis')}</h4>
-            <p style={{ color: 'var(--muted-foreground)', lineHeight: '1.7' }}>
-              {t('ruminants.ketosisDesc')}
-            </p>
-            <p style={{ color: 'var(--muted-foreground)', lineHeight: '1.7', marginTop: '1rem' }}>
-              {t('ruminants.ketosisStats')}
-            </p>
-            <p style={{ color: 'var(--muted-foreground)', lineHeight: '1.7', marginTop: '1rem' }}>
-              {t('ruminants.ketosisSolution')}
-            </p>
-            <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
-              <Link href="/products-for-animals/ruminants" className="btn btn-primary">{t('more')}</Link>
-              <Link href="/contact" className="btn btn-outline">{t('contactUs')}</Link>
-            </div>
-          </div>
+              return (
+                <Link
+                  key={animal.id}
+                  href={`/products-for-animals/${animal.slug}` as any}
+                  style={{
+                    textDecoration: 'none',
+                    color: 'inherit',
+                    display: 'block'
+                  }}
+                >
+                  <div style={{
+                    background: 'var(--background)',
+                    borderRadius: '16px',
+                    overflow: 'hidden',
+                    border: '1px solid var(--border)',
+                    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column'
+                  }}>
+                    {/* Image */}
+                    <div style={{
+                      position: 'relative',
+                      height: '200px',
+                      background: 'white',
+                      overflow: 'hidden'
+                    }}>
+                      {animal.imageUrl ? (
+                        <Image
+                          src={animal.imageUrl}
+                          alt={animalName}
+                          fill
+                          style={{ objectFit: 'contain', padding: '1rem' }}
+                        />
+                      ) : (
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          height: '100%',
+                          background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)'
+                        }}>
+                          <PawPrint style={{ width: '64px', height: '64px', opacity: 0.4, color: '#142346' }} />
+                        </div>
+                      )}
+                    </div>
 
-          <div className="card" style={{ padding: '2.5rem' }}>
-            <h3 style={{ fontSize: '1.6rem', marginBottom: '0.5rem' }}>{t('swine.title')}</h3>
-            <h4 style={{ fontSize: '1.25rem', marginBottom: '1rem', color: 'var(--primary)' }}>{t('swine.quickStart')}</h4>
-            <p style={{ color: 'var(--muted-foreground)', lineHeight: '1.7' }}>
-              {t('swine.quickStartDesc')}
-            </p>
-            <p style={{ color: 'var(--muted-foreground)', lineHeight: '1.7', marginTop: '1rem' }}>
-              {t('swine.quickStartSolution')}
-            </p>
-            <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
-              <Link href="/products-for-animals/swine" className="btn btn-primary">{t('more')}</Link>
-              <Link href="/contact" className="btn btn-outline">{t('contactUs')}</Link>
-            </div>
+                    {/* Content */}
+                    <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                      <h3 style={{
+                        fontSize: '1.25rem',
+                        fontWeight: '700',
+                        color: 'var(--foreground)',
+                        marginBottom: '0.75rem'
+                      }}>
+                        {animalName}
+                      </h3>
+                      {animalDesc && (
+                        <p style={{
+                          fontSize: '0.9rem',
+                          color: 'var(--muted-foreground)',
+                          lineHeight: 1.6,
+                          marginBottom: '1rem',
+                          flex: 1,
+                          display: '-webkit-box',
+                          WebkitLineClamp: 3,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden'
+                        }}>
+                          {animalDesc}
+                        </p>
+                      )}
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'flex-end',
+                        marginTop: 'auto'
+                      }}>
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                          color: '#142346',
+                          fontWeight: '600',
+                          fontSize: '0.9rem'
+                        }}>
+                          {isAr ? 'عرض الدليل' : 'View Guide'}
+                          <ArrowRight style={{ width: '16px', height: '16px' }} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
+        )}
+      </div>
+
+      {/* CTA Section */}
+      <div style={{
+        background: 'linear-gradient(135deg, #142346 0%, #1c2f5d 100%)',
+        padding: '4rem 2rem',
+        textAlign: 'center',
+        color: 'white'
+      }}>
+        <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+          <h2 style={{ fontSize: '2rem', fontWeight: '700', marginBottom: '1rem' }}>
+            {isAr ? 'هل تحتاج إلى برنامج مخصص؟' : 'Need a Custom Program?'}
+          </h2>
+          <p style={{ fontSize: '1.1rem', opacity: 0.95, marginBottom: '2rem' }}>
+            {isAr
+              ? 'تواصل مع خبرائنا للحصول على استشارة مجانية وبرنامج تغذية مخصص لثروتك الحيوانية'
+              : 'Contact our experts for a free consultation and customized nutrition plan for your livestock'}
+          </p>
+          <Link
+            href="/contact"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '1rem 2rem',
+              background: 'var(--background)',
+              color: '#142346',
+              borderRadius: '2rem',
+              fontWeight: '600',
+              textDecoration: 'none',
+              fontSize: '1rem'
+            }}
+          >
+            {isAr ? 'استشر خبير' : 'Consult an Expert'}
+          </Link>
         </div>
-      </section>
+      </div>
     </div>
   );
 }

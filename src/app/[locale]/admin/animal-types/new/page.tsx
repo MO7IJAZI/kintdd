@@ -1,9 +1,10 @@
-'use client';
 import AnimalTypeForm from "@/components/admin/AnimalTypeForm";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
+import { getProducts } from "@/actions/productActions";
 
-export default function NewAnimalTypePage() {
-  const t = useTranslations("AnimalTypeForm");
+export default async function NewAnimalTypePage() {
+  const t = await getTranslations("AnimalTypeForm");
+  const products = await getProducts();
   return (
     <div className="admin-dashboard">
       <div className="page-header">
@@ -13,7 +14,7 @@ export default function NewAnimalTypePage() {
         </div>
       </div>
       <div className="card">
-        <AnimalTypeForm />
+        <AnimalTypeForm products={products} />
       </div>
     </div>
   );

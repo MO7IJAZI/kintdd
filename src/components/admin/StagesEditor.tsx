@@ -22,12 +22,32 @@ interface StagesEditorProps {
     initialData?: Stage[];
     products: Product[];
     onChange: (data: Stage[]) => void;
+    labels?: {
+        sectionTitle?: string;
+        itemNameEn?: string;
+        itemNameAr?: string;
+        itemDescriptionEn?: string;
+        itemDescriptionAr?: string;
+        addItem?: string;
+        recommendedProducts?: string;
+    };
 }
 
-export default function StagesEditor({ initialData, products, onChange }: StagesEditorProps) {
+export default function StagesEditor({ initialData, products, onChange, labels }: StagesEditorProps) {
     const t = useTranslations('AdminStages');
     const locale = useLocale();
     const isRtl = locale === 'ar';
+
+    // Default labels fallback to AdminStages translations if not provided
+    const displayLabels = {
+        sectionTitle: labels?.sectionTitle || t('cropGrowthStages'),
+        itemNameEn: labels?.itemNameEn || t('stageNameEn'),
+        itemNameAr: labels?.itemNameAr || t('stageNameAr'),
+        itemDescriptionEn: labels?.itemDescriptionEn || t('stageDescriptionEn'),
+        itemDescriptionAr: labels?.itemDescriptionAr || t('stageDescriptionAr'),
+        addItem: labels?.addItem || t('addGrowthStage'),
+        recommendedProducts: labels?.recommendedProducts || t('recommendedProducts'),
+    };
     const [stages, setStages] = useState<Stage[]>(initialData || []);
     const [activeStageTab, setActiveStageTab] = useState<Record<number, 'en' | 'ar'>>({});
 
@@ -81,7 +101,7 @@ export default function StagesEditor({ initialData, products, onChange }: Stages
 
     return (
         <div style={{ marginBottom: '2rem' }}>
-            <label style={{ display: 'block', marginBottom: '1rem', fontWeight: '700', fontSize: '0.85rem', color: 'var(--foreground)', opacity: 0.8 }}>{t('cropGrowthStages')}</label>
+            <label style={{ display: 'block', marginBottom: '1rem', fontWeight: '700', fontSize: '0.85rem', color: 'var(--foreground)', opacity: 0.8 }}>{displayLabels.sectionTitle}</label>
 
             <div style={{ display: 'grid', gap: '1.5rem' }}>
                 {stages.map((stage, index) => (
@@ -113,7 +133,7 @@ export default function StagesEditor({ initialData, products, onChange }: Stages
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '1.5rem' }}>
                             <div>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.75rem', fontWeight: '600' }}>{t('stageNameEn')}</label>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.75rem', fontWeight: '600' }}>{displayLabels.itemNameEn}</label>
                                 <input 
                                     className="input" 
                                     style={{ width: '100%', backgroundColor: 'white' }}
@@ -123,7 +143,7 @@ export default function StagesEditor({ initialData, products, onChange }: Stages
                                 />
                             </div>
                             <div dir="rtl">
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.75rem', fontWeight: '600' }}>{t('stageNameAr')}</label>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.75rem', fontWeight: '600' }}>{displayLabels.itemNameAr}</label>
                                 <input 
                                     className="input" 
                                     style={{ width: '100%', backgroundColor: 'white' }}
@@ -175,14 +195,14 @@ export default function StagesEditor({ initialData, products, onChange }: Stages
                             {/* RichTextEditor based on active tab */}
                             {getStageTab(index) === 'en' ? (
                                 <RichTextEditor
-                                    label={t('stageDescriptionEn')}
+                                    label={displayLabels.itemDescriptionEn}
                                     value={stage.description || ''}
                                     onChange={(value) => updateStageField(index, 'description', value)}
                                 />
                             ) : (
                                 <div dir="rtl">
                                     <RichTextEditor
-                                        label={t('stageDescriptionAr')}
+                                        label={displayLabels.itemDescriptionAr}
                                         value={stage.description_ar || ''}
                                         onChange={(value) => updateStageField(index, 'description_ar', value)}
                                     />
@@ -191,7 +211,7 @@ export default function StagesEditor({ initialData, products, onChange }: Stages
                         </div>
 
                         <div>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.75rem', fontWeight: '600' }}>{t('recommendedProducts')}</label>
+                            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.75rem', fontWeight: '600' }}>{displayLabels.recommendedProducts}</label>
                             
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' }}>
                                 {stage.products?.map(prodId => {
@@ -248,7 +268,7 @@ export default function StagesEditor({ initialData, products, onChange }: Stages
                 className="btn btn-outline"
                 style={{ width: '100%', marginTop: '1rem', borderStyle: 'dashed', justifyContent: 'center' }}
             >
-                {t('addGrowthStage')}
+                {displayLabels.addItem}
             </button>
         </div>
     );

@@ -1,121 +1,337 @@
 import prisma from "@/lib/prisma";
+import { getTranslations, getLocale } from 'next-intl/server';
+import { PawPrint, ArrowRight, Leaf } from 'lucide-react';
 import Image from "next/image";
-import { getLocale } from "next-intl/server";
 import { Link } from "@/navigation";
 
 export const revalidate = 300;
 
-export default async function ByAnimalTypePage() {
+export default async function ProductsForAnimalsPage({
+  searchParams
+}: {
+  searchParams: Promise<{ category?: string }>
+}) {
+  const { category: activeCategory } = await searchParams;
   const locale = await getLocale();
   const isAr = locale === 'ar';
+  const t = await getTranslations('ProductsForAnimals');
 
-  const types = await prisma.animalType.findMany({
+  const where: any = { isActive: true };
+
+  const animalTypes = await prisma.animalType.findMany({
     where: { isActive: true },
     orderBy: { order: 'asc' },
-    include: { issues: { where: { isActive: true }, orderBy: { order: 'asc' } } }
   });
 
+  const categoriesMap = new Map<string, string>();
+  animalTypes.forEach(a => {
+    if (a.category && a.category.trim() !== '') {
+      if (!categoriesMap.has(a.category)) {
+        categoriesMap.set(a.category, isAr && a.category_ar ? a.category_ar : a.category);
+      }
+    }
+  });
+  
+  const uniqueCategories = Array.from(categoriesMap.entries());
+
+  const toPlainText = (html?: string | null) => {
+    if (!html) return '';
+    return html.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+  };
+
+  const filteredAnimalTypes = activeCategory
+    ? animalTypes.filter(a => a.category === activeCategory)
+    : animalTypes;
+
   return (
-    <div style={{ direction: isAr ? 'rtl' : 'ltr', overflowX: 'hidden' }}>
-      <section style={{
-        background: 'linear-gradient(rgba(20, 35, 70, 0.75), rgba(20, 35, 70, 0.65)), url(/images/banners/products-banner.png)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundAttachment: 'fixed',
-        color: 'white',
-        padding: '6rem 1rem',
+    <div style={{ minHeight: '100vh', background: 'var(--muted)' }}>
+      {/* Hero Section */}
+      <div style={{
+        background: 'linear-gradient(135deg, var(--secondary) 0%, #1c2f5d 100%)',
+        padding: '6rem 2rem 4rem',
         textAlign: 'center',
-        minHeight: '360px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
+        color: 'white',
+        position: 'relative',
+        overflow: 'hidden'
       }}>
-        <div style={{ maxWidth: '900px' }}>
-          <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 800, marginBottom: '0.75rem' }}>
-            {isAr ? 'حسب نوع الحيوان' : 'By Animal Type'}
-          </h1>
-          <p style={{ fontSize: '1.05rem', opacity: 0.95 }}>
-            {isAr ? 'تصفح الأنواع الحيوانية وقضاياها الشائعة' : 'Browse animal types and their most common issues'}
-          </p>
-        </div>
-      </section>
-
-      {/* Animal Types Grid */}
-      <section style={{ padding: '4rem 1rem', backgroundColor: '#f8fafc' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <div style={{ marginBottom: '2rem' }}>
-            <h2 style={{ fontSize: 'clamp(1.5rem, 3vw, 2.25rem)', fontWeight: 800, color: '#142346', marginBottom: '0.5rem' }}>
-              {isAr ? 'الأنواع الحيوانية' : 'Animal Types'}
-            </h2>
-            <div style={{ width: '60px', height: '4px', background: 'linear-gradient(90deg, #e9496c, #142346)', borderRadius: '2px' }} />
+        <div style={{
+          position: 'absolute',
+          top: 0, left: 0, right: 0, bottom: 0,
+          opacity: 0.08,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }} />
+        <div style={{ maxWidth: '900px', margin: '0 auto', position: 'relative', zIndex: 2 }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '1rem',
+            marginBottom: '1.5rem'
+          }}>
+            <PawPrint style={{ width: '48px', height: '48px' }} />
+            <h1 style={{
+              fontSize: 'clamp(2rem, 5vw, 3.5rem)',
+              fontWeight: '800',
+              margin: 0
+            }}>
+              {isAr ? 'أدلة الثروة الحيوانية' : 'Animal Guides'}
+            </h1>
           </div>
+          <p style={{
+            fontSize: '1.25rem',
+            opacity: 0.95,
+            maxWidth: '600px',
+            margin: '0 auto 2rem',
+            lineHeight: 1.6
+          }}>
+            {isAr
+              ? 'اكتشف برامج التغذية والرعاية الأمثل لكل نوع من الثروة الحيوانية'
+              : 'Discover optimal nutrition and care programs for each livestock type'}
+          </p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
-            {types.map(type => {
-              const title = isAr ? type.name_ar || type.name : type.name;
-              const desc = isAr ? type.description_ar || type.description : type.description;
+          {/* Breadcrumb */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '0.5rem',
+            fontSize: '0.95rem',
+            opacity: 0.9
+          }}>
+            <Link href="/" style={{ color: 'inherit', textDecoration: 'none' }}>
+              {isAr ? 'الرئيسية' : 'Home'}
+            </Link>
+            <span>/</span>
+            <Link href="/products" style={{ color: 'inherit', textDecoration: 'none' }}>
+              {isAr ? 'المنتجات' : 'Products'}
+            </Link>
+            <span>/</span>
+            <span style={{ fontWeight: '600' }}>{isAr ? 'الثروة الحيوانية' : 'Animal Guides'}</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Category Filter Tabs */}
+      {animalTypes.length > 0 && (
+        <div style={{
+          background: 'var(--background)',
+          padding: '1.5rem 2rem',
+          borderBottom: '1px solid var(--border)',
+          position: 'sticky',
+          top: 0,
+          zIndex: 10,
+          boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+        }}>
+          <div style={{
+            maxWidth: '1200px',
+            margin: '0 auto',
+            display: 'flex',
+            gap: '0.75rem',
+            flexWrap: 'wrap',
+            justifyContent: 'center'
+          }}>
+            <Link
+              href="/products/livestock/by-animal-type"
+              style={{
+                padding: '0.5rem 1.25rem',
+                borderRadius: '2rem',
+                background: !activeCategory ? '#142346' : 'var(--muted)',
+                color: !activeCategory ? 'white' : 'var(--foreground)',
+                textDecoration: 'none',
+                fontWeight: '600',
+                fontSize: '0.95rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <Leaf style={{ width: '18px', height: '18px' }} />
+              {isAr ? 'الكل' : 'All'}
+            </Link>
+            {uniqueCategories.map(([catSlug, catName]) => {
               return (
                 <Link
-                  key={type.id}
-                  href={{ pathname: '/products/livestock/by-animal-type/[slug]', params: { slug: type.slug } } as any}
-                  style={{ textDecoration: 'none', color: 'inherit' }}
+                  key={catSlug}
+                  href={{ pathname: '/products/livestock/by-animal-type', query: { category: catSlug } } as any}
+                  style={{
+                    padding: '0.5rem 1.25rem',
+                    borderRadius: '2rem',
+                    background: activeCategory === catSlug ? '#142346' : 'var(--muted)',
+                    color: activeCategory === catSlug ? 'white' : 'var(--foreground)',
+                    textDecoration: 'none',
+                    fontWeight: activeCategory === catSlug ? '600' : '500',
+                    fontSize: '0.95rem',
+                    transition: 'all 0.2s ease'
+                  }}
                 >
-                  <div className="card hover-card" style={{ overflow: 'hidden', height: '100%' }}>
-                    {type.imageUrl && (
-                      <div style={{ position: 'relative', aspectRatio: '1 / 1', background: '#ffffff', borderBottom: '1px solid #f1f5f9' }}>
-                        <Image src={type.imageUrl} alt={title} fill style={{ objectFit: 'contain', padding: '0.85rem' }} />
+                  {catName}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Animal Types Grid */}
+      <div style={{ padding: '3rem 2rem', maxWidth: '1400px', margin: '0 auto' }}>
+        {filteredAnimalTypes.length === 0 ? (
+          <div style={{
+            textAlign: 'center',
+            padding: '4rem 2rem',
+            background: 'var(--background)',
+            borderRadius: '16px',
+            border: '1px solid var(--border)'
+          }}>
+            <PawPrint style={{ width: '64px', height: '64px', margin: '0 auto 1rem', opacity: 0.5, color: '#142346' }} />
+            <h3 style={{ fontSize: '1.5rem', color: 'var(--foreground)', marginBottom: '0.5rem' }}>
+              {isAr ? 'لا توجد نتائج' : 'No results found'}
+            </h3>
+          </div>
+        ) : (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+            gap: '2rem'
+          }}>
+            {filteredAnimalTypes.map((animal) => {
+              const animalName = isAr ? (animal.name_ar || animal.name) : animal.name;
+              const animalDesc = toPlainText(isAr ? (animal.description_ar || animal.description) : animal.description);
+
+              return (
+                <Link
+                  key={animal.id}
+                  href={`/products/livestock/by-animal-type/${animal.slug}` as any}
+                  style={{
+                    textDecoration: 'none',
+                    color: 'inherit',
+                    display: 'block'
+                  }}
+                >
+                  <div style={{
+                    background: 'var(--background)',
+                    borderRadius: '16px',
+                    overflow: 'hidden',
+                    border: '1px solid var(--border)',
+                    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column'
+                  }}>
+                    {/* Image */}
+                    <div style={{
+                      position: 'relative',
+                      height: '200px',
+                      background: 'white',
+                      overflow: 'hidden'
+                    }}>
+                      {animal.imageUrl ? (
+                        <Image
+                          src={animal.imageUrl}
+                          alt={animalName}
+                          fill
+                          style={{ objectFit: 'contain', padding: '1rem' }}
+                        />
+                      ) : (
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          height: '100%',
+                          background: 'linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)'
+                        }}>
+                          <PawPrint style={{ width: '64px', height: '64px', opacity: 0.4, color: '#142346' }} />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Content */}
+                    <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                      <h3 style={{
+                        fontSize: '1.25rem',
+                        fontWeight: '700',
+                        color: 'var(--foreground)',
+                        marginBottom: '0.75rem'
+                      }}>
+                        {animalName}
+                      </h3>
+                      {animalDesc && (
+                        <p style={{
+                          fontSize: '0.9rem',
+                          color: 'var(--muted-foreground)',
+                          lineHeight: 1.6,
+                          marginBottom: '1rem',
+                          flex: 1,
+                          display: '-webkit-box',
+                          WebkitLineClamp: 3,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden'
+                        }}>
+                          {animalDesc}
+                        </p>
+                      )}
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'flex-end',
+                        marginTop: 'auto'
+                      }}>
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                          color: '#142346',
+                          fontWeight: '600',
+                          fontSize: '0.9rem'
+                        }}>
+                          {isAr ? 'عرض الدليل' : 'View Guide'}
+                          <ArrowRight style={{ width: '16px', height: '16px' }} />
+                        </div>
                       </div>
-                    )}
-                    <div style={{ padding: '1rem' }}>
-                      <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: '#142346', marginBottom: '0.5rem' }}>{title}</h3>
-                      {desc && <p style={{ color: '#64748b', fontSize: '0.95rem', lineHeight: 1.6 }}>{desc}</p>}
                     </div>
                   </div>
                 </Link>
-              )
+              );
             })}
           </div>
-        </div>
-      </section>
+        )}
+      </div>
 
-      {/* Most Common Issues */}
-      <section style={{ padding: '4rem 1rem', backgroundColor: 'white' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <div style={{ marginBottom: '2rem' }}>
-            <h2 style={{ fontSize: 'clamp(1.5rem, 3vw, 2.25rem)', fontWeight: 800, color: '#142346', marginBottom: '0.5rem' }}>
-              {isAr ? 'المشكلات الشائعة' : 'Most Common Issues'}
-            </h2>
-            <div style={{ width: '60px', height: '4px', background: 'linear-gradient(90deg, #e9496c, #142346)', borderRadius: '2px' }} />
-          </div>
-
-          <div style={{ display: 'grid', gap: '2rem' }}>
-            {types.map(type => {
-              const title = isAr ? type.name_ar || type.name : type.name;
-              if (!type.issues.length) return null;
-              return (
-                <div key={type.id} style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', overflow: 'hidden' }}>
-                  <div style={{ padding: '1rem 1.25rem', background: 'white', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <span style={{ fontWeight: 800, color: '#142346' }}>{title}</span>
-                    <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>{isAr ? 'القضايا' : 'Issues'}</span>
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem', padding: '1.25rem' }}>
-                    {type.issues.map(issue => {
-                      const itTitle = isAr ? issue.title_ar || issue.title : issue.title;
-                      const itDesc = isAr ? issue.description_ar || issue.description : issue.description;
-                      return (
-                        <div key={issue.id} className="card" style={{ padding: '1rem' }}>
-                          <h4 style={{ fontWeight: 700, color: '#142346', marginBottom: '0.5rem' }}>{itTitle}</h4>
-                          {itDesc && <p style={{ color: '#64748b', fontSize: '0.95rem', lineHeight: 1.6 }}>{itDesc}</p>}
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+      {/* CTA Section */}
+      <div style={{
+        background: 'linear-gradient(135deg, #142346 0%, #1c2f5d 100%)',
+        padding: '4rem 2rem',
+        textAlign: 'center',
+        color: 'white'
+      }}>
+        <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+          <h2 style={{ fontSize: '2rem', fontWeight: '700', marginBottom: '1rem' }}>
+            {isAr ? 'هل تحتاج إلى برنامج مخصص؟' : 'Need a Custom Program?'}
+          </h2>
+          <p style={{ fontSize: '1.1rem', opacity: 0.95, marginBottom: '2rem' }}>
+            {isAr
+              ? 'تواصل مع خبرائنا للحصول على استشارة مجانية وبرنامج تغذية مخصص لثروتك الحيوانية'
+              : 'Contact our experts for a free consultation and customized nutrition plan for your livestock'}
+          </p>
+          <Link
+            href="/contact"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              padding: '1rem 2rem',
+              background: 'var(--background)',
+              color: '#142346',
+              borderRadius: '2rem',
+              fontWeight: '600',
+              textDecoration: 'none',
+              fontSize: '1rem'
+            }}
+          >
+            {isAr ? 'استشر خبير' : 'Consult an Expert'}
+          </Link>
         </div>
-      </section>
+      </div>
     </div>
   );
 }

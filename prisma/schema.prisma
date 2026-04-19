@@ -424,21 +424,30 @@ model Document {
 
 // Animal Types (Livestock)
 model AnimalType {
-  id             String        @id @default(cuid())
-  name           String
-  name_ar        String?
-  slug           String        @unique
-  description    String?       @db.Text
-  description_ar String?       @db.Text
-  imageUrl       String?
-  icon           String?
-  order          Int           @default(0)
-  isActive       Boolean       @default(true)
-  issues         AnimalIssue[]
-  tabs           AnimalTypeTab[]
-  products       Product[]
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  id               String        @id @default(cuid())
+  name             String
+  name_ar          String?
+  slug             String        @unique
+  category         String?
+  category_ar      String?
+  productionSeason_ar String?
+  description      String?       @db.Text
+  description_ar   String?       @db.Text
+  imageUrl         String?
+  icon             String?
+  pdfUrl           String?
+  pdfUrl_ar        String?
+  documentTitle    String?
+  documentTitle_ar String?
+  order            Int           @default(0)
+  isActive         Boolean       @default(true)
+  issues           AnimalIssue[]
+  tabs             AnimalTypeTab[]
+  products         Product[]
+  metaTitle        String?
+  metaTitle_ar     String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
 
   @@index([slug])
   @@index([isActive])
@@ -457,6 +466,7 @@ model AnimalIssue {
   isActive       Boolean    @default(true)
   animalTypeId   String
   animalType     AnimalType @relation(fields: [animalTypeId], references: [id], onDelete: Cascade)
+  recommendation Json?      // Recommended products for this issue
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
 

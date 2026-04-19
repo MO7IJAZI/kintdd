@@ -6,7 +6,9 @@ import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { createAnimalType, updateAnimalType } from "@/actions/animalTypeActions";
 import ImageUpload from "./ImageUpload";
+import FileUpload from "./FileUpload";
 import { generateSlug } from "@/lib/slugUtils";
+import StagesEditor from "./StagesEditor";
 
 const RichTextEditor = dynamic(() => import("./RichTextEditor"), { ssr: false });
 
@@ -18,26 +20,7 @@ interface IssueItem {
   description_ar?: string;
   order?: number;
   isActive?: boolean;
-}
-
-interface TabImageItem {
-  id?: string;
-  imageUrl: string;
-  title?: string;
-  title_ar?: string;
-  description?: string;
-  description_ar?: string;
-  order?: number;
-}
-
-interface TabItem {
-  id?: string;
-  title: string;
-  title_ar?: string;
-  description?: string;
-  description_ar?: string;
-  order?: number;
-  images: TabImageItem[];
+  recommendation?: any;
 }
 
 interface InitialData {
@@ -49,14 +32,23 @@ interface InitialData {
   description_ar?: string;
   imageUrl?: string;
   icon?: string;
+  pdfUrl?: string;
+  pdfUrl_ar?: string;
+  documentTitle?: string;
+  documentTitle_ar?: string;
+  category?: string;
+  category_ar?: string;
+  productionSeason_ar?: string;
+  metaTitle?: string;
+  metaTitle_ar?: string;
+  products?: any[];
   order?: number;
   issues?: IssueItem[];
-  tabs?: TabItem[];
 }
 
 import { useTranslations } from "next-intl";
 
-export default function AnimalTypeForm({ initialData }: { initialData?: InitialData }) {
+export default function AnimalTypeForm({ initialData, products = [] }: { initialData?: InitialData, products?: any[] }) {
   const t = useTranslations("AnimalTypeForm");
   const router = useRouter();
   const locale = useLocale();
@@ -69,11 +61,30 @@ export default function AnimalTypeForm({ initialData }: { initialData?: InitialD
   const [description, setDescription] = useState(initialData?.description || "");
   const [description_ar, setDescriptionAr] = useState(initialData?.description_ar || "");
   const [imageUrl, setImageUrl] = useState(initialData?.imageUrl || initialData?.icon || "");
+  const [pdfUrl, setPdfUrl] = useState(initialData?.pdfUrl || "");
+  const [pdfUrl_ar, setPdfUrlAr] = useState(initialData?.pdfUrl_ar || "");
+  const [documentTitle, setDocumentTitle] = useState(initialData?.documentTitle || "");
+  const [documentTitle_ar, setDocumentTitleAr] = useState(initialData?.documentTitle_ar || "");
+  const [category, setCategory] = useState(initialData?.category || "");
+  const [category_ar, setCategoryAr] = useState(initialData?.category_ar || "");
+  const [productionSeason_ar, setProductionSeasonAr] = useState(initialData?.productionSeason_ar || "");
+  const [metaTitle, setMetaTitle] = useState(initialData?.metaTitle || "");
+  const [metaTitle_ar, setMetaTitleAr] = useState(initialData?.metaTitle_ar || "");
+  const [selectedProducts, setSelectedProducts] = useState<string[]>(initialData?.products?.map(p => p.id) || []);
   const [order, setOrder] = useState(initialData?.order || 0);
-  const [issues, setIssues] = useState<IssueItem[]>(initialData?.issues || []);
-  const [tabs, setTabs] = useState<TabItem[]>(initialData?.tabs || []);
+  
+  // Map issues to generic "stages" structure used by StagesEditor
+  const initialStages = (initialData?.issues || []).map(i => ({
+    id: i.id,
+    name: i.title,
+    name_ar: i.title_ar || "",
+    description: i.description || "",
+    description_ar: i.description_ar || "",
+    products: i.recommendation?.products || []
+  }));
+  const [stages, setStages] = useState<any[]>(initialStages);
+  
   const [isPending, setIsPending] = useState(false);
-  const [openTab, setOpenTab] = useState<number | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleNameChange = (val: string) => {
@@ -97,40 +108,12 @@ export default function AnimalTypeForm({ initialData }: { initialData?: InitialD
     return Object.keys(newErrors).length === 0;
   };
 
-  // --- Issues Handlers ---
-  const addIssue = () => {
-    setIssues(prev => [...prev, { title: "", title_ar: "", description: "", description_ar: "", order: prev.length }]);
-  };
-
-  const updateIssue = (idx: number, patch: Partial<IssueItem>) => {
-    setIssues(prev => prev.map((it, i) => i === idx ? { ...it, ...patch } : it));
-  };
-
-  const removeIssue = (idx: number) => {
-    setIssues(prev => prev.filter((_, i) => i !== idx));
-  };
-
-  // --- Tabs Handlers ---
-  const addTab = () => setTabs(prev => [...prev, { title: "", order: prev.length, images: [] }]);
-  const updateTab = (tabIdx: number, patch: Partial<TabItem>) => setTabs(prev => prev.map((tab, i) => i === tabIdx ? { ...tab, ...patch } : tab));
-  const removeTab = (tabIdx: number) => setTabs(prev => prev.filter((_, i) => i !== tabIdx));
-
-  // --- Tab Images Handlers ---
-  const addImage = (tabIdx: number) => {
-    const newImage: TabImageItem = { imageUrl: "", order: tabs[tabIdx].images.length };
-    const newTabs = [...tabs];
-    newTabs[tabIdx].images.push(newImage);
-    setTabs(newTabs);
-  };
-  const updateImage = (tabIdx: number, imgIdx: number, patch: Partial<TabImageItem>) => {
-    const newTabs = [...tabs];
-    newTabs[tabIdx].images[imgIdx] = { ...newTabs[tabIdx].images[imgIdx], ...patch };
-    setTabs(newTabs);
-  };
-  const removeImage = (tabIdx: number, imgIdx: number) => {
-    const newTabs = [...tabs];
-    newTabs[tabIdx].images = newTabs[tabIdx].images.filter((_, i) => i !== imgIdx);
-    setTabs(newTabs);
+  const toggleProduct = (productId: string) => {
+      setSelectedProducts(prev => 
+          prev.includes(productId) 
+          ? prev.filter(id => id !== productId) 
+          : [...prev, productId]
+      );
   };
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -151,9 +134,27 @@ export default function AnimalTypeForm({ initialData }: { initialData?: InitialD
          description, 
          description_ar, 
          imageUrl, 
+         pdfUrl,
+         pdfUrl_ar,
+         documentTitle,
+         documentTitle_ar,
+         category,
+         category_ar,
+         productionSeason_ar,
+         metaTitle,
+         metaTitle_ar,
+         productIds: selectedProducts,
          order, 
-         issues, 
-         tabs 
+         issues: stages.map((s, idx) => ({
+           id: s.id,
+           title: s.name,
+           title_ar: s.name_ar,
+           description: s.description,
+           description_ar: s.description_ar,
+           order: idx,
+           isActive: true,
+           recommendation: { products: s.products }
+         })), 
        };
        if (initialData?.id) {
          await updateAnimalType(initialData.id, payload);
@@ -192,11 +193,45 @@ export default function AnimalTypeForm({ initialData }: { initialData?: InitialD
         </div>
       </div>
       <div className="form-group-grid">
-        {/* Slug hidden */}
-        <input type="hidden" name="slug" value={slug} />
         <div className="form-field">
-          <label>{t('Order')}</label>
+          <label>{t('Order') || 'Order'}</label>
           <input type="number" value={order} onChange={e => setOrder(parseInt(e.target.value || '0'))} className="input" />
+        </div>
+        <div className="form-field">
+            <label>{t('CategoryEn')}</label>
+            <input 
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="input"
+                placeholder="e.g. Poultry, Cattle"
+            />
+        </div>
+        <div className="form-field" dir="rtl">
+            <label>{t('CategoryAr')}</label>
+            <input 
+                value={category_ar}
+                onChange={(e) => setCategoryAr(e.target.value)}
+                className="input"
+                placeholder="مثال: الدواجن، المواشي"
+            />
+        </div>
+      </div>
+
+      <div className="form-group-grid">
+        <div className="form-field">
+            <label>{t('MetaTitleEn')}</label>
+            <input value={metaTitle} onChange={e => setMetaTitle(e.target.value)} className="input" placeholder="Meta title..." />
+        </div>
+        <div className="form-field" dir="rtl">
+            <label>{t('MetaTitleAr')}</label>
+            <input value={metaTitle_ar} onChange={e => setMetaTitleAr(e.target.value)} className="input" placeholder="عنوان الميتا..." />
+        </div>
+      </div>
+
+      <div className="form-group-grid">
+        <div className="form-field" dir="rtl">
+            <label>{t('ProductionSeason')}</label>
+            <input value={productionSeason_ar} onChange={e => setProductionSeasonAr(e.target.value)} className="input" placeholder="مثال: طوال العام" />
         </div>
       </div>
       <div className="form-field">
@@ -205,6 +240,30 @@ export default function AnimalTypeForm({ initialData }: { initialData?: InitialD
           value={imageUrl}
           onChange={setImageUrl}
         />
+      </div>
+
+      {/* PDF & Document Fields */}
+      <div className="form-group-grid" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
+        <FileUpload
+          label={`PDF (English)`}
+          value={pdfUrl}
+          onChange={setPdfUrl}
+        />
+        <FileUpload
+          label={`PDF (العربية)`}
+          value={pdfUrl_ar}
+          onChange={setPdfUrlAr}
+        />
+      </div>
+      <div className="form-group-grid">
+        <div className="form-field">
+          <label>{t('DocumentTitleEn')}</label>
+          <input value={documentTitle} onChange={e => setDocumentTitle(e.target.value)} className="input" placeholder="e.g. Poultry Nutrition Guide" />
+        </div>
+        <div className="form-field" dir="rtl">
+          <label>{t('DocumentTitleAr')}</label>
+          <input value={documentTitle_ar} onChange={e => setDocumentTitleAr(e.target.value)} className="input" placeholder="مثال: دليل تغذية الدواجن" />
+        </div>
       </div>
       <div className="form-group-grid">
         <div className="form-field">
@@ -221,112 +280,50 @@ export default function AnimalTypeForm({ initialData }: { initialData?: InitialD
         <h3 className="form-section-title">{t('MostCommonIssues')}</h3>
         <p className="form-section-description">{t('IssuesDescription')}</p>
 
-        <div className="issues-grid">
-          {issues.map((issue, idx) => (
-            <div key={idx} className="card issue-card">
-              <div className="form-group-grid">
-                <div className="form-field">
-                  <label>{t('TitleEN')}</label>
-                  <input value={issue.title} onChange={e => updateIssue(idx, { title: e.target.value })} className="input" required />
-                </div>
-                <div className="form-field">
-                  <label>{t('TitleAR')}</label>
-                  <input value={issue.title_ar || ''} onChange={e => updateIssue(idx, { title_ar: e.target.value })} className="input" dir="rtl" />
-                </div>
-              </div>
-              <div className="form-group-grid">
-                <div className="form-field">
-                  <label>{t('DescriptionEN')}</label>
-                  <textarea value={issue.description || ''} onChange={e => updateIssue(idx, { description: e.target.value })} rows={3} className="input" />
-                </div>
-                <div className="form-field">
-                  <label>{t('DescriptionAR')}</label>
-                  <textarea value={issue.description_ar || ''} onChange={e => updateIssue(idx, { description_ar: e.target.value })} rows={3} className="input" dir="rtl" />
-                </div>
-              </div>
-              <div className="issue-actions">
-                <label>{t('Order')}</label>
-                <input type="number" value={issue.order ?? idx} onChange={e => updateIssue(idx, { order: parseInt(e.target.value || '0') })} className="input issue-order-input" />
-                <label className="checkbox-label">{t('Active')}</label>
-                <input type="checkbox" checked={issue.isActive ?? true} onChange={e => updateIssue(idx, { isActive: e.target.checked })} />
-                <button type="button" onClick={() => removeIssue(idx)} className="btn btn-outline btn-danger">{t('RemoveIssue')}</button>
-              </div>
-            </div>
-          ))}
-          <button type="button" onClick={addIssue} className="btn btn-secondary">{t('AddIssue')}</button>
-        </div>
+        <StagesEditor 
+          initialData={stages}
+          products={products}
+          onChange={setStages}
+          labels={{
+            sectionTitle: t('MostCommonIssues'),
+            itemNameEn: t('IssueNameEn'),
+            itemNameAr: t('IssueNameAr'),
+            itemDescriptionEn: t('IssueDescriptionEn'),
+            itemDescriptionAr: t('IssueDescriptionAr'),
+            addItem: t('AddIssue'),
+            recommendedProducts: t('RecommendedProductsForIssue')
+          }}
+        />
       </div>
 
-      {/* --- Tabs Section --- */}
-      <div className="form-section">
-        <h3 className="form-section-title">{t('Tabs')}</h3>
-        <p className="form-section-description">{t('TabsDescription')}</p>
-        <div className="tabs-grid">
-          {tabs.map((tab, tabIdx) => (
-            <div key={tab.id || tabIdx} className="tab-card">
-              <div className="tab-header" onClick={() => setOpenTab(openTab === tabIdx ? null : tabIdx)}>
-                <h4>{t('Tab')} #{tabIdx + 1}: {tab.title || `(${t('NewTab')})`}</h4>
-                <div className="tab-toggle-icon" style={{ transform: openTab === tabIdx ? 'rotate(180deg)' : 'rotate(0deg)' }}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
-                </div>
-              </div>
-              {openTab === tabIdx && (
-                <div className="tab-content">
-                  <div className="form-group-grid">
-                    <div className="form-field"><label>{t('TitleEN')}</label><input value={tab.title} onChange={e => updateTab(tabIdx, { title: e.target.value })} className="input" required /></div>
-                    <div className="form-field"><label>{t('TitleAR')}</label><input value={tab.title_ar || ''} onChange={e => updateTab(tabIdx, { title_ar: e.target.value })} className="input" dir="rtl" /></div>
-                  </div>
-                  <div className="form-group-grid">
-                    <div className="form-field">
-                        <label>{t('DescriptionEN')}</label>
-                        <RichTextEditor 
-                            value={tab.description || ''} 
-                            onChange={val => updateTab(tabIdx, { description: val })} 
-                        />
-                    </div>
-                    <div className="form-field" dir="rtl">
-                        <label>{t('DescriptionAR')}</label>
-                        <RichTextEditor 
-                            value={tab.description_ar || ''} 
-                            onChange={val => updateTab(tabIdx, { description_ar: val })} 
-                            dir="rtl"
-                        />
-                    </div>
-                  </div>
-                  <div className="form-field"><label>{t('Order')}</label><input type="number" value={tab.order ?? tabIdx} onChange={e => updateTab(tabIdx, { order: parseInt(e.target.value || '0') })} className="input issue-order-input" /></div>
-                  
-                  {/* --- Images Slider Section --- */}
-                  <div className="form-section">
-                    <h5 className="form-section-title">{t('ImagesSlider')}</h5>
-                    {tab.images.map((image, imgIdx) => (
-                      <div key={image.id || imgIdx} className="card image-card">
-                        <ImageUpload label={t('Image')} value={image.imageUrl} onChange={val => updateImage(tabIdx, imgIdx, { imageUrl: val })} />
-                        <div className="form-group-grid">
-                          <div className="form-field"><label>{t('TitleEN')}</label><input value={image.title || ''} onChange={e => updateImage(tabIdx, imgIdx, { title: e.target.value })} className="input" /></div>
-                          <div className="form-field"><label>{t('TitleAR')}</label><input value={image.title_ar || ''} onChange={e => updateImage(tabIdx, imgIdx, { title_ar: e.target.value })} className="input" dir="rtl" /></div>
-                        </div>
-                        <div className="form-group-grid">
-                          <div className="form-field"><label>{t('DescriptionEN')}</label><textarea value={image.description || ''} onChange={e => updateImage(tabIdx, imgIdx, { description: e.target.value })} rows={2} className="input" /></div>
-                          <div className="form-field"><label>{t('DescriptionAR')}</label><textarea value={image.description_ar || ''} onChange={e => updateImage(tabIdx, imgIdx, { description_ar: e.target.value })} rows={2} className="input" dir="rtl" /></div>
-                        </div>
-                        <div className="issue-actions">
-                          <label>{t('Order')}</label>
-                          <input type="number" value={image.order ?? imgIdx} onChange={e => updateImage(tabIdx, imgIdx, { order: parseInt(e.target.value || '0') })} className="input issue-order-input" />
-                          <button type="button" onClick={() => removeImage(tabIdx, imgIdx)} className="btn btn-outline btn-danger">{t('RemoveImage')}</button>
-                        </div>
-                      </div>
-                    ))}
-                    <button type="button" onClick={() => addImage(tabIdx)} className="btn btn-secondary">{t('AddImage')}</button>
-                  </div>
-                  <button type="button" onClick={() => removeTab(tabIdx)} className="btn btn-outline btn-danger">{t('RemoveTab')}</button>
-                </div>
-              )}
-            </div>
-          ))}
-          <button type="button" onClick={addTab} className="btn btn-secondary">{t('AddTab')}</button>
-        </div>
+      <div style={{ marginBottom: '2.5rem' }}>
+          <label style={{ display: 'block', marginBottom: '1rem', fontWeight: '700', fontSize: '1.1rem' }}>
+            {t('GeneralRecommendedProducts')}
+          </label>
+          <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+              gap: '1rem',
+              maxHeight: '300px',
+              overflowY: 'auto',
+              padding: '1.5rem',
+              backgroundColor: '#f8fafc',
+              borderRadius: '0.75rem',
+              border: '1px solid var(--border)'
+          }}>
+              {products?.map(product => (
+                  <label key={product.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.9rem', cursor: 'pointer' }}>
+                      <input 
+                          type="checkbox" 
+                          checked={selectedProducts.includes(product.id)}
+                          onChange={() => toggleProduct(product.id)}
+                          style={{ width: '18px', height: '18px', accentColor: 'var(--primary)' }}
+                      />
+                      {isRtl && product.name_ar ? product.name_ar : product.name}
+                  </label>
+              ))}
+          </div>
       </div>
-
       <div className="form-actions">
         <button type="submit" className="btn btn-primary" disabled={isPending}>{initialData?.id ? t('UpdateButton') : t('CreateButton')}</button>
         <button type="button" className="btn btn-outline" onClick={() => router.back()}>{t('CancelButton')}</button>

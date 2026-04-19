@@ -28,25 +28,7 @@ export async function getAnimalType(id: string) {
 }
 
 
-interface TabImageItem {
-  id?: string;
-  imageUrl: string;
-  title?: string;
-  title_ar?: string;
-  description?: string;
-  description_ar?: string;
-  order?: number;
-}
 
-interface TabItem {
-  id?: string;
-  title: string;
-  title_ar?: string;
-  description?: string;
-  description_ar?: string;
-  order?: number;
-  images?: TabImageItem[];
-}
 
 export async function createAnimalType(data: {
   name: string;
@@ -56,10 +38,19 @@ export async function createAnimalType(data: {
   description_ar?: string;
   imageUrl?: string;
   icon?: string;
+  pdfUrl?: string;
+  pdfUrl_ar?: string;
+  documentTitle?: string;
+  documentTitle_ar?: string;
+  category?: string;
+  category_ar?: string;
+  productionSeason_ar?: string;
+  metaTitle?: string;
+  metaTitle_ar?: string;
+  productIds?: string[];
   order?: number;
   isActive?: boolean;
-  issues?: Array<{ title: string; title_ar?: string; description?: string; description_ar?: string; order?: number; isActive?: boolean }>;
-  tabs?: TabItem[];
+  issues?: Array<{ title: string; title_ar?: string; description?: string; description_ar?: string; order?: number; isActive?: boolean, recommendation?: any }>;
 }) {
   // Ensure slug is present and unique globally
   let finalSlug = data.slug;
@@ -84,8 +75,20 @@ export async function createAnimalType(data: {
       slug: finalSlug,
       description: data.description || null,
       description_ar: data.description_ar || null,
+      category: data.category || null,
+      category_ar: data.category_ar || null,
+      productionSeason_ar: data.productionSeason_ar || null,
+      metaTitle: data.metaTitle || null,
+      metaTitle_ar: data.metaTitle_ar || null,
+      products: {
+        connect: (data.productIds || []).map(id => ({ id }))
+      },
       imageUrl: data.imageUrl || null,
       icon: data.icon || null,
+      pdfUrl: data.pdfUrl || null,
+      pdfUrl_ar: data.pdfUrl_ar || null,
+      documentTitle: data.documentTitle || null,
+      documentTitle_ar: data.documentTitle_ar || null,
       order: data.order ?? 0,
       isActive: data.isActive ?? true,
       issues: {
@@ -95,26 +98,8 @@ export async function createAnimalType(data: {
           description: i.description || null,
           description_ar: i.description_ar || null,
           order: i.order ?? 0,
-          isActive: i.isActive ?? true
-        }))
-      },
-      tabs: {
-        create: (data.tabs || []).map(t => ({
-          title: t.title,
-          title_ar: t.title_ar || null,
-          description: t.description || null,
-          description_ar: t.description_ar || null,
-          order: t.order ?? 0,
-          images: {
-            create: (t.images || []).map(img => ({
-              imageUrl: img.imageUrl,
-              title: img.title || null,
-              title_ar: img.title_ar || null,
-              description: img.description || null,
-              description_ar: img.description_ar || null,
-              order: img.order ?? 0,
-            }))
-          }
+          isActive: i.isActive ?? true,
+          recommendation: i.recommendation ? i.recommendation : null
         }))
       }
     }
@@ -139,17 +124,25 @@ export async function updateAnimalType(id: string, data: {
   description_ar?: string;
   imageUrl?: string;
   icon?: string;
+  pdfUrl?: string;
+  pdfUrl_ar?: string;
+  documentTitle?: string;
+  documentTitle_ar?: string;
+  category?: string;
+  category_ar?: string;
+  productionSeason_ar?: string;
+  metaTitle?: string;
+  metaTitle_ar?: string;
+  productIds?: string[];
   order?: number;
   isActive?: boolean;
-  issues?: Array<{ id?: string; title: string; title_ar?: string; description?: string; description_ar?: string; order?: number; isActive?: boolean }>;
-  tabs?: TabItem[];
+  issues?: Array<{ id?: string; title: string; title_ar?: string; description?: string; description_ar?: string; order?: number; isActive?: boolean; recommendation?: any }>;
 }) {
   // Fetch current state including relations to compare
   const current = await prisma.animalType.findUnique({
     where: { id },
     include: {
       issues: true,
-      tabs: { include: { images: true } }
     }
   });
 
@@ -176,23 +169,6 @@ export async function updateAnimalType(id: string, data: {
   const incomingIssueIds = new Set((data.issues || []).map(i => i.id).filter((id): id is string => !!id));
   const issuesToDelete = [...existingIssueIds].filter(x => !incomingIssueIds.has(x));
 
-  // --- Tabs and Images ---
-  const existingTabs = current.tabs;
-  const existingTabIds = new Set(existingTabs.map(t => t.id));
-  const incomingTabIds = new Set((data.tabs || []).map(t => t.id).filter((id): id is string => !!id));
-  const tabsToDelete = [...existingTabIds].filter(x => !incomingTabIds.has(x));
-
-  let imagesToDelete: string[] = [];
-  existingTabs.forEach(existingTab => {
-    const incomingTab = (data.tabs || []).find(t => t.id === existingTab.id);
-    if (incomingTab) {
-      const existingImageIds = new Set(existingTab.images.map(img => img.id));
-      const incomingImageIds = new Set((incomingTab.images || []).map(img => img.id).filter((id): id is string => !!id));
-      const tabImagesToDelete = [...existingImageIds].filter(x => !incomingImageIds.has(x));
-      imagesToDelete.push(...tabImagesToDelete);
-    }
-  });
-
   // Perform transaction
   const result = await prisma.$transaction([
     // 1. Update the base AnimalType
@@ -204,64 +180,32 @@ export async function updateAnimalType(id: string, data: {
         slug: finalSlug,
         description: data.description,
         description_ar: data.description_ar,
+        category: data.category,
+        category_ar: data.category_ar,
+        productionSeason_ar: data.productionSeason_ar,
+        metaTitle: data.metaTitle,
+        metaTitle_ar: data.metaTitle_ar,
+        products: data.productIds ? {
+          set: data.productIds.map(id => ({ id }))
+        } : undefined,
         imageUrl: data.imageUrl,
         icon: data.icon,
+        pdfUrl: data.pdfUrl !== undefined ? (data.pdfUrl || null) : undefined,
+        pdfUrl_ar: data.pdfUrl_ar !== undefined ? (data.pdfUrl_ar || null) : undefined,
+        documentTitle: data.documentTitle !== undefined ? (data.documentTitle || null) : undefined,
+        documentTitle_ar: data.documentTitle_ar !== undefined ? (data.documentTitle_ar || null) : undefined,
         order: data.order,
         isActive: data.isActive
       }
     }),
 
-    // 2. Delete issues, tabs, and images that were removed
+    // 2. Delete issues that were removed
     ...issuesToDelete.map(issueId => prisma.animalIssue.delete({ where: { id: issueId } })),
-    ...imagesToDelete.map(imgId => prisma.animalTypeTabImage.delete({ where: { id: imgId }})),
-    ...tabsToDelete.map(tabId => prisma.animalTypeTab.delete({ where: { id: tabId } })),
 
-    // 3. Upsert issues
     ...(data.issues || []).map(i => i.id
-      ? prisma.animalIssue.update({ where: { id: i.id }, data: { title: i.title, title_ar: i.title_ar, description: i.description, description_ar: i.description_ar, order: i.order, isActive: i.isActive } })
-      : prisma.animalIssue.create({ data: { title: i.title, title_ar: i.title_ar, description: i.description, description_ar: i.description_ar, order: i.order, isActive: i.isActive, animalTypeId: id } })
+      ? prisma.animalIssue.update({ where: { id: i.id }, data: { title: i.title, title_ar: i.title_ar, description: i.description, description_ar: i.description_ar, order: i.order, isActive: i.isActive, recommendation: i.recommendation ? i.recommendation : null } })
+      : prisma.animalIssue.create({ data: { title: i.title, title_ar: i.title_ar, description: i.description, description_ar: i.description_ar, order: i.order, isActive: i.isActive, recommendation: i.recommendation ? i.recommendation : null, animalTypeId: id } })
     ),
-
-    // 4. Upsert tabs and their images
-    ...(data.tabs || []).map((t: TabItem) => {
-      const tabData = {
-        title: t.title,
-        title_ar: t.title_ar,
-        description: t.description,
-        description_ar: t.description_ar,
-        order: t.order,
-      };
-
-      if (t.id) {
-        // Update existing tab and its images
-        return prisma.animalTypeTab.update({
-          where: { id: t.id },
-          data: {
-            ...tabData,
-            images: {
-              upsert: (t.images || []).map((image: TabImageItem) => ({
-                where: { id: image.id || '' },
-                update: { imageUrl: image.imageUrl, title: image.title, title_ar: image.title_ar, description: image.description, description_ar: image.description_ar, order: image.order },
-                create: { imageUrl: image.imageUrl, title: image.title, title_ar: image.title_ar, description: image.description, description_ar: image.description_ar, order: image.order },
-              })) 
-            }
-          }
-        });
-      } else {
-        // Create new tab and its images
-        return prisma.animalTypeTab.create({
-          data: {
-            ...tabData,
-            animalTypeId: id,
-            images: {
-              create: (t.images || []).map((image: TabImageItem) => ({
-                imageUrl: image.imageUrl, title: image.title, title_ar: image.title_ar, description: image.description, description_ar: image.description_ar, order: image.order
-              }))
-            }
-          }
-        });
-      }
-    })
   ]);
 
   revalidatePath("/admin/animal-types");
@@ -277,4 +221,15 @@ export async function listAnimalIssues(animalTypeId: string) {
     where: { animalTypeId, isActive: true },
     orderBy: { order: 'asc' }
   });
+}
+
+export async function deleteAnimalType(id: string) {
+  await prisma.animalType.delete({
+    where: { id }
+  });
+  
+  revalidatePath("/admin/animal-types");
+  revalidatePath("/products");
+  revalidatePath("/ar/products");
+  revalidatePath("/en/products");
 }

@@ -1,4 +1,5 @@
 import { getAnimalType } from "@/actions/animalTypeActions";
+import { getProducts } from "@/actions/productActions";
 import AnimalTypeForm from "@/components/admin/AnimalTypeForm";
 import { notFound } from "next/navigation";
 
@@ -11,6 +12,8 @@ export default async function EditAnimalTypePage({
   const item = await getAnimalType(id);
   if (!item) notFound();
 
+  const products = await getProducts();
+
   return (
     <div className="admin-dashboard">
       <div className="page-header">
@@ -20,7 +23,7 @@ export default async function EditAnimalTypePage({
         </div>
       </div>
       <div className="card">
-        <AnimalTypeForm initialData={item as any} />
+        <AnimalTypeForm initialData={item as any} products={products} />
       </div>
     </div>
   );

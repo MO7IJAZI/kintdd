@@ -15,14 +15,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     const isAr = locale === 'ar';
     const animal = await prisma.animalType.findUnique({
       where: { slug },
-      select: { name: true, name_ar: true, description: true, description_ar: true, metaTitle: true, metaTitle_ar: true }
+      select: { name: true, name_ar: true, description: true, description_ar: true }
     });
     if (!animal) return {};
     const name = isAr && animal.name_ar ? animal.name_ar : animal.name;
     const description = isAr && animal.description_ar ? animal.description_ar : animal.description;
-    const metaTitle = isAr && animal.metaTitle_ar ? animal.metaTitle_ar : animal.metaTitle;
     return {
-      title: metaTitle || `${name} | KINT`,
+      title: `${name} | KINT`,
       description: description?.substring(0, 160),
     };
   } catch {
@@ -90,7 +89,7 @@ export default async function AnimalDetail({ params }: { params: Promise<{ slug:
         <div className="container-technical" style={{ paddingInline: '1.5rem' }}>
           <nav style={{ marginBottom: '1.5rem', fontSize: '0.8rem', color: '#999', fontWeight: 700, display: 'flex', gap: '0.5rem' }}>
             <Link href={`/` as any} style={{ color: '#999' }}>{tNav('home').toUpperCase()}</Link> /
-            <Link href={`/products/livestock/by-animal-type` as any} style={{ color: '#999' }}> {isAr ? 'أدلة الثروة الحيوانية' : 'ANIMAL GUIDES'}</Link> /
+            <Link href={`/products-for-animals` as any} style={{ color: '#999' }}> {isAr ? 'أدلة الثروة الحيوانية' : 'ANIMAL GUIDES'}</Link> /
             <span style={{ color: '#142346' }}> {name.toUpperCase()}</span>
           </nav>
           <h1 style={{
@@ -121,20 +120,6 @@ export default async function AnimalDetail({ params }: { params: Promise<{ slug:
           )}
 
           <div style={{ maxWidth: '1120px', margin: '0 auto' }}>
-            {/* Tags / Badges */}
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', alignItems: 'center', marginBottom: '1.25rem' }}>
-                {(animal.category || animal.category_ar) && (
-                    <span style={{ padding: '0.4rem 0.8rem', backgroundColor: '#f1f5f9', color: '#475569', borderRadius: '0.5rem', fontSize: '0.75rem', fontWeight: 800 }}>
-                        {isAr && animal.category_ar ? animal.category_ar : animal.category}
-                    </span>
-                )}
-                {isAr && animal.productionSeason_ar && (
-                    <span style={{ padding: '0.4rem 0.8rem', backgroundColor: '#fff7ed', color: '#ea580c', borderRadius: '0.5rem', fontSize: '0.75rem', fontWeight: 800 }}>
-                        {animal.productionSeason_ar}
-                    </span>
-                )}
-            </div>
-
             {/* PDF Attachment */}
             {normalizedPdfUrl && (
               <div style={{
@@ -287,17 +272,17 @@ export default async function AnimalDetail({ params }: { params: Promise<{ slug:
                     const safeIssueDesc = stripScripts(issueDesc);
 
                     return (
-                      <div key={issue.id} className="card" dir={isAr ? 'rtl' : 'ltr'} style={{
+                      <div key={issue.id} className="card" style={{
                         display: 'grid',
                         gridTemplateColumns: '220px 1fr',
                         overflow: 'hidden',
-                        border: '1px solid #eee'
+                        border: '1px solid #eee',
+                        direction: 'ltr'
                       }}>
                         <div style={{
                           backgroundColor: '#f8fafc',
                           padding: '2rem',
-                          borderRight: isAr ? 'none' : '1px solid #eee',
-                          borderLeft: isAr ? '1px solid #eee' : 'none',
+                          borderRight: '1px solid #eee',
                           display: 'flex',
                           flexDirection: 'column',
                           justifyContent: 'center'

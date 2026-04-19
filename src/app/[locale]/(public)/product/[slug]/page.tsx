@@ -7,6 +7,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getTranslations } from 'next-intl/server';
 import { Metadata } from "next";
+import { Download, Eye } from 'lucide-react';
 
 export const revalidate = 300;
 
@@ -414,17 +415,16 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                                                             display: 'flex',
                                                             alignItems: 'center',
                                                             justifyContent: 'center',
-                                                            borderRadius: '0.75rem',
-                                                            backgroundColor: '#f1f5f9',
+                                                            borderRadius: '0.55rem',
+                                                            backgroundColor: theme.light,
                                                             color: theme.primary,
-                                                            border: `1.5px solid ${theme.primary}2a`,
+                                                            border: `1.5px solid ${theme.primary}38`,
                                                             textDecoration: 'none',
                                                             transition: 'all 0.2s ease',
                                                             flexShrink: 0
                                                         }}
-                                                        className="hover-card"
                                                     >
-                                                        <span style={{ fontSize: '1.1rem' }}>⬇️</span>
+                                                        <Download size={18} strokeWidth={2.2} />
                                                     </a>
 
                                                     {/* View — wide rectangle */}
@@ -434,24 +434,23 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                                                             flex: 1,
                                                             display: 'flex',
                                                             alignItems: 'center',
-                                                            gap: '0.75rem',
-                                                            padding: '0 1.25rem',
+                                                            justifyContent: 'center',
+                                                            gap: '0.45rem',
                                                             height: '46px',
-                                                            borderRadius: '0.75rem',
+                                                            borderRadius: '0.55rem',
                                                             backgroundColor: theme.primary,
                                                             color: 'white',
                                                             fontWeight: 700,
-                                                            fontSize: '0.85rem',
+                                                            fontSize: '0.93rem',
                                                             textDecoration: 'none',
-                                                            transition: 'all 0.2s ease',
-                                                            boxShadow: `0 4px 12px ${theme.primary}2a`
+                                                            transition: 'background-color 0.2s, transform 0.15s',
+                                                            letterSpacing: '0.01em',
                                                         }}
-                                                        className="hover-card"
                                                     >
-                                                        <span style={{ opacity: 0.9 }}>{type === 'SDS' ? '📄' : type === 'Label' ? '🏷️' : '📜'}</span>
+                                                        <Eye size={16} strokeWidth={2.2} />
                                                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.2 }}>
                                                             <span style={{ fontSize: '0.7rem', opacity: 0.8, fontWeight: 500 }}>{type.toUpperCase()}</span>
-                                                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '180px' }}>{title.toUpperCase()}</span>
+                                                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '150px' }}>{title}</span>
                                                         </div>
                                                     </a>
                                                 </div>

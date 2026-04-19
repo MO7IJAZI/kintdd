@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { stripScripts } from "@/lib/sanitizeHtml";
 import { Metadata } from "next";
+import { Download, Eye, FileDown } from "lucide-react";
 
 export const revalidate = 300;
 
@@ -268,16 +269,16 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
                                         <div style={{
                                             width: '46px',
                                             height: '46px',
-                                            borderRadius: '0.75rem',
-                                            backgroundColor: 'white',
+                                            borderRadius: '0.875rem',
+                                            backgroundColor: '#dde3f0',
                                             border: '1px solid #c7d2fe',
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'center',
-                                            fontSize: '1.2rem',
-                                            flexShrink: 0
+                                            flexShrink: 0,
+                                            color: '#142346'
                                         }}>
-                                            📄
+                                            <FileDown size={22} strokeWidth={2.2} />
                                         </div>
                                         <div style={{ minWidth: 0 }}>
                                             <div style={{ fontSize: '0.72rem', fontWeight: 800, color: '#64748b', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
@@ -288,47 +289,53 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
                                             </div>
                                         </div>
                                     </div>
-                                    <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', flexShrink: 0 }}>
-                                        <a
-                                            href={`/${locale}/catalogs/viewer?source=${encodeURIComponent(normalizedPdfUrl)}&title=${encodeURIComponent(name)}`}
-                                            style={{
-                                                padding: '0.65rem 1rem',
-                                                backgroundColor: '#1d4ed8',
-                                                color: 'white',
-                                                borderRadius: '0.65rem',
-                                                fontSize: '0.86rem',
-                                                fontWeight: 800,
-                                                textDecoration: 'none',
-                                                border: '1px solid #1e40af',
-                                                display: 'inline-flex',
-                                                alignItems: 'center',
-                                                gap: '0.45rem',
-                                                whiteSpace: 'nowrap',
-                                                flexShrink: 0
-                                            }}
-                                        >
-                                            👁 {isRtl ? 'عرض المستند' : 'Open Document'}
-                                        </a>
+                                    <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', flexShrink: 0, alignItems: 'stretch' }}>
+                                        {/* Download — small square */}
                                         <a
                                             href={pdfPreviewUrl}
                                             download
+                                            title={t('downloadPdf')}
                                             style={{
-                                                padding: '0.65rem 1rem',
-                                                backgroundColor: 'white',
-                                                color: '#1e293b',
-                                                borderRadius: '0.65rem',
-                                                fontSize: '0.86rem',
-                                                fontWeight: 800,
-                                                textDecoration: 'none',
-                                                border: '1px solid #cbd5e1',
-                                                display: 'inline-flex',
+                                                width: '46px',
+                                                minWidth: '46px',
+                                                height: '46px',
+                                                display: 'flex',
                                                 alignItems: 'center',
-                                                gap: '0.45rem',
-                                                whiteSpace: 'nowrap',
-                                                flexShrink: 0
+                                                justifyContent: 'center',
+                                                borderRadius: '0.55rem',
+                                                backgroundColor: '#e8ecf5',
+                                                color: '#142346',
+                                                border: '1.5px solid #142346' + '38',
+                                                textDecoration: 'none',
+                                                transition: 'background-color 0.2s, color 0.2s',
+                                                flexShrink: 0,
                                             }}
                                         >
-                                            ⬇ {t('downloadPdf')}
+                                            <Download size={18} strokeWidth={2.2} />
+                                        </a>
+                                        {/* View — wide rectangle */}
+                                        <a
+                                            href={`/${locale}/catalogs/viewer?source=${encodeURIComponent(normalizedPdfUrl)}&title=${encodeURIComponent(name)}`}
+                                            style={{
+                                                flex: 1,
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                gap: '0.45rem',
+                                                height: '46px',
+                                                padding: '0 1rem',
+                                                borderRadius: '0.55rem',
+                                                backgroundColor: '#142346',
+                                                color: '#ffffff',
+                                                fontWeight: 700,
+                                                fontSize: '0.93rem',
+                                                textDecoration: 'none',
+                                                transition: 'background-color 0.2s, transform 0.15s',
+                                                whiteSpace: 'nowrap',
+                                            }}
+                                        >
+                                            <Eye size={16} strokeWidth={2.2} />
+                                            {isRtl ? 'عرض المستند' : 'Open Document'}
                                         </a>
                                     </div>
                                 </div>
@@ -359,11 +366,12 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
                                         fontSize: '1.2rem',
                                         lineHeight: '1.9',
                                         color: '#0f172a',
-                                        [isRtl ? 'paddingRight' : 'paddingLeft']: '1.5rem',
-                                        [isRtl ? 'borderRight' : 'borderLeft']: '3px solid var(--primary)',
+                                        paddingRight: isRtl ? '1.5rem' : '1.25rem',
+                                        paddingLeft: isRtl ? '1.25rem' : '1.5rem',
+                                        borderRight: isRtl ? '3px solid var(--primary)' : 'none',
+                                        borderLeft: isRtl ? 'none' : '3px solid var(--primary)',
                                         paddingTop: '1.25rem',
-                                        paddingBottom: '1.25rem',
-                                        [isRtl ? 'paddingLeft' : 'paddingRight']: '1.25rem'
+                                        paddingBottom: '1.25rem'
                                     }}
                                     dangerouslySetInnerHTML={{ __html: safeDescription }}
                                 />
@@ -395,27 +403,26 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
                                         const safeStageDesc = stripScripts(stageDesc);
 
                                         return (
-                                            <div key={stage.id} className="card" style={{
+                                            <div key={stage.id} className="card" dir={isRtl ? 'rtl' : 'ltr'} style={{
                                                 display: 'grid',
-                                                gridTemplateColumns: isRtl ? '1fr 220px' : '220px 1fr',
+                                                gridTemplateColumns: '220px 1fr',
                                                 overflow: 'hidden',
                                                 border: '1px solid #eee'
                                             }}>
-                                                {!isRtl && (
-                                                    <div style={{
-                                                        backgroundColor: '#f8fafc',
-                                                        padding: '2rem',
-                                                        borderRight: '1px solid #eee',
-                                                        display: 'flex',
-                                                        flexDirection: 'column',
-                                                        justifyContent: 'center'
-                                                    }}>
-                                                        <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', opacity: 0.7 }}>{t('developmentPhase')}</span>
-                                                        <h4 style={{ fontSize: '1.15rem', fontWeight: 900, marginTop: '0.5rem', color: 'var(--foreground)' }}>{stageName.toUpperCase()}</h4>
-                                                    </div>
-                                                )}
+                                                <div style={{
+                                                    backgroundColor: '#f8fafc',
+                                                    padding: '2rem',
+                                                    borderRight: isRtl ? 'none' : '1px solid #eee',
+                                                    borderLeft: isRtl ? '1px solid #eee' : 'none',
+                                                    display: 'flex',
+                                                    flexDirection: 'column',
+                                                    justifyContent: 'center'
+                                                }}>
+                                                    <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', opacity: 0.7 }}>{t('developmentPhase')}</span>
+                                                    <h4 style={{ fontSize: '1.15rem', fontWeight: 900, marginTop: '0.5rem', color: 'var(--foreground)', direction: isRtl ? 'rtl' : 'ltr' }}>{stageName.toUpperCase()}</h4>
+                                                </div>
 
-                                                <div style={{ padding: '2rem', backgroundColor: 'white' }}>
+                                                <div style={{ padding: '2rem', backgroundColor: 'white', direction: isRtl ? 'rtl' : 'ltr' }}>
                                                     <div style={{ color: '#666', fontSize: '0.95rem', lineHeight: '1.7' }} dangerouslySetInnerHTML={{ __html: safeStageDesc }} />
 
                                                     {/* In a real app, recommendations would be many-to-many here too */}
@@ -457,20 +464,6 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
                                                         })()}
                                                     </div>
                                                 </div>
-
-                                                {isRtl && (
-                                                    <div style={{
-                                                        backgroundColor: '#f8fafc',
-                                                        padding: '2rem',
-                                                        borderLeft: '1px solid #eee',
-                                                        display: 'flex',
-                                                        flexDirection: 'column',
-                                                        justifyContent: 'center'
-                                                    }}>
-                                                        <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', opacity: 0.7 }}>{t('developmentPhase')}</span>
-                                                        <h4 style={{ fontSize: '1.15rem', fontWeight: 900, marginTop: '0.5rem', color: 'var(--foreground)' }}>{stageName.toUpperCase()}</h4>
-                                                    </div>
-                                                )}
                                             </div>
                                         );
                                     })}

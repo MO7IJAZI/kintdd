@@ -3,6 +3,7 @@
 import React from 'react';
 import { Link } from "@/navigation";
 import { useTranslations } from 'next-intl';
+import { deleteAnimalType } from "@/actions/animalTypeActions";
 
 interface AnimalType {
   id: string;
@@ -16,16 +17,29 @@ interface AnimalType {
 
 export default function AnimalTypesAdminPage() {
   const t = useTranslations('Product');
+  const tCommon = useTranslations('AdminCommon');
   const [items, setItems] = React.useState<AnimalType[]>([]);
 
+  const fetchData = async () => {
+    const response = await fetch('/api/animal-types');
+    const data = await response.json();
+    setItems(data);
+  };
+
   React.useEffect(() => {
-    async function fetchData() {
-      const response = await fetch('/api/animal-types');
-      const data = await response.json();
-      setItems(data);
-    }
     fetchData();
   }, []);
+
+  const handleDelete = async (id: string) => {
+    if (window.confirm(tCommon('confirmDelete') || "Are you sure you want to delete this?")) {
+      try {
+        await deleteAnimalType(id);
+        fetchData();
+      } catch (error) {
+        console.error("Failed to delete", error);
+      }
+    }
+  };
 
   return (
     <div className="admin-dashboard">
@@ -52,6 +66,9 @@ export default function AnimalTypesAdminPage() {
               <div>{(item as any)._count?.issues ?? 0}</div>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <Link href={{ pathname: '/admin/animal-types/[id]', params: { id: item.id } } as any} className="btn btn-outline">{t('Edit')}</Link>
+                <button onClick={() => handleDelete(item.id)} className="btn btn-outline btn-danger" style={{ cursor: 'pointer' }}>
+                  {tCommon('delete')}
+                </button>
               </div>
             </div>
           ))}
