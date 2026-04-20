@@ -460,9 +460,9 @@ export default function PdfCatalogViewer({ source, title, texts, direction = "lt
     if (viewMode === "spread" && flipRef.current) {
       flipRef.current.pageFlip().flipPrev();
     } else {
-      goToPage(currentPage); // 0-indexed; currentPage = prev page number
+      goToPage(displayPage - 1);
     }
-  }, [goToPage, currentPage, viewMode]);
+  }, [goToPage, displayPage, viewMode]);
 
   const goNext = useCallback(() => {
     // scaleX(-1) already mirrors the visual direction for RTL.
@@ -470,9 +470,9 @@ export default function PdfCatalogViewer({ source, title, texts, direction = "lt
     if (viewMode === "spread" && flipRef.current) {
       flipRef.current.pageFlip().flipNext();
     } else {
-      goToPage(currentPage + 2); // 0-indexed; +2 = next page number
+      goToPage(displayPage + 1);
     }
-  }, [goToPage, currentPage, viewMode]);
+  }, [goToPage, displayPage, viewMode]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -744,20 +744,22 @@ export default function PdfCatalogViewer({ source, title, texts, direction = "lt
       {/* Floating Navigation Arrows (Desktop) */}
       {!isLoadingDoc && !hasError && (
         <>
-          {/* Left arrow = prev page (scaleX-1 makes this visually correct for RTL too) */}
+          {/* Left arrow - switch behavior for RTL */}
           <button 
-            onClick={goPrev} 
-            disabled={!canGoPrev}
+            onClick={direction === "rtl" ? goNext : goPrev} 
+            disabled={direction === "rtl" ? !canGoNext : !canGoPrev}
             className={`absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-black/20 p-3 text-white backdrop-blur-sm transition-all hover:bg-black/40 disabled:opacity-0 ${showControls ? "opacity-100" : "opacity-0"}`}
           >
-            <ChevronLeft size={32} />
+            {direction === "rtl" ? <ChevronRight size={32} /> : <ChevronLeft size={32} />}
           </button>
+          
+          {/* Right arrow - switch behavior for RTL */}
           <button 
-            onClick={goNext} 
-            disabled={!canGoNext}
+            onClick={direction === "rtl" ? goPrev : goNext} 
+            disabled={direction === "rtl" ? !canGoPrev : !canGoNext}
             className={`absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-black/20 p-3 text-white backdrop-blur-sm transition-all hover:bg-black/40 disabled:opacity-0 ${showControls ? "opacity-100" : "opacity-0"}`}
           >
-            <ChevronRight size={32} />
+            {direction === "rtl" ? <ChevronLeft size={32} /> : <ChevronRight size={32} />}
           </button>
         </>
       )}
