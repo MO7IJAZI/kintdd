@@ -144,6 +144,7 @@ export default function PdfCatalogViewer({ source, title, texts, direction = "lt
   const [pageAspectRatio, setPageAspectRatio] = useState(0.707); // Default A4 aspect ratio
   const [isCoverOpen, setIsCoverOpen] = useState(false); // Track if cover has been flipped
   const [isAnimatingOpen, setIsAnimatingOpen] = useState(false); // Track opening animation
+  const [isLastPage, setIsLastPage] = useState(false); // Track if we're on last page
 
   const addDiagnostic = useCallback((message: string) => {
     setDiagnostics((prev) => (prev.includes(message) ? prev : [...prev, message]));
@@ -258,6 +259,7 @@ export default function PdfCatalogViewer({ source, title, texts, direction = "lt
     setPdfDoc(null);
     setNumPages(0);
     setCurrentPage(0);
+    setIsLastPage(false);
 
     const load = async () => {
       try {
@@ -570,7 +572,7 @@ export default function PdfCatalogViewer({ source, title, texts, direction = "lt
               <div
                 style={{
                   transition: 'transform 700ms cubic-bezier(0.4, 0, 0.2, 1)',
-                  transform: (!isCoverOpen && !isAnimatingOpen)
+                  transform: (!isCoverOpen && !isAnimatingOpen && !isLastPage)
                     ? (direction === 'rtl' ? 'translateX(25%)' : 'translateX(-25%)')
                     : 'translateX(0%)',
                   willChange: 'transform',
@@ -626,6 +628,10 @@ export default function PdfCatalogViewer({ source, title, texts, direction = "lt
                     // Convert flipbook index to 0-based page index for UI
                     const pdfPage = flipIndexToPage(flipIndex);
                     setCurrentPage(pdfPage - 1);
+                    
+                    // Check if we are on last page
+                    setIsLastPage(flipIndex >= numPages - 1);
+                    
                     if (!isCoverOpen && flipIndex > 0) {
                       setIsAnimatingOpen(true);
                       setTimeout(() => {
