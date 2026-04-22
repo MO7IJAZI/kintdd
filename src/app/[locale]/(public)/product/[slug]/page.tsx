@@ -429,7 +429,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
                                                     {/* View — wide rectangle */}
                                                     <a
-                                                        href={`/${locale}/catalogs/viewer?source=${encodeURIComponent(fileUrl)}&title=${encodeURIComponent(title)}`}
+                                                        href={`/${locale}/catalogs/viewer?source=${encodeURIComponent(fileUrl)}&title=${encodeURIComponent(title)}&mode=single`}
                                                         style={{
                                                             flex: 1,
                                                             display: 'flex',

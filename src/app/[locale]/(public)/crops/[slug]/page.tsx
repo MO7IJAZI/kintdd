@@ -315,7 +315,7 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
                                         </a>
                                         {/* View — wide rectangle */}
                                         <a
-                                            href={`/${locale}/catalogs/viewer?source=${encodeURIComponent(normalizedPdfUrl)}&title=${encodeURIComponent(name)}`}
+                                            href={`/${locale}/catalogs/viewer?source=${encodeURIComponent(normalizedPdfUrl)}&title=${encodeURIComponent(name)}&mode=single`}
                                             style={{
                                                 flex: 1,
                                                 display: 'flex',

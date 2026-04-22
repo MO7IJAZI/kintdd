@@ -79,6 +79,7 @@ type PdfCatalogViewerProps = {
   title?: string;
   texts: CatalogPdfViewerTexts;
   direction?: "ltr" | "rtl";
+  initialViewMode?: "single" | "spread";
 };
 
 type PdfOutlineEntry = {
@@ -122,7 +123,7 @@ async function renderPageToCanvas(page: PDFPageProxy, canvas: HTMLCanvasElement,
   }).promise;
 }
 
-export default function PdfCatalogViewer({ source, title, texts, direction = "ltr" }: PdfCatalogViewerProps) {
+export default function PdfCatalogViewer({ source, title, texts, direction = "ltr", initialViewMode = "spread" }: PdfCatalogViewerProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const flipRef = useRef<any>(null);
   const pageCanvasRefs = useRef<Map<number, HTMLCanvasElement>>(new Map());
@@ -137,7 +138,7 @@ export default function PdfCatalogViewer({ source, title, texts, direction = "lt
   const [currentPage, setCurrentPage] = useState(0); // 0-indexed for flipbook
   const [zoom, setZoom] = useState(1);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [viewMode, setViewMode] = useState<"single" | "spread">("spread");
+  const [viewMode, setViewMode] = useState<"single" | "spread">(initialViewMode);
   const [showControls, setShowControls] = useState(true);
   const [useNativeViewer, setUseNativeViewer] = useState(false);
   const [bookDimensions, setBookDimensions] = useState({ width: 400, height: 600 });
@@ -217,8 +218,6 @@ export default function PdfCatalogViewer({ source, title, texts, direction = "lt
     const handleResize = () => {
       if (window.innerWidth < 768) {
         setViewMode("single");
-      } else {
-        setViewMode("spread");
       }
     };
     
@@ -756,7 +755,7 @@ export default function PdfCatalogViewer({ source, title, texts, direction = "lt
             disabled={direction === "rtl" ? !canGoNext : !canGoPrev}
             className={`absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-black/20 p-3 text-white backdrop-blur-sm transition-all hover:bg-black/40 disabled:opacity-0 ${showControls ? "opacity-100" : "opacity-0"}`}
           >
-            {direction === "rtl" ? <ChevronRight size={32} /> : <ChevronLeft size={32} />}
+            <ChevronLeft size={32} />
           </button>
           
           {/* Right arrow - switch behavior for RTL */}
@@ -765,7 +764,7 @@ export default function PdfCatalogViewer({ source, title, texts, direction = "lt
             disabled={direction === "rtl" ? !canGoPrev : !canGoNext}
             className={`absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-black/20 p-3 text-white backdrop-blur-sm transition-all hover:bg-black/40 disabled:opacity-0 ${showControls ? "opacity-100" : "opacity-0"}`}
           >
-            {direction === "rtl" ? <ChevronLeft size={32} /> : <ChevronRight size={32} />}
+            <ChevronRight size={32} />
           </button>
         </>
       )}

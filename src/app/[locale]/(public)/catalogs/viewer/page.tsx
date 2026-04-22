@@ -16,7 +16,7 @@ export default async function CatalogViewerPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ id?: string; source?: string; title?: string; title_ar?: string }>;
+  searchParams: Promise<{ id?: string; source?: string; title?: string; title_ar?: string; mode?: "single" | "spread" }>;
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "Catalogs" });
@@ -24,6 +24,7 @@ export default async function CatalogViewerPage({
   
   let source = "";
   let title = "";
+  const initialViewMode = sp.mode || "spread";
 
   const isRtl = locale === "ar";
   const direction = isRtl ? "rtl" : "ltr";
@@ -67,6 +68,7 @@ export default async function CatalogViewerPage({
           source={source}
           title={title}
           direction={direction}
+          initialViewMode={initialViewMode}
           texts={{
             share: t("viewer.share"),
             download: t("viewer.download"),
