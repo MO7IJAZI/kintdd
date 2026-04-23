@@ -52,9 +52,10 @@ export default function RichTextEditor({
       .catch(console.error)
   }, [])
 
-  const uploadAsset = useCallback(async (file: Blob, fileName = 'upload-file') => {
+  const uploadAsset = useCallback(async (file: Blob, fileName = 'upload-file', folder = 'uploads') => {
     const formData = new FormData()
     formData.append('file', file, fileName)
+    formData.append('folder', folder)
     const response = await fetch('/api/upload', {
       method: 'POST',
       body: formData,
@@ -87,7 +88,7 @@ export default function RichTextEditor({
 
   /* ─── Build @font-face CSS for custom uploaded fonts ─── */
   const customFontCss = customFonts.map(f =>
-    `@font-face { font-family: '${f.name}'; src: url('${f.url}'); } `
+    `@font-face { font-family: '${f.name}'; src: url('${f.url}'); font-display: swap; } `
   ).join('')
 
   /* ─── List of font families including custom ones ─── */
@@ -141,7 +142,7 @@ export default function RichTextEditor({
               const nameInput = document.getElementById('custom-font-name') as HTMLInputElement
               const fontName = nameInput?.value?.trim() || file.name.replace(/\.[^.]+$/, '')
               try {
-                const url = await uploadAsset(file, file.name)
+                const url = await uploadAsset(file, file.name, 'fonts')
                 const res = await fetch('/api/fonts', {
                   method: 'POST',
                   body: JSON.stringify({ name: fontName, url }),
