@@ -93,12 +93,12 @@ export default function RichTextEditor({
 
   /* ─── List of font families including custom ones ─── */
   const fontFamilyFormats = [
+    ...customFonts.map(f => `${f.name}=${f.name},sans-serif`),
     'Arial=arial,helvetica,sans-serif',
     'Tahoma=tahoma,arial,helvetica,sans-serif',
     'Georgia=georgia,serif',
     'Times New Roman=times new roman,times,serif',
     'Courier New=courier new,courier,monospace',
-    ...customFonts.map(f => `${f.name}=${f.name},sans-serif`),
   ].join(';')
 
   return (
