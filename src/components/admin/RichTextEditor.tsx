@@ -102,7 +102,7 @@ export default function RichTextEditor({
 
   /* ─── List of font families including custom ones ─── */
   const fontFamilyFormats = [
-    ...customFonts.map(f => `'${f.name}'='${f.name}',sans-serif`),
+    ...customFonts.map(f => `${f.name}=${f.name},sans-serif`),
     'Arial=arial,helvetica,sans-serif',
     'Tahoma=tahoma,arial,helvetica,sans-serif',
     'Georgia=georgia,serif',
@@ -317,8 +317,14 @@ export default function RichTextEditor({
             const dom = editor.dom
             const html = args.node
             
-            // Find all spans with hardcoded font-family and mark them as overridable
-            dom.select('span[style*="font-family"]', html)
+            // Find all spans with hardcoded font-family and remove them 
+            // so they don't block the editor's font application
+            const spans = dom.select('span[style*="font-family"]', html)
+            spans.forEach((span: HTMLElement) => {
+              // Only remove font-family, keep colors, sizes, etc.
+              span.style.fontFamily = ''
+              if (!span.getAttribute('style')) span.removeAttribute('style')
+            })
           },
 
           style_formats: [
@@ -331,6 +337,7 @@ export default function RichTextEditor({
             { title: 'Code Block', block: 'pre', classes: 'language-markup' },
           ],
 
+          font_family_formats: fontFamilyFormats,
           fontsize_formats: '10pt 11pt 12pt 14pt 16pt 18pt 20pt 24pt 28pt 32pt 36pt',
           line_height_formats: '1 1.15 1.5 1.75 2 2.5 3',
           autosave_ask_before_unload: false,
@@ -372,14 +379,6 @@ export default function RichTextEditor({
           // This ensures that when we apply a font, it's applied correctly to the selected content
           // even if it has complex nested structures from copy-paste
           font_size_style_values: '10pt,11pt,12pt,14pt,16pt,18pt,20pt,24pt,28pt,32pt,36pt',
-          font_family_formats: fontFamilyFormats,
-          
-          // CRITICAL: Force font family to wrap with span and not try to optimize by 
-          // removing nested spans, which often breaks colors/bold when font is changed
-          inline_styles: true,
-          schema: 'html5',
-          verify_html: false, // Be more lenient with pasted HTML
-          convert_fonts_to_spans: true,
           
           setup: (editor) => {
             const getClosest = (element: Element | null, selector: string) =>
@@ -395,49 +394,28 @@ export default function RichTextEditor({
             /* ── Intercept font family application to override child styles PROFESSIONALLY ── */
             editor.on('ExecCommand', (e) => {
               if (e.command === 'FontName') {
-                const selection = editor.selection;
+                const fontValue = e.value;
+                if (!fontValue) return;
                 
-                // Use a small timeout to let TinyMCE apply its default formatting first
+                // Get the base font name (e.g. "Cairo" from "Cairo,sans-serif")
+                const fontBase = fontValue.split(',')[0].replace(/['"]/g, '').toLowerCase();
+
                 setTimeout(() => {
                   editor.undoManager.transact(() => {
-                    // If the user selected everything or a large block
-                    // we want to ensure ALL nested spans lose their font-family 
-                    // so the new font-family (usually applied to a parent span) wins.
-                    // BUT we must keep colors, font-size, etc.
+                    const selectedNode = editor.selection.getNode();
+                    const spans = editor.dom.select('span[style*="font-family"]', selectedNode);
                     
-                    const walkAndFix = (node: Node) => {
-                      if (node.nodeType === 1) { // Element
-                        const el = node as HTMLElement;
-                        if (el.style.fontFamily) {
-                          // Only remove font-family, keep everything else
-                          el.style.fontFamily = '';
-                          if (!el.getAttribute('style')) el.removeAttribute('style');
-                        }
-                        el.childNodes.forEach(walkAndFix);
+                    spans.forEach(span => {
+                      const spanFont = span.style.fontFamily.split(',')[0].replace(/['"]/g, '').toLowerCase();
+                      // If the nested span has a different font, clear it so it inherits the new selection font
+                      if (spanFont && spanFont !== fontBase) {
+                        span.style.fontFamily = '';
+                        if (!span.getAttribute('style')) span.removeAttribute('style');
                       }
-                    };
-
-                    // Get the actual selection range content to be precise
-                    const content = selection.getContent({ format: 'html' });
-                    if (content) {
-                      // Apply to all elements within the current selection
-                      const bookmark = selection.getBookmark();
-                      
-                      // Find all spans with font-family in the editor and if they are 
-                      // within the current selection range, clear their font-family
-                      const allSpans = editor.dom.select('span[style*="font-family"]');
-                      allSpans.forEach(span => {
-                        if (selection.getSel()?.containsNode(span, true)) {
-                          span.style.fontFamily = '';
-                          if (!span.getAttribute('style')) span.removeAttribute('style');
-                        }
-                      });
-                      
-                      selection.moveToBookmark(bookmark);
-                    }
+                    });
                   });
                   editor.nodeChanged();
-                }, 10);
+                }, 20);
               }
             });
 
