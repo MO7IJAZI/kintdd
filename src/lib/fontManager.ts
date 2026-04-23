@@ -28,6 +28,11 @@ export interface CustomFontResponse {
  */
 export async function getCustomFonts(): Promise<CustomFontResponse[]> {
     try {
+        if (!db.customFont) {
+            console.error('Prisma Error: customFont model is not defined. Make sure to run "npx prisma generate" on the server.');
+            return [];
+        }
+
         const fonts = await db.customFont.findMany({
             where: { isActive: true },
             orderBy: { createdAt: 'desc' },
@@ -49,6 +54,10 @@ export async function getCustomFonts(): Promise<CustomFontResponse[]> {
  */
 export async function saveCustomFont(font: CustomFont): Promise<CustomFontResponse[]> {
     try {
+        if (!db.customFont) {
+            throw new Error('Prisma customFont model is not defined. Please run "npx prisma generate" on the server.');
+        }
+
         console.log('Saving custom font to DB:', font);
         // Check if font already exists
         const existing = await db.customFont.findUnique({
@@ -98,6 +107,10 @@ export async function saveCustomFont(font: CustomFont): Promise<CustomFontRespon
  */
 export async function deleteCustomFont(name: string): Promise<CustomFontResponse[]> {
     try {
+        if (!db.customFont) {
+            throw new Error('Prisma customFont model is not defined.');
+        }
+
         const fontToDelete = await db.customFont.findUnique({
             where: { name },
         });

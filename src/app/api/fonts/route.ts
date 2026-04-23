@@ -55,11 +55,11 @@ export async function POST(req: Request) {
         return NextResponse.json(fonts);
     } catch (error: any) {
         console.error('Error saving font:', error);
-        // Include stack trace for 500 errors to help debug on VPS
+        // Always include stack trace and details for debugging on VPS until resolved
         return NextResponse.json({ 
             error: 'Failed to save font', 
             details: error?.message || String(error),
-            stack: process.env.NODE_ENV === 'development' ? error?.stack : undefined
+            stack: error?.stack
         }, { status: 500 });
     }
 }

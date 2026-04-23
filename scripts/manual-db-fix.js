@@ -69,6 +69,27 @@ async function main() {
       console.log('ℹ️ FK B for _animaltypetoproduct might already exist');
     }
 
+    // 5. Create custom_fonts table
+    console.log('Creating custom_fonts table...');
+    await prisma.$executeRawUnsafe(`
+      CREATE TABLE IF NOT EXISTS \`custom_fonts\` (
+          \`id\` VARCHAR(191) NOT NULL,
+          \`name\` VARCHAR(191) NOT NULL,
+          \`url\` TEXT NOT NULL,
+          \`fileName\` VARCHAR(191) NOT NULL,
+          \`fileSize\` INTEGER NOT NULL,
+          \`mimeType\` VARCHAR(191) NOT NULL,
+          \`displayName\` VARCHAR(191),
+          \`isActive\` BOOLEAN NOT NULL DEFAULT true,
+          \`createdAt\` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+          \`updatedAt\` DATETIME(3) NOT NULL,
+          UNIQUE INDEX \`custom_fonts_name_key\`(\`name\`),
+          INDEX \`custom_fonts_isActive_idx\`(\`isActive\`),
+          PRIMARY KEY (\`id\`)
+      ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+    `);
+    console.log('✅ Created table custom_fonts');
+
     console.log('Database fix completed successfully.');
   } catch (error) {
     console.error('Error executing database fix:', error);
