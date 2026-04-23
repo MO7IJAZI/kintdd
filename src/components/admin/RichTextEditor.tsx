@@ -93,7 +93,6 @@ export default function RichTextEditor({
 
   /* ─── List of font families including custom ones ─── */
   const fontFamilyFormats = [
-    'Inter=Inter,sans-serif',
     'Arial=arial,helvetica,sans-serif',
     'Tahoma=tahoma,arial,helvetica,sans-serif',
     'Georgia=georgia,serif',
@@ -104,6 +103,9 @@ export default function RichTextEditor({
 
   return (
     <div className="rich-text-editor-wrapper" dir={dir === 'auto' ? undefined : dir}>
+      {/* ── Global style for custom fonts in admin preview ── */}
+      {customFontCss && <style dangerouslySetInnerHTML={{ __html: customFontCss }} />}
+      
       {label && <label className="editor-label">{label}</label>}
 
       {/* ── Custom font uploader ── */}
@@ -160,6 +162,47 @@ export default function RichTextEditor({
           />
         </label>
       </div>
+
+      {/* ── Custom fonts list with delete button ── */}
+      {customFonts.length > 0 && (
+        <div style={{
+          display: 'flex', gap: '0.5rem', flexWrap: 'wrap',
+          marginBottom: '0.75rem', padding: '0 0.25rem'
+        }}>
+          {customFonts.map(f => (
+            <div key={f.name} style={{
+              display: 'flex', alignItems: 'center', gap: '0.4rem',
+              padding: '0.25rem 0.6rem', background: '#f1f5f9',
+              borderRadius: '6px', border: '1px solid #e2e8f0',
+              fontSize: '0.75rem', fontWeight: 600, color: '#475569'
+            }}>
+              <span style={{ fontFamily: f.name }}>{f.name}</span>
+              <button
+                type="button"
+                onClick={async () => {
+                  if (confirm(t('confirmDeleteFont') ?? `هل أنت متأكد من حذف خط ${f.name}؟`)) {
+                    const res = await fetch(`/api/fonts?name=${encodeURIComponent(f.name)}`, { method: 'DELETE' });
+                    if (res.ok) {
+                      const data = await res.json();
+                      setCustomFonts(data);
+                      // Force re-render of TinyMCE by changing key if needed, 
+                      // but fontFamilyFormats dependency in 'key' already handles this
+                    }
+                  }
+                }}
+                style={{
+                  border: 'none', background: 'none', cursor: 'pointer',
+                  color: '#ef4444', fontSize: '1rem', padding: '0 2px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }}
+                title="حذف الخط"
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
 
       <TinyMCEEditor
         key={fontFamilyFormats}

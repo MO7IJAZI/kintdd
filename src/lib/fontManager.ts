@@ -27,6 +27,17 @@ export async function saveCustomFont(font: CustomFont): Promise<CustomFont[]> {
 
 export async function deleteCustomFont(name: string): Promise<CustomFont[]> {
     const fonts = await getCustomFonts();
+    const fontToDelete = fonts.find(f => f.name === name);
+    
+    if (fontToDelete && fontToDelete.url.startsWith('/')) {
+        try {
+            const filePath = path.join(process.cwd(), 'public', fontToDelete.url);
+            await fs.unlink(filePath);
+        } catch (error) {
+            console.error(`Failed to delete font file: ${fontToDelete.url}`, error);
+        }
+    }
+    
     const updated = fonts.filter(f => f.name !== name);
     await fs.writeFile(FONTS_FILE, JSON.stringify(updated, null, 2));
     return updated;
