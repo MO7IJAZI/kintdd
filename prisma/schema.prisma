@@ -513,3 +513,20 @@ model AnimalTypeTabImage {
   @@index([order])
   @@map("animal_type_tab_images")
 }
+
+// Custom Fonts Model - Store uploaded fonts with metadata
+model CustomFont {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  url       String   // URL path to the font file (e.g., /uploads/Cairo-1234567890.ttf)
+  fileName  String   // Original file name
+  fileSize  Int      // File size in bytes
+  mimeType  String   // MIME type (e.g., font/ttf, font/otf, font/woff2)
+  displayName String? // User-friendly display name
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive])
+  @@map("custom_fonts")
+}

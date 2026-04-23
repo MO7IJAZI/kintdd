@@ -2,25 +2,60 @@ import { NextResponse } from 'next/server';
 import { getCustomFonts, saveCustomFont, deleteCustomFont } from '@/lib/fontManager';
 import { auth } from '@/auth';
 
+/**
+ * GET /api/fonts - List all active custom fonts
+ */
 export async function GET() {
-    const fonts = await getCustomFonts();
-    return NextResponse.json(fonts);
+    try {
+        const fonts = await getCustomFonts();
+        return NextResponse.json(fonts);
+    } catch (error) {
+        console.error('Error fetching fonts:', error);
+        return NextResponse.json({ error: 'Failed to fetch fonts' }, { status: 500 });
+    }
 }
 
+/**
+ * POST /api/fonts - Save a new custom font to the database
+ * Body: { name, url, fileName, fileSize, mimeType, displayName }
+ */
 export async function POST(req: Request) {
     const session = await auth();
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     try {
-        const { name, url } = await req.json();
-        if (!name || !url) return NextResponse.json({ error: 'Missing name or url' }, { status: 400 });
-        const fonts = await saveCustomFont({ name, url });
+        const { name, url, fileName, fileSize, mimeType, displayName } = await req.json();
+        
+        if (!name || !url) {
+            return NextResponse.json({ error: 'Missing required fields: name, url' }, { status: 400 });
+        }
+
+        // Validate font name
+        if (name.length < 2 || name.length > 100) {
+            return NextResponse.json({ error: 'Font name must be 2-100 characters' }, { status: 400 });
+        }
+
+        // Save to database
+        const fonts = await saveCustomFont({
+            name,
+            url,
+            fileName: fileName || '',
+            fileSize: fileSize || 0,
+            mimeType: mimeType || 'font/ttf',
+            displayName: displayName || name,
+        });
+
         return NextResponse.json(fonts);
     } catch (error) {
+        console.error('Error saving font:', error);
         return NextResponse.json({ error: 'Failed to save font' }, { status: 500 });
     }
 }
 
+/**
+ * DELETE /api/fonts - Delete a custom font
+ * Query: name=[fontName]
+ */
 export async function DELETE(req: Request) {
     const session = await auth();
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -28,10 +63,15 @@ export async function DELETE(req: Request) {
     try {
         const { searchParams } = new URL(req.url);
         const name = searchParams.get('name');
-        if (!name) return NextResponse.json({ error: 'Missing name' }, { status: 400 });
+        
+        if (!name) {
+            return NextResponse.json({ error: 'Missing required query parameter: name' }, { status: 400 });
+        }
+
         const fonts = await deleteCustomFont(name);
         return NextResponse.json(fonts);
     } catch (error) {
+        console.error('Error deleting font:', error);
         return NextResponse.json({ error: 'Failed to delete font' }, { status: 500 });
     }
 }

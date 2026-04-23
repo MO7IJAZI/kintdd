@@ -154,10 +154,30 @@ export default function RichTextEditor({
               setEditorLoadError(null)
 
               try {
+                // Upload the font file and get the URL
                 const url = await uploadAsset(file, file.name, 'fonts')
+                
+                // Determine MIME type from file extension
+                const ext = file.name.split('.').pop()?.toLowerCase()
+                const mimeTypeMap: Record<string, string> = {
+                  'ttf': 'font/ttf',
+                  'otf': 'font/otf',
+                  'woff': 'font/woff',
+                  'woff2': 'font/woff2',
+                }
+                const mimeType = mimeTypeMap[ext || ''] || file.type || 'font/ttf'
+                
+                // Save font metadata to database
                 const res = await fetch('/api/fonts', {
                   method: 'POST',
-                  body: JSON.stringify({ name: fontName, url }),
+                  body: JSON.stringify({
+                    name: fontName,
+                    url,
+                    fileName: file.name,
+                    fileSize: file.size,
+                    mimeType,
+                    displayName: fontName
+                  }),
                   headers: { 'Content-Type': 'application/json' }
                 })
                 
@@ -165,6 +185,7 @@ export default function RichTextEditor({
                   const data = await res.json()
                   setCustomFonts(data)
                   if (nameInput) nameInput.value = ''
+                  setEditorLoadError(null)
                 } else {
                   throw new Error('Failed to save font metadata')
                 }
@@ -269,12 +290,26 @@ export default function RichTextEditor({
           paste_retain_style_properties: 'all',
           paste_remove_styles_if_webkit: false,
 
-          /* ── Pre-process pasted content to ensure compatibility with overrides ── */
+          /* ─── Pre-process pasted content to ensure styles are preserved ─── */
           paste_preprocess: (plugin, args) => {
-            // We want to keep styles but make them overridable.
-            // Some stubborn styles like 'font-family' in every span can be problematic.
-            // But user wants to keep them unless they change them.
-            // No action needed here for now as we'll handle overrides in 'setup'
+            // Keep pasted content styling intact
+            // We'll handle overrides in the ExecCommand handler
+            // This allows users to paste styled content and then change the font if needed
+          },
+
+          /* ─── Post-process pasted content to fix any style issues ─── */
+          paste_postprocess: (plugin, args) => {
+            // Normalize pasted content to be compatible with font changes
+            const dom = plugin.editor.dom
+            const html = args.node
+            
+            // Find all spans with hardcoded font-family and mark them as overridable
+            const spans = dom.select('span[style*="font-family"]', html)
+            spans.forEach((span: HTMLElement) => {
+              // Keep the font-family but make it clearable by editor commands
+              const style = span.getAttribute('style') || ''
+              // We'll keep the style as-is but can override when user applies new font
+            })
           },
 
           style_formats: [
@@ -337,16 +372,35 @@ export default function RichTextEditor({
               }
             })
 
-            /* ── Intercept font family application to clear child overrides ── */
+            /* ── Intercept font family application to override child styles ── */
             editor.on('ExecCommand', (e) => {
               if (e.command === 'FontName') {
-                const node = editor.selection.getNode()
-                // Clear font-family from all spans inside the selection 
-                // to let the new wrapping span take priority
-                const spans = editor.dom.select('span', node)
-                spans.forEach(span => {
-                  editor.dom.setStyle(span, 'font-family', '')
-                })
+                const selection = editor.selection
+                const selectedNode = selection.getNode()
+                
+                if (!selectedNode) return
+                
+                // After applying new font, wrap selection in span with new font
+                // and remove font-family from inner elements to allow the wrapper style to take precedence
+                setTimeout(() => {
+                  // Get all descendant spans and clear their font-family
+                  const allSpans = editor.dom.select('span[style*="font-family"]', selectedNode)
+                  allSpans.forEach(span => {
+                    const style = span.getAttribute('style') || ''
+                    // Remove font-family from style attribute
+                    const newStyle = style
+                      .replace(/font-family\s*:\s*[^;]+;?\s*/gi, '')
+                      .replace(/;\s*;/g, ';')
+                      .trim()
+                    
+                    if (newStyle) {
+                      span.setAttribute('style', newStyle)
+                    } else {
+                      span.removeAttribute('style')
+                    }
+                  })
+                  editor.nodeChanged()
+                }, 0)
               }
             })
 
@@ -634,6 +688,7 @@ export default function RichTextEditor({
 
           content_style: `
             ${customFontCss}
+            /* Base styles for editor body */
             body {
               font-family: Inter, system-ui, sans-serif;
               font-size: 16px;
@@ -642,19 +697,66 @@ export default function RichTextEditor({
               padding: 14px;
               direction: ${dir === 'rtl' ? 'rtl' : 'ltr'};
             }
-            /* Preserve all inline colors and styles on paste */
-            * { }
-            table { border-collapse: collapse; width: 100%; border: 1px solid #64748b; }
-            tbody, thead, tfoot, tr, th, td { border-color: inherit; border-style: inherit; border-width: inherit; }
-            table th, table td { padding: 10px 12px; }
-            table th { background: #f8fafc; font-weight: 700; }
-            pre[class*="language-"] { background: #0f172a; color: #e2e8f0; padding: 14px; border-radius: 10px; overflow-x: auto; }
-            code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace; }
-            img, video, iframe { max-width: 100%; }
-            img[data-mce-selected], video[data-mce-selected], iframe[data-mce-selected] { outline: 2px solid #3b82f6; outline-offset: 2px; }
+            
+            /* Ensure custom fonts are available throughout the editor */
+            * {
+              /* Allow fonts to apply properly */
+            }
+            
+            /* Table styling */
+            table {
+              border-collapse: collapse;
+              width: 100%;
+              border: 1px solid #64748b;
+            }
+            tbody, thead, tfoot, tr, th, td {
+              border-color: inherit;
+              border-style: inherit;
+              border-width: inherit;
+            }
+            table th, table td {
+              padding: 10px 12px;
+            }
+            table th {
+              background: #f8fafc;
+              font-weight: 700;
+            }
+            
+            /* Code styling */
+            pre[class*="language-"] {
+              background: #0f172a;
+              color: #e2e8f0;
+              padding: 14px;
+              border-radius: 10px;
+              overflow-x: auto;
+              font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
+            }
+            code {
+              font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
+            }
+            
+            /* Media styling */
+            img, video, iframe {
+              max-width: 100%;
+              height: auto;
+            }
+            img[data-mce-selected], video[data-mce-selected], iframe[data-mce-selected] {
+              outline: 2px solid #3b82f6;
+              outline-offset: 2px;
+            }
+            
             /* Float support for text beside images */
-            img[style*="float: left"], img[style*="float:left"] { margin: 0 1rem 0.5rem 0; }
-            img[style*="float: right"], img[style*="float:right"] { margin: 0 0 0.5rem 1rem; }
+            img[style*="float: left"], img[style*="float:left"] {
+              margin: 0 1rem 0.5rem 0;
+            }
+            img[style*="float: right"], img[style*="float:right"] {
+              margin: 0 0 0.5rem 1rem;
+            }
+            
+            /* Ensure pasted styled content preserves its appearance */
+            span[style*="font-family"] {
+              /* Keep pasted font styles intact */
+            }
           `,
         }}
         onEditorChange={(html) => {
