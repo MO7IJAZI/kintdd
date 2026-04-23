@@ -63,11 +63,11 @@ model Product {
   metaDesc       String?          @db.Text
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
-  compTable      String?          @db.LongText
+  compTable      Json?
   sku            String?          @unique
-  usageTable     String?          @db.LongText
+  usageTable     Json?
   benefits_ar    String?          @db.Text
-  compTable_ar   String?          @db.LongText
+  compTable_ar   Json?
   composition_ar String?          @db.Text
   description_ar String?          @db.Text
   features_ar    String?          @db.Text
@@ -75,16 +75,16 @@ model Product {
   metaTitle_ar   String?
   name_ar        String?
   shortDesc_ar   String?          @db.Text
-  tabs           String?          @db.LongText
-  tabs_ar        String?          @db.LongText
-  usageTable_ar  String?          @db.LongText
+  tabs           Json?
+  tabs_ar        Json?
+  usageTable_ar  Json?
   usage_ar       String?          @db.Text
   colorTheme     String           @default("blue")
   downloads      Download[]
   images         ProductImage[]
   sections       ProductSection[]
   category       Category         @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  animal_types   AnimalType[]     @relation("animaltypetoproduct")
+  animalTypes    AnimalType[]     @relation("animaltypetoproduct")
   crops          Crop[]           @relation("croprecommendedproducts")
 
   @@index([slug])
@@ -197,7 +197,7 @@ model Crop {
   documentTitle    String?
   documentTitle_ar String?
   stages           CropStage[]
-  products         Product[]   @relation("croprecommendedproducts")
+  recommendedProducts Product[]   @relation("croprecommendedproducts")
 
   @@index([slug])
   @@index([category])
@@ -209,7 +209,7 @@ model CropStage {
   name           String
   order          Int      @default(0)
   cropId         String
-  recommendation String?  @db.LongText
+  recommendation Json?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   name_ar        String?
@@ -439,7 +439,7 @@ model AnimalIssue {
   animalTypeId   String
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
-  recommendation String?    @db.LongText
+  recommendation Json?
   animalType     AnimalType @relation(fields: [animalTypeId], references: [id], onDelete: Cascade)
 
   @@index([animalTypeId])
