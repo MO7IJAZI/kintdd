@@ -88,9 +88,17 @@ export default function RichTextEditor({
   }
 
   /* ─── Build @font-face CSS for custom uploaded fonts ─── */
-  const customFontCss = customFonts.map(f =>
-    `@font-face { font-family: '${f.name}'; src: url('${f.url}'); font-display: swap; } `
-  ).join('')
+  const customFontCss = customFonts.map(f => {
+    const ext = f.url.split('.').pop()?.toLowerCase() || 'ttf'
+    const formats: Record<string, string> = {
+      'ttf': 'truetype',
+      'otf': 'opentype',
+      'woff': 'woff',
+      'woff2': 'woff2',
+    }
+    const format = formats[ext] || 'truetype'
+    return `@font-face { font-family: '${f.name}'; src: url('${f.url}') format('${format}'); font-display: swap; } `
+  }).join('')
 
   /* ─── List of font families including custom ones ─── */
   const fontFamilyFormats = [
@@ -155,7 +163,8 @@ export default function RichTextEditor({
 
               try {
                 // Upload the font file and get the URL
-                const url = await uploadAsset(file, file.name, 'fonts')
+                // We use 'uploads/fonts' to ensure it's picked up by our dynamic server /api/uploads/[...filename]
+                const url = await uploadAsset(file, file.name, 'uploads/fonts')
                 
                 // Determine MIME type from file extension
                 const ext = file.name.split('.').pop()?.toLowerCase()
@@ -191,7 +200,7 @@ export default function RichTextEditor({
                 }
               } catch (err) {
                 console.error('Font upload error:', err)
-                setEditorLoadError(t('fontUploadFailed') ?? 'فشل رفع الخط وتطبيقه')
+                setEditorLoadError(t('fontUploadFailed'))
               } finally {
                 setIsUploadingFont(false)
               }
@@ -217,7 +226,7 @@ export default function RichTextEditor({
               <button
                 type="button"
                 onClick={async () => {
-                  if (confirm(t('confirmDeleteFont') ?? `هل أنت متأكد من حذف خط ${f.name}؟`)) {
+                  if (confirm(t('confirmDeleteFont', { name: f.name }))) {
                     const res = await fetch(`/api/fonts?name=${encodeURIComponent(f.name)}`, { method: 'DELETE' });
                     if (res.ok) {
                       const data = await res.json();
@@ -232,7 +241,7 @@ export default function RichTextEditor({
                   color: '#ef4444', fontSize: '1rem', padding: '0 2px',
                   display: 'flex', alignItems: 'center', justifyContent: 'center'
                 }}
-                title="حذف الخط"
+                title={t('deleteFont')}
               >
                 ×
               </button>
@@ -415,14 +424,14 @@ export default function RichTextEditor({
             /* ── Custom: Insert new table with NO trailing empty row ── */
             editor.ui.registry.addButton('kintInsertTable', {
               icon: 'table',
-              tooltip: 'إدراج جدول',
+              tooltip: t('insertTable'),
               onAction: () => {
-                const rows = parseInt(prompt('عدد الصفوف:', '3') || '3', 10) || 3
-                const cols = parseInt(prompt('عدد الأعمدة:', '3') || '3', 10) || 3
+                const rows = parseInt(prompt(t('rows'), '3') || '3', 10) || 3
+                const cols = parseInt(prompt(t('cols'), '3') || '3', 10) || 3
                 let html = '<table border="1" style="width:100%;border-collapse:collapse;border:1px solid #64748b;"><colgroup>'
                 for (let c = 0; c < cols; c++) html += `<col style="width:${Math.round(100 / cols)}%">`
                 html += '</colgroup><thead><tr>'
-                for (let c = 0; c < cols; c++) html += `<th style="padding:8px 10px;background:#f8fafc;font-weight:700;">Header ${c + 1}</th>`
+                for (let c = 0; c < cols; c++) html += `<th style="padding:8px 10px;background:#f8fafc;font-weight:700;">${t('header')} ${c + 1}</th>`
                 html += '</tr></thead><tbody>'
                 for (let r = 0; r < rows - 1; r++) {
                   html += '<tr>'
@@ -437,7 +446,7 @@ export default function RichTextEditor({
             /* ── Wrap image left / right (text beside image) ── */
             editor.ui.registry.addButton('wrapImageLeft', {
               icon: 'align-left',
-              tooltip: 'نص بجانب الصورة (يسار)',
+              tooltip: t('wrapLeft'),
               onAction: () => {
                 const node = editor.selection.getNode() as HTMLElement
                 const img = node.tagName === 'IMG' ? node : (node.querySelector('img') as HTMLElement)
@@ -450,7 +459,7 @@ export default function RichTextEditor({
             })
             editor.ui.registry.addButton('wrapImageRight', {
               icon: 'align-right',
-              tooltip: 'نص بجانب الصورة (يمين)',
+              tooltip: t('wrapRight'),
               onAction: () => {
                 const node = editor.selection.getNode() as HTMLElement
                 const img = node.tagName === 'IMG' ? node : (node.querySelector('img') as HTMLElement)
@@ -463,7 +472,7 @@ export default function RichTextEditor({
             })
             editor.ui.registry.addButton('clearWrap', {
               icon: 'remove',
-              tooltip: 'إلغاء التفاف النص',
+              tooltip: t('clearWrap'),
               onAction: () => {
                 const node = editor.selection.getNode() as HTMLElement
                 const img = node.tagName === 'IMG' ? node : (node.querySelector('img') as HTMLElement)
@@ -492,7 +501,7 @@ export default function RichTextEditor({
                   if (tag === 'IMG') node.setAttribute('alt', file.name)
                   editor.nodeChanged()
                 } catch {
-                  setEditorLoadError('فشل استبدال الملف')
+                  setEditorLoadError(t('replaceError'))
                 }
               }
               input.click()
@@ -517,50 +526,49 @@ export default function RichTextEditor({
               editor.nodeChanged()
             }
 
-            editor.ui.registry.addButton('mediaSize25', { text: '25%', tooltip: 'حجم 25%', onAction: () => setSelectedMediaWidth('25') })
-            editor.ui.registry.addButton('mediaSize50', { text: '50%', tooltip: 'حجم 50%', onAction: () => setSelectedMediaWidth('50') })
-            editor.ui.registry.addButton('mediaSize75', { text: '75%', tooltip: 'حجم 75%', onAction: () => setSelectedMediaWidth('75') })
-            editor.ui.registry.addButton('mediaSize100', { text: '100%', tooltip: 'حجم 100%', onAction: () => setSelectedMediaWidth('100') })
-            editor.ui.registry.addButton('mediaSizeAuto', { text: 'Auto', tooltip: 'الحجم الأصلي', onAction: () => setSelectedMediaWidth('auto') })
+            editor.ui.registry.addButton('mediaSize25', { text: '25%', tooltip: t('size25'), onAction: () => setSelectedMediaWidth('25') })
+            editor.ui.registry.addButton('mediaSize50', { text: '50%', tooltip: t('size50'), onAction: () => setSelectedMediaWidth('50') })
+            editor.ui.registry.addButton('mediaSize75', { text: '75%', tooltip: t('size75'), onAction: () => setSelectedMediaWidth('75') })
+            editor.ui.registry.addButton('mediaSize100', { text: '100%', tooltip: t('size100'), onAction: () => setSelectedMediaWidth('100') })
+            editor.ui.registry.addButton('mediaSizeAuto', { text: 'Auto', tooltip: t('originalSize'), onAction: () => setSelectedMediaWidth('auto') })
 
-            editor.ui.registry.addMenuItem('kintEditMedia', { text: 'تحرير الوسائط', onAction: () => { const node = editor.selection.getNode() as HTMLElement | null; if (!node) return; if (node.tagName === 'IMG') editor.execCommand('mceImage'); else editor.execCommand('mceMedia') } })
-            editor.ui.registry.addMenuItem('kintReplaceMedia', { text: 'استبدال الملف', onAction: () => { void replaceSelectedMediaSource() } })
-            editor.ui.registry.addMenuItem('kintMedia25', { text: 'حجم 25%', onAction: () => setSelectedMediaWidth('25') })
-            editor.ui.registry.addMenuItem('kintMedia50', { text: 'حجم 50%', onAction: () => setSelectedMediaWidth('50') })
-            editor.ui.registry.addMenuItem('kintMedia75', { text: 'حجم 75%', onAction: () => setSelectedMediaWidth('75') })
-            editor.ui.registry.addMenuItem('kintMedia100', { text: 'حجم 100%', onAction: () => setSelectedMediaWidth('100') })
-            editor.ui.registry.addMenuItem('kintMediaAuto', { text: 'الحجم الأصلي', onAction: () => setSelectedMediaWidth('auto') })
-            editor.ui.registry.addMenuItem('kintRemoveNode', { text: 'حذف العنصر', onAction: () => { const node = editor.selection.getNode(); if (node) node.remove(); editor.nodeChanged() } })
+            editor.ui.registry.addMenuItem('kintEditMedia', { text: t('editMedia'), onAction: () => { const node = editor.selection.getNode() as HTMLElement | null; if (!node) return; if (node.tagName === 'IMG') editor.execCommand('mceImage'); else editor.execCommand('mceMedia') } })
+            editor.ui.registry.addMenuItem('kintReplaceMedia', { text: t('replaceFile'), onAction: () => { void replaceSelectedMediaSource() } })
+            editor.ui.registry.addMenuItem('kintMedia25', { text: t('size25'), onAction: () => setSelectedMediaWidth('25') })
+            editor.ui.registry.addMenuItem('kintMedia50', { text: t('size50'), onAction: () => setSelectedMediaWidth('50') })
+            editor.ui.registry.addMenuItem('kintMedia75', { text: t('size75'), onAction: () => setSelectedMediaWidth('75') })
+            editor.ui.registry.addMenuItem('kintMedia100', { text: t('size100'), onAction: () => setSelectedMediaWidth('100') })
+            editor.ui.registry.addMenuItem('kintMediaAuto', { text: t('originalSize'), onAction: () => setSelectedMediaWidth('auto') })
+            editor.ui.registry.addMenuItem('kintRemoveNode', { text: t('deleteElement'), onAction: () => { const node = editor.selection.getNode(); if (node) node.remove(); editor.nodeChanged() } })
 
-            editor.ui.registry.addMenuItem('kintTableProps', { text: 'خصائص الجدول', onAction: () => editor.execCommand('mceTableProps') })
-            editor.ui.registry.addMenuItem('kintTableInsertRowBefore', { text: 'إدراج صف قبل', onAction: () => editor.execCommand('mceTableInsertRowBefore') })
-            editor.ui.registry.addMenuItem('kintTableInsertRowAfter', { text: 'إدراج صف بعد', onAction: () => editor.execCommand('mceTableInsertRowAfter') })
-            editor.ui.registry.addMenuItem('kintTableDeleteRow', { text: 'حذف الصف', onAction: () => editor.execCommand('mceTableDeleteRow') })
-            editor.ui.registry.addMenuItem('kintTableInsertColBefore', { text: 'إدراج عمود قبل', onAction: () => editor.execCommand('mceTableInsertColBefore') })
-            editor.ui.registry.addMenuItem('kintTableInsertColAfter', { text: 'إدراج عمود بعد', onAction: () => editor.execCommand('mceTableInsertColAfter') })
-            editor.ui.registry.addMenuItem('kintTableDeleteCol', { text: 'حذف العمود', onAction: () => editor.execCommand('mceTableDeleteCol') })
-            editor.ui.registry.addMenuItem('kintTableDelete', { text: 'حذف الجدول', onAction: () => editor.execCommand('mceTableDelete') })
-            editor.ui.registry.addMenuItem('kintTableMerge', { text: 'دمج الخلايا', onAction: () => editor.execCommand('mceTableMergeCells') })
-            editor.ui.registry.addMenuItem('kintTableSplit', { text: 'تقسيم الخلايا', onAction: () => editor.execCommand('mceTableSplitCells') })
+            editor.ui.registry.addMenuItem('kintTableProps', { text: t('tableProps'), onAction: () => editor.execCommand('mceTableProps') })
+            editor.ui.registry.addMenuItem('kintTableInsertRowBefore', { text: t('insertRowBefore'), onAction: () => editor.execCommand('mceTableInsertRowBefore') })
+            editor.ui.registry.addMenuItem('kintTableInsertRowAfter', { text: t('insertRowAfter'), onAction: () => editor.execCommand('mceTableInsertRowAfter') })
+            editor.ui.registry.addMenuItem('kintTableDeleteRow', { text: t('deleteRow'), onAction: () => editor.execCommand('mceTableDeleteRow') })
+            editor.ui.registry.addMenuItem('kintTableInsertColBefore', { text: t('insertColBefore'), onAction: () => editor.execCommand('mceTableInsertColBefore') })
+            editor.ui.registry.addMenuItem('kintTableInsertColAfter', { text: t('insertColAfter'), onAction: () => editor.execCommand('mceTableInsertColAfter') })
+            editor.ui.registry.addMenuItem('kintTableDeleteCol', { text: t('deleteCol'), onAction: () => editor.execCommand('mceTableDeleteCol') })
+            editor.ui.registry.addMenuItem('kintDeleteTable', { text: t('deleteTable'), onAction: () => editor.execCommand('mceTableDelete') })
+            editor.ui.registry.addMenuItem('kintMergeCells', { text: t('mergeCells'), onAction: () => editor.execCommand('mceTableMergeCells') })
+            editor.ui.registry.addMenuItem('kintSplitCells', { text: t('splitCells'), onAction: () => editor.execCommand('mceTableSplitCells') })
 
-            editor.ui.registry.addMenuItem('kintEditLink', { text: 'تحرير الرابط', onAction: () => editor.execCommand('mceLink') })
-            editor.ui.registry.addMenuItem('kintUnlink', { text: 'إزالة الرابط', onAction: () => editor.execCommand('unlink') })
-            editor.ui.registry.addMenuItem('kintCopyLink', {
-              text: 'نسخ الرابط',
-              onAction: async () => {
-                const node = editor.selection.getNode() as HTMLElement | null
-                const anchor = getClosest(node, 'a')
-                const href = anchor?.getAttribute('href')
-                if (!href) return
-                try { await navigator.clipboard.writeText(href) } catch {}
-              },
-            })
+            editor.ui.registry.addMenuItem('kintEditLink', { text: t('editLink'), onAction: () => editor.execCommand('mceLink') })
+            editor.ui.registry.addMenuItem('kintRemoveLink', { text: t('removeLink'), onAction: () => editor.execCommand('unlink') })
+            editor.ui.registry.addMenuItem('kintOpenLink', { text: t('openLink'), onAction: () => { const node = editor.selection.getNode(); const link = getClosest(node, 'a'); if (link) window.open(link.getAttribute('href') || '', '_blank') } })
 
-            editor.ui.registry.addMenuItem('kintBold', { text: 'غامق', onAction: () => editor.execCommand('Bold') })
-            editor.ui.registry.addMenuItem('kintItalic', { text: 'مائل', onAction: () => editor.execCommand('Italic') })
-            editor.ui.registry.addMenuItem('kintUnderline', { text: 'تسطير', onAction: () => editor.execCommand('Underline') })
-            editor.ui.registry.addMenuItem('kintTextCode', { text: 'كتلة كود', onAction: () => editor.execCommand('mceCodeSample') })
-            editor.ui.registry.addMenuItem('kintTextClear', { text: 'مسح التنسيق', onAction: () => editor.execCommand('RemoveFormat') })
+            editor.ui.registry.addMenuItem('kintBold', { text: t('bold'), onAction: () => editor.execCommand('Bold') })
+            editor.ui.registry.addMenuItem('kintItalic', { text: t('italic'), onAction: () => editor.execCommand('Italic') })
+            editor.ui.registry.addMenuItem('kintUnderline', { text: t('underline'), onAction: () => editor.execCommand('Underline') })
+            editor.ui.registry.addMenuItem('kintStrike', { text: t('strikeThrough'), onAction: () => editor.execCommand('Strikethrough') })
+            editor.ui.registry.addMenuItem('kintAlignLeft', { text: t('alignLeft'), onAction: () => editor.execCommand('JustifyLeft') })
+            editor.ui.registry.addMenuItem('kintAlignCenter', { text: t('alignCenter'), onAction: () => editor.execCommand('JustifyCenter') })
+            editor.ui.registry.addMenuItem('kintAlignRight', { text: t('alignRight'), onAction: () => editor.execCommand('JustifyRight') })
+            editor.ui.registry.addMenuItem('kintAlignJustify', { text: t('alignJustify'), onAction: () => editor.execCommand('JustifyFull') })
+            editor.ui.registry.addMenuItem('kintBulletList', { text: t('bulletList'), onAction: () => editor.execCommand('InsertUnorderedList') })
+            editor.ui.registry.addMenuItem('kintOrderedList', { text: t('orderedList'), onAction: () => editor.execCommand('InsertOrderedList') })
+            editor.ui.registry.addMenuItem('kintBlockquote', { text: t('blockquote'), onAction: () => editor.execCommand('mceBlockQuote') })
+            editor.ui.registry.addMenuItem('kintTextCode', { text: t('codeBlock'), onAction: () => editor.execCommand('mceCodeSample') })
+             editor.ui.registry.addMenuItem('kintTextClear', { text: t('clear'), onAction: () => editor.execCommand('RemoveFormat') })
 
             editor.ui.registry.addContextMenu('kintmedia', {
               update: (element) => {
@@ -571,7 +579,7 @@ export default function RichTextEditor({
             editor.ui.registry.addContextMenu('kinttable', {
               update: (element) => {
                 const table = getClosest(element, 'table')
-                return table ? 'kintTableProps | kintTableInsertRowBefore kintTableInsertRowAfter kintTableDeleteRow | kintTableInsertColBefore kintTableInsertColAfter kintTableDeleteCol | kintTableMerge kintTableSplit | kintTableDelete' : ''
+                return table ? 'kintTableProps | kintTableInsertRowBefore kintTableInsertRowAfter kintTableDeleteRow | kintTableInsertColBefore kintTableInsertColAfter kintTableDeleteCol | kintMergeCells kintSplitCells | kintDeleteTable' : ''
               },
             })
             editor.ui.registry.addContextMenu('kintlink', {
@@ -601,7 +609,7 @@ export default function RichTextEditor({
 
             editor.ui.registry.addButton('uploadImage', {
               icon: 'image',
-              tooltip: 'رفع صورة',
+              tooltip: t('uploadImage'),
               onAction: () => {
                 const input = document.createElement('input')
                 input.type = 'file'
@@ -613,7 +621,7 @@ export default function RichTextEditor({
                     const url = await uploadAsset(file, file.name)
                     editor.insertContent(`<img src="${url}" alt="${file.name}" style="max-width:100%;" />`)
                   } catch {
-                    setEditorLoadError('فشل رفع الصورة')
+                    setEditorLoadError(t('uploadImageError'))
                   }
                 }
                 input.click()
@@ -622,9 +630,9 @@ export default function RichTextEditor({
 
             editor.ui.registry.addButton('uploadVideo', {
               icon: 'embed',
-              tooltip: 'رفع فيديو / رابط YouTube',
+              tooltip: t('uploadVideo'),
               onAction: () => {
-                const choice = prompt('اختر: (1) رفع ملف فيديو، (2) رابط YouTube\nأدخل رابط YouTube مباشرةً أو اضغط إلغاء لرفع ملف:')
+                const choice = prompt(t('videoChoice'))
                 if (choice !== null && choice.trim()) {
                   const embedUrl = toYouTubeEmbed(choice.trim())
                   if (embedUrl) {
@@ -643,7 +651,7 @@ export default function RichTextEditor({
                       const url = await uploadAsset(file, file.name)
                       editor.insertContent(`<video controls src="${url}" style="max-width: 100%;display:block;"></video>`)
                     } catch {
-                      setEditorLoadError('فشل رفع الفيديو')
+                      setEditorLoadError(t('uploadVideoError'))
                     }
                   }
                   input.click()

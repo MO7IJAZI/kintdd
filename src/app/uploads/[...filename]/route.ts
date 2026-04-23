@@ -77,6 +77,18 @@ function serveFile(filenameParts: string[]) {
       case '.pdf':
         contentType = 'application/pdf';
         break;
+      case '.ttf':
+        contentType = 'font/ttf';
+        break;
+      case '.otf':
+        contentType = 'font/otf';
+        break;
+      case '.woff':
+        contentType = 'font/woff';
+        break;
+      case '.woff2':
+        contentType = 'font/woff2';
+        break;
     }
 
     return new NextResponse(fileBuffer, {
