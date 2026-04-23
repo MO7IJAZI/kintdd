@@ -6,6 +6,7 @@ import { inter, outfit, cairo } from '@/app/fonts';
 import '@/app/globals.css';
 import { Metadata } from 'next';
 import { Providers } from '@/components/Providers';
+import CustomFontsLoader from '@/components/CustomFontsLoader';
 
 export async function generateMetadata({
   params
@@ -46,6 +47,7 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} dir={direction} className={`${inter.variable} ${outfit.variable} ${cairo.variable}`}>
       <body className={locale === 'ar' ? 'font-arabic' : 'font-latin'}>
+        <CustomFontsLoader />
         <NextIntlClientProvider messages={messages}>
           <Providers>
             {children}

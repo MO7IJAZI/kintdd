@@ -267,6 +267,21 @@ export default function AnimalTypeForm({ initialData, products = [] }: { initial
       </div>
       <div className="form-group-grid">
         <div className="form-field">
+          <label>{t('MetaTitleEn')}</label>
+          <input value={metaTitle} onChange={e => setMetaTitle(e.target.value)} className="input" placeholder="SEO title in English" />
+        </div>
+        <div className="form-field" dir="rtl">
+          <label>{t('MetaTitleAr')}</label>
+          <input value={metaTitle_ar} onChange={e => setMetaTitleAr(e.target.value)} className="input" placeholder="عنوان SEO بالعربي" />
+        </div>
+        <div className="form-field" dir="rtl">
+          <label>{t('ProductionSeason')}</label>
+          <input value={productionSeason_ar} onChange={e => setProductionSeasonAr(e.target.value)} className="input" placeholder="مثال: طوال العام، الشتاء..." />
+        </div>
+      </div>
+
+      <div className="form-group-grid">
+        <div className="form-field">
           <label>{t('DescriptionEN')}</label>
           <textarea value={description} onChange={e => setDescription(e.target.value)} rows={3} className="input" />
         </div>

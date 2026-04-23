@@ -341,134 +341,124 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
                                 </div>
                             )}
                             {/* Premium Technical Description Sheet */}
-                            <div style={{ marginBottom: '3rem' }}>
-                                <div style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '1rem',
-                                    marginBottom: '2rem'
-                                }}>
-                                    <div style={{ width: '40px', height: '2px', backgroundColor: 'var(--primary)' }} />
-                                    <h3 style={{
-                                        fontSize: '0.9rem',
-                                        fontWeight: 800,
-                                        textTransform: 'uppercase',
-                                        color: 'var(--primary)',
-                                        margin: 0,
-                                        letterSpacing: '0.1em'
+                            {safeDescription && safeDescription.trim() !== '' && (
+                                <div style={{ marginBottom: '3rem' }}>
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '1rem',
+                                        marginBottom: '2rem'
                                     }}>
-                                        {t('technicalSpec')}
-                                    </h3>
-                                </div>
-                                <div
-                                    className="technical-content"
-                                    style={{
-                                        fontSize: '1.2rem',
-                                        lineHeight: '1.9',
-                                        color: '#0f172a',
-                                        paddingRight: isRtl ? '1.5rem' : '1.25rem',
-                                        paddingLeft: isRtl ? '1.25rem' : '1.5rem',
-                                        borderRight: isRtl ? '3px solid var(--primary)' : 'none',
-                                        borderLeft: isRtl ? 'none' : '3px solid var(--primary)',
-                                        paddingTop: '1.25rem',
-                                        paddingBottom: '1.25rem'
-                                    }}
-                                    dangerouslySetInnerHTML={{ __html: safeDescription }}
-                                />
-                                {(!safeDescription || safeDescription.trim() === '') && (
-                                    <div style={{ color: '#999', fontSize: '0.95rem', fontWeight: 700, marginTop: '1rem' }}>
-                                        {isRtl ? 'يتم تحديث المعلومات الفنية التفصيلية حالياً.' : 'Detailed technical information is currently being updated.'}
+                                        <div style={{ width: '40px', height: '2px', backgroundColor: 'var(--primary)' }} />
+                                        <h3 style={{
+                                            fontSize: '0.9rem',
+                                            fontWeight: 800,
+                                            textTransform: 'uppercase',
+                                            color: 'var(--primary)',
+                                            margin: 0,
+                                            letterSpacing: '0.1em'
+                                        }}>
+                                            {t('technicalSpec')}
+                                        </h3>
                                     </div>
-                                )}
-                            </div>
+                                    <div
+                                        className="technical-content"
+                                        style={{
+                                            fontSize: '1.2rem',
+                                            lineHeight: '1.9',
+                                            color: '#0f172a',
+                                            paddingRight: isRtl ? '1.5rem' : '1.25rem',
+                                            paddingLeft: isRtl ? '1.25rem' : '1.5rem',
+                                            borderRight: isRtl ? '3px solid var(--primary)' : 'none',
+                                            borderLeft: isRtl ? 'none' : '3px solid var(--primary)',
+                                            paddingTop: '1.25rem',
+                                            paddingBottom: '1.25rem'
+                                        }}
+                                        dangerouslySetInnerHTML={{ __html: safeDescription }}
+                                    />
+                                </div>
+                            )}
 
                             {/* Feeding Program Table */}
-                            <div>
-                                <h3 style={{
-                                    fontSize: '1.25rem',
-                                    fontWeight: 1200,
-                                    textTransform: 'uppercase',
-                                    color: 'var(--primary)',
-                                    marginBottom: '2rem',
-                                    paddingBottom: '0.5rem',
-                                    borderBottom: '2px solid var(--primary)',
-                                    display: 'inline-block'
-                                }}>
-                                    {t('detailedFeedingProgram')}
-                                </h3>
-                                <div style={{ display: 'grid', gap: '1.5rem' }}>
-                                    {cropData.stages.map((stage) => {
-                                        const stageName = (isRtl && stage.name_ar) ? stage.name_ar : stage.name;
-                                        const stageDesc = (isRtl && stage.description_ar) ? stage.description_ar : (stage.description || t('defaultStageDescription', { name }));
-                                        const safeStageDesc = stripScripts(stageDesc);
+                            {cropData.stages.length > 0 && (
+                                <div>
+                                    <h3 style={{
+                                        fontSize: '1.25rem',
+                                        fontWeight: 1200,
+                                        textTransform: 'uppercase',
+                                        color: 'var(--primary)',
+                                        marginBottom: '2rem',
+                                        paddingBottom: '0.5rem',
+                                        borderBottom: '2px solid var(--primary)',
+                                        display: 'inline-block'
+                                    }}>
+                                        {t('detailedFeedingProgram')}
+                                    </h3>
+                                    <div style={{ display: 'grid', gap: '1.5rem' }}>
+                                        {cropData.stages.map((stage) => {
+                                            const stageName = (isRtl && stage.name_ar) ? stage.name_ar : stage.name;
+                                            const stageDesc = (isRtl && stage.description_ar) ? stage.description_ar : (stage.description || t('defaultStageDescription', { name }));
+                                            const safeStageDesc = stripScripts(stageDesc);
 
-                                        return (
-                                            <div key={stage.id} className="card" dir={isRtl ? 'rtl' : 'ltr'} style={{
-                                                display: 'grid',
-                                                gridTemplateColumns: '220px 1fr',
-                                                overflow: 'hidden',
-                                                border: '1px solid #eee'
-                                            }}>
-                                                <div style={{
-                                                    backgroundColor: '#f8fafc',
-                                                    padding: '2rem',
-                                                    borderRight: isRtl ? 'none' : '1px solid #eee',
-                                                    borderLeft: isRtl ? '1px solid #eee' : 'none',
-                                                    display: 'flex',
-                                                    flexDirection: 'column',
-                                                    justifyContent: 'center'
+                                            return (
+                                                <div key={stage.id} className="card" dir={isRtl ? 'rtl' : 'ltr'} style={{
+                                                    display: 'grid',
+                                                    gridTemplateColumns: '220px 1fr',
+                                                    overflow: 'hidden',
+                                                    border: '1px solid #eee'
                                                 }}>
-                                                    <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', opacity: 0.7 }}>{t('developmentPhase')}</span>
-                                                    <h4 style={{ fontSize: '1.15rem', fontWeight: 900, marginTop: '0.5rem', color: 'var(--foreground)', direction: isRtl ? 'rtl' : 'ltr' }}>{stageName.toUpperCase()}</h4>
-                                                </div>
+                                                    <div style={{
+                                                        backgroundColor: '#f8fafc',
+                                                        padding: '2rem',
+                                                        borderRight: isRtl ? 'none' : '1px solid #eee',
+                                                        borderLeft: isRtl ? '1px solid #eee' : 'none',
+                                                        display: 'flex',
+                                                        flexDirection: 'column',
+                                                        justifyContent: 'center'
+                                                    }}>
+                                                        <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', opacity: 0.7 }}>{t('developmentPhase')}</span>
+                                                        <h4 style={{ fontSize: '1.15rem', fontWeight: 900, marginTop: '0.5rem', color: 'var(--foreground)', direction: isRtl ? 'rtl' : 'ltr' }}>{stageName.toUpperCase()}</h4>
+                                                    </div>
 
-                                                <div style={{ padding: '2rem', backgroundColor: 'white', direction: isRtl ? 'rtl' : 'ltr' }}>
-                                                    <div style={{ color: '#666', fontSize: '0.95rem', lineHeight: '1.7' }} dangerouslySetInnerHTML={{ __html: safeStageDesc }} />
+                                                    <div style={{ padding: '2rem', backgroundColor: 'white', direction: isRtl ? 'rtl' : 'ltr' }}>
+                                                        <div style={{ color: '#666', fontSize: '0.95rem', lineHeight: '1.7' }} dangerouslySetInnerHTML={{ __html: safeStageDesc }} />
 
-                                                    {/* In a real app, recommendations would be many-to-many here too */}
-                                                    <div style={{ marginTop: '1.5rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                                                        {(() => {
-                                                            const recommendation = stage.recommendation as { products?: string[] } | null | undefined;
-                                                            if (!recommendation?.products || !Array.isArray(recommendation.products) || recommendation.products.length === 0) {
-                                                                return (
-                                                                    <span style={{
-                                                                        padding: '0.4rem 1rem',
-                                                                        backgroundColor: '#f1f5f9',
-                                                                        color: '#475569',
-                                                                        borderRadius: '0.5rem',
-                                                                        fontSize: '0.7rem',
-                                                                        fontWeight: 800
-                                                                    }}>{t('optimizedPerformance')}</span>
-                                                                );
-                                                            }
+                                                        {/* In a real app, recommendations would be many-to-many here too */}
+                                                        <div style={{ marginTop: '1.5rem', display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                                                            {(() => {
+                                                                const recommendation = stage.recommendation as { products?: string[] } | null | undefined;
+                                                                if (!recommendation?.products || !Array.isArray(recommendation.products) || recommendation.products.length === 0) {
+                                                                    return null; // Don't show anything if no products
+                                                                }
 
-                                                            return recommendation.products.map((prodId) => {
-                                                                const prod = productsMap.get(prodId);
-                                                                if (!prod) return null;
-                                                                return (
-                                                                    <Link key={prod.id} href={`/product/${prod.slug}` as any} style={{
-                                                                        padding: '0.4rem 1rem',
-                                                                        backgroundColor: '#f1f5f9',
-                                                                        color: '#475569',
-                                                                        borderRadius: '0.5rem',
-                                                                        fontSize: '0.7rem',
-                                                                        fontWeight: 800,
-                                                                        textDecoration: 'none',
-                                                                        display: 'inline-block',
-                                                                        transition: '0.2s'
-                                                                    }}>
-                                                                        {prod.name}
-                                                                    </Link>
-                                                                );
-                                                            });
-                                                        })()}
+                                                                return recommendation.products.map((prodId) => {
+                                                                    const prod = productsMap.get(prodId);
+                                                                    if (!prod) return null;
+                                                                    return (
+                                                                        <Link key={prod.id} href={`/product/${prod.slug}` as any} style={{
+                                                                            padding: '0.4rem 1rem',
+                                                                            backgroundColor: '#f1f5f9',
+                                                                            color: '#475569',
+                                                                            borderRadius: '0.5rem',
+                                                                            fontSize: '0.7rem',
+                                                                            fontWeight: 800,
+                                                                            textDecoration: 'none',
+                                                                            display: 'inline-block',
+                                                                            transition: '0.2s'
+                                                                        }}>
+                                                                            {prod.name}
+                                                                        </Link>
+                                                                    );
+                                                                });
+                                                            })()}
+                                                        </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        );
-                                    })}
+                                            );
+                                        })}
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
                             {/* Products Recommended Section */}
                             {cropData.recommendedProducts.length > 0 && (

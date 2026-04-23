@@ -27,12 +27,15 @@ export default async function EditCropPage({ params }: { params: Promise<{ id: s
     // Transform crop data to match CropInitialData type
     const transformedCrop = {
         ...crop,
-        stages: (crop.stages as CropStage[] | undefined)?.map((s) => ({
+        stages: crop.stages.map((s: any) => ({
             name: s.name,
+            name_ar: s.name_ar,
+            description: s.description,
+            description_ar: s.description_ar,
             recommendation: s.recommendation && typeof s.recommendation === 'object' 
                 ? s.recommendation 
                 : undefined
-        })) || []
+        }))
     };
 
     return (

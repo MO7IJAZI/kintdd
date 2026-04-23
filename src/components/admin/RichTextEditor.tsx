@@ -43,6 +43,15 @@ export default function RichTextEditor({
   /* ── Custom font upload state ── */
   const [customFonts, setCustomFonts] = useState<{ name: string; url: string }[]>([])
 
+  useEffect(() => {
+    fetch('/api/fonts')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setCustomFonts(data)
+      })
+      .catch(console.error)
+  }, [])
+
   const uploadAsset = useCallback(async (file: Blob, fileName = 'upload-file') => {
     const formData = new FormData()
     formData.append('file', file, fileName)
@@ -133,10 +142,15 @@ export default function RichTextEditor({
               const fontName = nameInput?.value?.trim() || file.name.replace(/\.[^.]+$/, '')
               try {
                 const url = await uploadAsset(file, file.name)
-                setCustomFonts(prev => {
-                  const next = [...prev.filter(f => f.name !== fontName), { name: fontName, url }]
-                  return next
+                const res = await fetch('/api/fonts', {
+                  method: 'POST',
+                  body: JSON.stringify({ name: fontName, url }),
+                  headers: { 'Content-Type': 'application/json' }
                 })
+                if (res.ok) {
+                  const data = await res.json()
+                  setCustomFonts(data)
+                }
                 if (nameInput) nameInput.value = ''
               } catch {
                 setEditorLoadError('فشل رفع الخط')
@@ -144,27 +158,10 @@ export default function RichTextEditor({
             }}
           />
         </label>
-        {customFonts.length > 0 && (
-          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-            {customFonts.map(f => (
-              <span key={f.name} style={{
-                padding: '0.2rem 0.6rem', borderRadius: '4px',
-                background: '#e2e8f0', fontSize: '0.78rem', fontWeight: 600,
-                display: 'flex', alignItems: 'center', gap: '0.3rem',
-              }}>
-                {f.name}
-                <button
-                  type="button"
-                  onClick={() => setCustomFonts(prev => prev.filter(x => x.name !== f.name))}
-                  style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#ef4444', fontWeight: 900, lineHeight: 1 }}
-                >×</button>
-              </span>
-            ))}
-          </div>
-        )}
       </div>
 
       <TinyMCEEditor
+        key={fontFamilyFormats}
         tinymceScriptSrc="https://cdn.jsdelivr.net/npm/tinymce@7.7.1/tinymce.min.js"
         licenseKey="gpl"
         value={editorValue}
@@ -264,6 +261,13 @@ export default function RichTextEditor({
           setup: (editor) => {
             const getClosest = (element: Element | null, selector: string) =>
               element?.closest(selector) as HTMLElement | null
+
+            /* ── Add custom fonts to editor body dynamically ── */
+            editor.on('init', () => {
+              if (customFontCss) {
+                editor.dom.addStyle(customFontCss)
+              }
+            })
 
             /* ── YouTube auto-embed on paste ── */
             editor.on('PastePreProcess', (e) => {
@@ -574,14 +578,15 @@ export default function RichTextEditor({
         }}
         onEditorChange={(html) => {
           const clean = DOMPurify.sanitize(html, {
-            ADD_TAGS: ['video', 'source', 'iframe', 'table', 'thead', 'tbody', 'tr', 'td', 'th', 'colgroup', 'col'],
+            ADD_TAGS: ['video', 'source', 'iframe', 'table', 'thead', 'tbody', 'tr', 'td', 'th', 'colgroup', 'col', 'span', 'font', 'style'],
             ADD_ATTR: [
               'controls', 'width', 'height', 'src', 'allow', 'allowfullscreen', 'frameborder',
               'data-type', 'type', 'style', 'colspan', 'rowspan', 'data-float',
               'data-border-color', 'data-border-width', 'border', 'cellpadding', 'cellspacing',
-              'class', 'id', 'dir', 'lang', 'color', 'bgcolor', 'align', 'valign',
+              'class', 'id', 'dir', 'lang', 'color', 'bgcolor', 'align', 'valign', 'face', 'size',
+              'data-mce-style', 'data-mce-selected',
             ],
-            FORBID_ATTR: [],
+            PARSER_MEDIA_TYPE: 'text/html',
             FORCE_BODY: false,
             WHOLE_DOCUMENT: false,
           })

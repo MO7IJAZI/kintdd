@@ -429,7 +429,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
                                                     {/* View — wide rectangle */}
                                                     <a
-                                                        href={`/${locale}/catalogs/viewer?source=${encodeURIComponent(fileUrl)}&title=${encodeURIComponent(title)}&mode=single`}
+                                                        href={`/${locale}/catalogs/viewer?source=${encodeURIComponent(fileUrl)}`}
                                                         style={{
                                                             flex: 1,
                                                             display: 'flex',
@@ -449,7 +449,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                                                     >
                                                         <Eye size={16} strokeWidth={2.2} />
                                                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.2 }}>
-                                                            <span style={{ fontSize: '0.7rem', opacity: 0.8, fontWeight: 500 }}>{type.toUpperCase()}</span>
+                                                            
                                                             <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '150px' }}>{title}</span>
                                                         </div>
                                                     </a>

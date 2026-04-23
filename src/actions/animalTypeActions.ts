@@ -17,6 +17,7 @@ export async function getAnimalType(id: string) {
     where: { id },
     include: { 
       issues: { orderBy: { order: 'asc' } },
+      products: { select: { id: true } },
       tabs: { 
         orderBy: { order: 'asc' },
         include: {

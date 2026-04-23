@@ -124,8 +124,6 @@ export async function createCrop(formData: FormData) {
     const rawDescAr = formData.get("description_ar");
     const description = typeof rawDesc === "string" ? rawDesc : "";
     const description_ar = typeof rawDescAr === "string" ? rawDescAr : "";
-    const harvestSeason_ar_raw = formData.get("harvestSeason_ar");
-    const harvestSeason_ar = typeof harvestSeason_ar_raw === "string" && harvestSeason_ar_raw.trim() ? harvestSeason_ar_raw : null;
     const image = formData.get("image") as string;
     const rawPdfUrl = formData.get("pdfUrl");
     const pdfUrl = normalizeUploadedAssetUrl(typeof rawPdfUrl === "string" ? rawPdfUrl : "");
@@ -190,7 +188,6 @@ export async function createCrop(formData: FormData) {
                 category_ar,
                 description: finalDesc,
                 description_ar: finalDescAr,
-                harvestSeason_ar,
                 image,
                 pdfUrl,
                 pdfUrl_ar,
@@ -242,7 +239,6 @@ export async function createCrop(formData: FormData) {
                     category_ar,
                     description: finalDesc,
                     description_ar: finalDescAr,
-                    harvestSeason_ar,
                     image,
                     pdfUrl,
                     pdfUrl_ar,
@@ -376,8 +372,6 @@ export async function updateCrop(id: string, formData: FormData) {
     const rawDescAr = formData.get("description_ar");
     const description = typeof rawDesc === "string" ? rawDesc : "";
     const description_ar = typeof rawDescAr === "string" ? rawDescAr : "";
-    const harvestSeason_ar_raw = formData.get("harvestSeason_ar");
-    const harvestSeason_ar = typeof harvestSeason_ar_raw === "string" && harvestSeason_ar_raw.trim() ? harvestSeason_ar_raw : null;
     const image = formData.get("image") as string;
     const rawPdfUrl = formData.get("pdfUrl");
     const pdfUrl = normalizeUploadedAssetUrl(typeof rawPdfUrl === "string" ? rawPdfUrl : "");
@@ -442,7 +436,6 @@ export async function updateCrop(id: string, formData: FormData) {
             category_ar,
             description: finalDesc,
             description_ar: finalDescAr,
-            harvestSeason_ar,
             image,
             pdfUrl,
             pdfUrl_ar,

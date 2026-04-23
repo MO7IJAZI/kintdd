@@ -19,6 +19,7 @@ interface CropProduct {
 interface CropStageData {
     name: string;
     name_ar?: string;
+    description?: string;
     description_ar?: string;
     recommendation?: {
         products?: string[];
@@ -81,6 +82,8 @@ export default function CropForm({ initialData, products = [] }: CropFormProps) 
     const [slugEdited, setSlugEdited] = useState(false);
     const [name, setName] = useState(initialData?.name || "");
     const [name_ar, setNameAr] = useState(initialData?.name_ar || "");
+    const [metaTitle, setMetaTitle] = useState(initialData?.metaTitle || "");
+    const [metaTitleAr, setMetaTitleAr] = useState(initialData?.metaTitle_ar || "");
     const [errors, setErrors] = useState<Record<string, string>>({});
     const predefinedCategories = ["vegetables", "fruits", "legumes", "cereals", "industrial", "herbs"];
     const isExistingInitialCategory = initialData?.category ? predefinedCategories.includes(initialData.category) : true;
@@ -101,7 +104,7 @@ export default function CropForm({ initialData, products = [] }: CropFormProps) 
         initialData?.stages?.map((s) => ({
             name: s.name,
             name_ar: s.name_ar || "",
-            description: (s as any).description || "",
+            description: s.description || "",
             description_ar: s.description_ar || "",
             products: s.recommendation?.products || []
         })) || []
@@ -220,6 +223,8 @@ export default function CropForm({ initialData, products = [] }: CropFormProps) 
         formData.set("pdfUrl_ar", pdfUrl_ar);
         formData.set("documentTitle", documentTitle);
         formData.set("documentTitle_ar", documentTitleAr);
+        formData.set("metaTitle", metaTitle);
+        formData.set("metaTitle_ar", metaTitleAr);
         formData.set("slug", slug);
         if (categoryMode === 'new') {
             formData.set("category", newCategoryEn.trim());
@@ -386,6 +391,33 @@ export default function CropForm({ initialData, products = [] }: CropFormProps) 
                         className="input"
                         style={{ width: '100%' }}
                         placeholder={t('documentTitleArPlaceholder')}
+                    />
+                </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2.5rem' }}>
+                <div>
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.9rem' }}>
+                        {t('metaTitle')}
+                    </label>
+                    <input 
+                        value={metaTitle}
+                        onChange={(e) => setMetaTitle(e.target.value)}
+                        className="input"
+                        style={{ width: '100%' }}
+                        placeholder="English meta title..."
+                    />
+                </div>
+                <div dir="rtl">
+                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.9rem' }}>
+                        {t('metaTitleAr')}
+                    </label>
+                    <input 
+                        value={metaTitleAr}
+                        onChange={(e) => setMetaTitleAr(e.target.value)}
+                        className="input"
+                        style={{ width: '100%' }}
+                        placeholder={t('metaTitleArPlaceholder')}
                     />
                 </div>
             </div>

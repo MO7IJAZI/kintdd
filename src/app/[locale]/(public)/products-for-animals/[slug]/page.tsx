@@ -213,21 +213,21 @@ export default async function AnimalDetail({ params }: { params: Promise<{ slug:
             )}
 
             {/* Technical Description */}
-            <div style={{ marginBottom: '3rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
-                <div style={{ width: '40px', height: '2px', backgroundColor: '#142346' }} />
-                <h3 style={{
-                  fontSize: '0.9rem',
-                  fontWeight: 800,
-                  textTransform: 'uppercase',
-                  color: '#142346',
-                  margin: 0,
-                  letterSpacing: '0.1em'
-                }}>
-                  {isAr ? 'المعلومات التقنية' : 'Technical Specifications'}
-                </h3>
-              </div>
-              {safeDescription ? (
+            {safeDescription && safeDescription.trim() !== '' && (
+              <div style={{ marginBottom: '3rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
+                  <div style={{ width: '40px', height: '2px', backgroundColor: '#142346' }} />
+                  <h3 style={{
+                    fontSize: '0.9rem',
+                    fontWeight: 800,
+                    textTransform: 'uppercase',
+                    color: '#142346',
+                    margin: 0,
+                    letterSpacing: '0.1em'
+                  }}>
+                    {isAr ? 'المعلومات التقنية' : 'Technical Specifications'}
+                  </h3>
+                </div>
                 <div
                   className="technical-content"
                   style={{
@@ -243,12 +243,8 @@ export default async function AnimalDetail({ params }: { params: Promise<{ slug:
                   }}
                   dangerouslySetInnerHTML={{ __html: safeDescription }}
                 />
-              ) : (
-                <div style={{ color: '#999', fontSize: '0.95rem', fontWeight: 700, marginTop: '1rem' }}>
-                  {isAr ? 'يتم تحديث المعلومات التفصيلية حالياً.' : 'Detailed information is currently being updated.'}
-                </div>
-              )}
-            </div>
+              </div>
+            )}
 
             {/* Issues / Treatment Program */}
             {animal.issues && animal.issues.length > 0 && (
@@ -302,16 +298,7 @@ export default async function AnimalDetail({ params }: { params: Promise<{ slug:
                               {(() => {
                                   const recommendation = issue.recommendation as { products?: string[] } | null | undefined;
                                   if (!recommendation?.products || !Array.isArray(recommendation.products) || recommendation.products.length === 0) {
-                                      return (
-                                          <span style={{
-                                              padding: '0.4rem 1rem',
-                                              backgroundColor: '#f1f5f9',
-                                              color: '#475569',
-                                              borderRadius: '0.5rem',
-                                              fontSize: '0.7rem',
-                                              fontWeight: 800
-                                          }}>{isAr ? 'أداء محسّن' : 'Optimized Performance'}</span>
-                                      );
+                                      return null;
                                   }
 
                                   return recommendation.products.map((prodId: string) => {

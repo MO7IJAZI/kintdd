@@ -30,7 +30,7 @@ export default function Footer({ productCategories = [] }: { productCategories?:
         <footer style={{
             backgroundColor: '#0a0a0a',
             color: 'white',
-            padding: '6rem 0 3rem',
+            padding: '5rem 0 3rem',
             position: 'relative',
             overflow: 'hidden'
         }} dir={isRtl ? 'rtl' : 'ltr'}>
@@ -49,15 +49,11 @@ export default function Footer({ productCategories = [] }: { productCategories?:
             }} />
 
             <div className="container">
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                    gap: '4rem',
-                    marginBottom: '5rem',
-                    textAlign: isRtl ? 'right' : 'left'
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-20 gap-y-10 mb-20" style={{
+                    textAlign: isRtl ? 'right' : 'left',
                 }}>
                     {/* Brand Section */}
-                    <div>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
                         <Link href="/" style={{
                             fontSize: '1.75rem',
                             fontWeight: 900,
@@ -65,11 +61,12 @@ export default function Footer({ productCategories = [] }: { productCategories?:
                             display: 'flex',
                             alignItems: 'center',
                             gap: '0.75rem',
-                            marginBottom: '0.1rem'
+                            marginBottom: '1.5rem',
+                            marginTop: '-1.15rem' // Fine-tuned to align logo baseline/top with h4 titles
                         }}>
                             <div style={{
                                 width: '200px',
-                                height: '100px',
+                                height: '80px',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
@@ -80,7 +77,7 @@ export default function Footer({ productCategories = [] }: { productCategories?:
                                 <Image src="/images/logo_down.png" alt="KINT Logo" width={200} height={200} style={{ objectFit: 'contain' }} />
                             </div>
                         </Link>
-                        <p style={{ color: 'rgba(255,255,255,0.6)', lineHeight: '1.8', marginBottom: '2.5rem', fontSize: '1rem' }}>
+                        <p style={{ color: 'rgba(255,255,255,0.6)', lineHeight: '1.6', marginBottom: '2rem', fontSize: '0.95rem' }}>
                             {t('description')}
                         </p>
                         <div style={{ display: 'flex', gap: '1rem' }}>
@@ -127,8 +124,8 @@ export default function Footer({ productCategories = [] }: { productCategories?:
 
                     {/* Products Section */}
                     <div>
-                        <h4 style={{ fontSize: '1.2rem', marginBottom: '2rem', fontWeight: '700' }}>{tNav('products')}</h4>
-                        <ul style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <h4 style={{ fontSize: '1.15rem', marginBottom: '1.5rem', fontWeight: '700' }}>{tNav('products')}</h4>
+                        <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
                             {categories.map((category) => (
                                 <li key={category.id}>
                                     <Link href={`/products/${category.slug}` as any} style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }} className="hover:text-primary">
@@ -142,8 +139,8 @@ export default function Footer({ productCategories = [] }: { productCategories?:
 
                     {/* Contact Pages Section */}
                     <div>
-                        <h4 style={{ fontSize: '1.2rem', marginBottom: '2rem', fontWeight: '700' }}>{tNav('contact')}</h4>
-                        <ul style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <h4 style={{ fontSize: '1.15rem', marginBottom: '1.5rem', fontWeight: '700' }}>{tNav('contact')}</h4>
+                        <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
                             <li><Link href="/contact/headquarter" style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }} className="hover:text-primary">{tNav('companyHeadquarter')}</Link></li>
                             <li><Link href="/contact" style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }} className="hover:text-primary">{tNav('contactForm')}</Link></li>
                         </ul>
@@ -151,8 +148,8 @@ export default function Footer({ productCategories = [] }: { productCategories?:
 
                     {/* Contact Info */}
                     <div>
-                        <h4 style={{ fontSize: '1.2rem', marginBottom: '2rem', fontWeight: '700' }}>{t('contactUs')}</h4>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', color: 'rgba(255,255,255,0.6)' }}>
+                        <h4 style={{ fontSize: '1.15rem', marginBottom: '1.5rem', fontWeight: '700' }}>{t('contactUs')}</h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', color: 'rgba(255,255,255,0.6)' }}>
                             <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
                                 <span style={{ color: 'var(--primary)', marginTop: '4px' }}><MapPin size={20} /></span>
                                 <span>{t('address')}</span>
