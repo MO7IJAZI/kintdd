@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { Editor as TinyMCEEditor } from '@tinymce/tinymce-react'
 import DOMPurify from 'dompurify'
 import debounce from 'lodash.debounce'
@@ -318,11 +318,7 @@ export default function RichTextEditor({
             const html = args.node
             
             // Find all spans with hardcoded font-family and mark them as overridable
-            const spans = dom.select('span[style*="font-family"]', html)
-            spans.forEach((span: HTMLElement) => {
-              // Keep the font-family but make it clearable by editor commands
-              // We'll keep the style as-is but can override when user applies new font
-            })
+            dom.select('span[style*="font-family"]', html)
           },
 
           style_formats: [
@@ -335,7 +331,6 @@ export default function RichTextEditor({
             { title: 'Code Block', block: 'pre', classes: 'language-markup' },
           ],
 
-          font_family_formats: fontFamilyFormats,
           fontsize_formats: '10pt 11pt 12pt 14pt 16pt 18pt 20pt 24pt 28pt 32pt 36pt',
           line_height_formats: '1 1.15 1.5 1.75 2 2.5 3',
           autosave_ask_before_unload: false,
@@ -374,6 +369,18 @@ export default function RichTextEditor({
             { text: 'Markdown', value: 'markdown' },
           ],
 
+          // This ensures that when we apply a font, it's applied correctly to the selected content
+          // even if it has complex nested structures from copy-paste
+          font_size_style_values: '10pt,11pt,12pt,14pt,16pt,18pt,20pt,24pt,28pt,32pt,36pt',
+          font_family_formats: fontFamilyFormats,
+          
+          // CRITICAL: Force font family to wrap with span and not try to optimize by 
+          // removing nested spans, which often breaks colors/bold when font is changed
+          inline_styles: true,
+          schema: 'html5',
+          verify_html: false, // Be more lenient with pasted HTML
+          convert_fonts_to_spans: true,
+          
           setup: (editor) => {
             const getClosest = (element: Element | null, selector: string) =>
               element?.closest(selector) as HTMLElement | null
@@ -385,37 +392,54 @@ export default function RichTextEditor({
               }
             })
 
-            /* ── Intercept font family application to override child styles ── */
+            /* ── Intercept font family application to override child styles PROFESSIONALLY ── */
             editor.on('ExecCommand', (e) => {
               if (e.command === 'FontName') {
-                const selection = editor.selection
-                const selectedNode = selection.getNode()
+                const selection = editor.selection;
                 
-                if (!selectedNode) return
-                
-                // After applying new font, wrap selection in span with new font
-                // and remove font-family from inner elements to allow the wrapper style to take precedence
+                // Use a small timeout to let TinyMCE apply its default formatting first
                 setTimeout(() => {
-                  // Get all descendant spans and clear their font-family
-                  const allSpans = editor.dom.select('span[style*="font-family"]', selectedNode)
-                  allSpans.forEach(span => {
-                    const style = span.getAttribute('style') || ''
-                    // Remove font-family from style attribute
-                    const newStyle = style
-                      .replace(/font-family\s*:\s*[^;]+;?\s*/gi, '')
-                      .replace(/;\s*;/g, ';')
-                      .trim()
+                  editor.undoManager.transact(() => {
+                    // If the user selected everything or a large block
+                    // we want to ensure ALL nested spans lose their font-family 
+                    // so the new font-family (usually applied to a parent span) wins.
+                    // BUT we must keep colors, font-size, etc.
                     
-                    if (newStyle) {
-                      span.setAttribute('style', newStyle)
-                    } else {
-                      span.removeAttribute('style')
+                    const walkAndFix = (node: Node) => {
+                      if (node.nodeType === 1) { // Element
+                        const el = node as HTMLElement;
+                        if (el.style.fontFamily) {
+                          // Only remove font-family, keep everything else
+                          el.style.fontFamily = '';
+                          if (!el.getAttribute('style')) el.removeAttribute('style');
+                        }
+                        el.childNodes.forEach(walkAndFix);
+                      }
+                    };
+
+                    // Get the actual selection range content to be precise
+                    const content = selection.getContent({ format: 'html' });
+                    if (content) {
+                      // Apply to all elements within the current selection
+                      const bookmark = selection.getBookmark();
+                      
+                      // Find all spans with font-family in the editor and if they are 
+                      // within the current selection range, clear their font-family
+                      const allSpans = editor.dom.select('span[style*="font-family"]');
+                      allSpans.forEach(span => {
+                        if (selection.getSel()?.containsNode(span, true)) {
+                          span.style.fontFamily = '';
+                          if (!span.getAttribute('style')) span.removeAttribute('style');
+                        }
+                      });
+                      
+                      selection.moveToBookmark(bookmark);
                     }
-                  })
-                  editor.nodeChanged()
-                }, 0)
+                  });
+                  editor.nodeChanged();
+                }, 10);
               }
-            })
+            });
 
             /* ── YouTube auto-embed on paste ── */
             editor.on('PastePreProcess', (e) => {
