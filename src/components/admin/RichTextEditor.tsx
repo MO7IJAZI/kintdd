@@ -291,23 +291,22 @@ export default function RichTextEditor({
           paste_remove_styles_if_webkit: false,
 
           /* ─── Pre-process pasted content to ensure styles are preserved ─── */
-          paste_preprocess: (plugin, args) => {
+          paste_preprocess: () => {
             // Keep pasted content styling intact
             // We'll handle overrides in the ExecCommand handler
             // This allows users to paste styled content and then change the font if needed
           },
 
           /* ─── Post-process pasted content to fix any style issues ─── */
-          paste_postprocess: (plugin, args) => {
+          paste_postprocess: (editor, args) => {
             // Normalize pasted content to be compatible with font changes
-            const dom = plugin.editor.dom
+            const dom = editor.dom
             const html = args.node
             
             // Find all spans with hardcoded font-family and mark them as overridable
             const spans = dom.select('span[style*="font-family"]', html)
             spans.forEach((span: HTMLElement) => {
               // Keep the font-family but make it clearable by editor commands
-              const style = span.getAttribute('style') || ''
               // We'll keep the style as-is but can override when user applies new font
             })
           },
