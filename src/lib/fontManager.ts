@@ -2,6 +2,10 @@ import fs from 'fs/promises';
 import path from 'path';
 import prisma from './prisma';
 
+// Prisma client sometimes lacks freshly generated model typings in the TS server.
+// Use a local `db` alias typed as `any` to access model delegates without editor errors.
+const db = prisma as unknown as any;
+
 export interface CustomFont {
     id?: string;
     name: string;
@@ -24,7 +28,7 @@ export interface CustomFontResponse {
  */
 export async function getCustomFonts(): Promise<CustomFontResponse[]> {
     try {
-        const fonts = await prisma.customFont.findMany({
+        const fonts = await db.customFont.findMany({
             where: { isActive: true },
             orderBy: { createdAt: 'desc' },
         });
@@ -46,13 +50,13 @@ export async function getCustomFonts(): Promise<CustomFontResponse[]> {
 export async function saveCustomFont(font: CustomFont): Promise<CustomFontResponse[]> {
     try {
         // Check if font already exists
-        const existing = await prisma.customFont.findUnique({
+        const existing = await db.customFont.findUnique({
             where: { name: font.name },
         });
 
         if (existing) {
             // Update existing font
-            await prisma.customFont.update({
+            await db.customFont.update({
                 where: { name: font.name },
                 data: {
                     url: font.url,
@@ -66,7 +70,7 @@ export async function saveCustomFont(font: CustomFont): Promise<CustomFontRespon
             });
         } else {
             // Create new font
-            await prisma.customFont.create({
+            await db.customFont.create({
                 data: {
                     name: font.name,
                     url: font.url,
@@ -91,7 +95,7 @@ export async function saveCustomFont(font: CustomFont): Promise<CustomFontRespon
  */
 export async function deleteCustomFont(name: string): Promise<CustomFontResponse[]> {
     try {
-        const fontToDelete = await prisma.customFont.findUnique({
+        const fontToDelete = await db.customFont.findUnique({
             where: { name },
         });
 
@@ -111,7 +115,7 @@ export async function deleteCustomFont(name: string): Promise<CustomFontResponse
         }
 
         // Delete from database
-        await prisma.customFont.delete({
+        await db.customFont.delete({
             where: { name },
         });
 
@@ -127,7 +131,7 @@ export async function deleteCustomFont(name: string): Promise<CustomFontResponse
  */
 export async function getFontCssDeclarations(): Promise<string> {
     try {
-        const fonts = await prisma.customFont.findMany({
+        const fonts = await db.customFont.findMany({
             where: { isActive: true },
             orderBy: { createdAt: 'asc' },
         });
