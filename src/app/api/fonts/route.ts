@@ -20,18 +20,25 @@ export async function GET() {
  * Body: { name, url, fileName, fileSize, mimeType, displayName }
  */
 export async function POST(req: Request) {
-    const session = await auth();
-    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
     try {
-        const { name, url, fileName, fileSize, mimeType, displayName } = await req.json();
+        const session = await auth();
+        if (!session) {
+            console.error('Unauthorized font upload attempt - no session found');
+            return NextResponse.json({ error: 'Unauthorized - Please log in again' }, { status: 401 });
+        }
+
+        const body = await req.json();
+        console.log('Font upload request body:', body);
+        const { name, url, fileName, fileSize, mimeType, displayName } = body;
         
         if (!name || !url) {
+            console.error('Missing required fields:', { name, url });
             return NextResponse.json({ error: 'Missing required fields: name, url' }, { status: 400 });
         }
 
         // Validate font name
         if (name.length < 2 || name.length > 100) {
+            console.error('Invalid font name length:', name.length);
             return NextResponse.json({ error: 'Font name must be 2-100 characters' }, { status: 400 });
         }
 
@@ -40,15 +47,20 @@ export async function POST(req: Request) {
             name,
             url,
             fileName: fileName || '',
-            fileSize: fileSize || 0,
+            fileSize: Number(fileSize) || 0,
             mimeType: mimeType || 'font/ttf',
             displayName: displayName || name,
         });
 
         return NextResponse.json(fonts);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error saving font:', error);
-        return NextResponse.json({ error: 'Failed to save font' }, { status: 500 });
+        // Include stack trace for 500 errors to help debug on VPS
+        return NextResponse.json({ 
+            error: 'Failed to save font', 
+            details: error?.message || String(error),
+            stack: process.env.NODE_ENV === 'development' ? error?.stack : undefined
+        }, { status: 500 });
     }
 }
 

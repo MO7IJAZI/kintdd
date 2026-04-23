@@ -177,16 +177,19 @@ export default function RichTextEditor({
                 const mimeType = mimeTypeMap[ext || ''] || file.type || 'font/ttf'
                 
                 // Save font metadata to database
+                const postData = {
+                  name: fontName,
+                  url,
+                  fileName: file.name,
+                  fileSize: file.size,
+                  mimeType,
+                  displayName: fontName
+                }
+                console.log('Sending font metadata to API:', postData)
+                
                 const res = await fetch('/api/fonts', {
                   method: 'POST',
-                  body: JSON.stringify({
-                    name: fontName,
-                    url,
-                    fileName: file.name,
-                    fileSize: file.size,
-                    mimeType,
-                    displayName: fontName
-                  }),
+                  body: JSON.stringify(postData),
                   headers: { 'Content-Type': 'application/json' }
                 })
                 
@@ -196,7 +199,9 @@ export default function RichTextEditor({
                   if (nameInput) nameInput.value = ''
                   setEditorLoadError(null)
                 } else {
-                  throw new Error('Failed to save font metadata')
+                  const errorData = await res.json().catch(() => ({ error: 'Unknown error' }))
+                  console.error('API Error details:', errorData)
+                  throw new Error(errorData.details || errorData.error || 'Failed to save font metadata')
                 }
               } catch (err) {
                 console.error('Font upload error:', err)

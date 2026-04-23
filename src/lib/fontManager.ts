@@ -49,19 +49,21 @@ export async function getCustomFonts(): Promise<CustomFontResponse[]> {
  */
 export async function saveCustomFont(font: CustomFont): Promise<CustomFontResponse[]> {
     try {
+        console.log('Saving custom font to DB:', font);
         // Check if font already exists
         const existing = await db.customFont.findUnique({
             where: { name: font.name },
         });
 
         if (existing) {
+            console.log('Updating existing font:', font.name);
             // Update existing font
             await db.customFont.update({
                 where: { name: font.name },
                 data: {
                     url: font.url,
                     fileName: font.fileName || existing.fileName,
-                    fileSize: font.fileSize || existing.fileSize,
+                    fileSize: font.fileSize !== undefined ? Number(font.fileSize) : existing.fileSize,
                     mimeType: font.mimeType || existing.mimeType,
                     displayName: font.displayName || existing.displayName,
                     isActive: font.isActive !== undefined ? font.isActive : true,
@@ -69,13 +71,14 @@ export async function saveCustomFont(font: CustomFont): Promise<CustomFontRespon
                 },
             });
         } else {
+            console.log('Creating new font entry:', font.name);
             // Create new font
             await db.customFont.create({
                 data: {
                     name: font.name,
                     url: font.url,
                     fileName: font.fileName || '',
-                    fileSize: font.fileSize || 0,
+                    fileSize: font.fileSize !== undefined ? Number(font.fileSize) : 0,
                     mimeType: font.mimeType || 'font/ttf',
                     displayName: font.displayName || font.name,
                     isActive: true,
@@ -85,7 +88,7 @@ export async function saveCustomFont(font: CustomFont): Promise<CustomFontRespon
 
         return getCustomFonts();
     } catch (error) {
-        console.error('Failed to save font:', error);
+        console.error('Failed to save font to database:', error);
         throw error;
     }
 }
