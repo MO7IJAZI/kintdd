@@ -42,6 +42,7 @@ export default function RichTextEditor({
 
   /* ── Custom font upload state ── */
   const [customFonts, setCustomFonts] = useState<{ name: string; url: string }[]>([])
+  const [isUploadingFont, setIsUploadingFont] = useState(false)
 
   useEffect(() => {
     fetch('/api/fonts')
@@ -93,7 +94,7 @@ export default function RichTextEditor({
 
   /* ─── List of font families including custom ones ─── */
   const fontFamilyFormats = [
-    ...customFonts.map(f => `${f.name}=${f.name},sans-serif`),
+    ...customFonts.map(f => `'${f.name}'='${f.name}',sans-serif`),
     'Arial=arial,helvetica,sans-serif',
     'Tahoma=tahoma,arial,helvetica,sans-serif',
     'Georgia=georgia,serif',
@@ -127,22 +128,31 @@ export default function RichTextEditor({
             border: '1px solid #cbd5e1', fontSize: '0.82rem',
             flex: 1, minWidth: '120px',
           }}
+          disabled={isUploadingFont}
         />
         <label style={{
           padding: '0.35rem 0.9rem', borderRadius: '6px',
-          background: '#e9496c', color: 'white', fontWeight: 700,
-          fontSize: '0.82rem', cursor: 'pointer', whiteSpace: 'nowrap',
+          background: isUploadingFont ? '#94a3b8' : '#e9496c', 
+          color: 'white', fontWeight: 700,
+          fontSize: '0.82rem', cursor: isUploadingFont ? 'default' : 'pointer', 
+          whiteSpace: 'nowrap',
+          transition: 'all 0.2s',
         }}>
-          {t('chooseFont') ?? 'اختر ملف الخط'}
+          {isUploadingFont ? (t('uploading') ?? 'جاري الرفع...') : (t('chooseFont') ?? 'اختر ملف الخط')}
           <input
             type="file"
             accept=".ttf,.otf,.woff,.woff2"
             style={{ display: 'none' }}
+            disabled={isUploadingFont}
             onChange={async (e) => {
               const file = e.target.files?.[0]
               if (!file) return
               const nameInput = document.getElementById('custom-font-name') as HTMLInputElement
               const fontName = nameInput?.value?.trim() || file.name.replace(/\.[^.]+$/, '')
+              
+              setIsUploadingFont(true)
+              setEditorLoadError(null)
+
               try {
                 const url = await uploadAsset(file, file.name, 'fonts')
                 const res = await fetch('/api/fonts', {
@@ -150,13 +160,19 @@ export default function RichTextEditor({
                   body: JSON.stringify({ name: fontName, url }),
                   headers: { 'Content-Type': 'application/json' }
                 })
+                
                 if (res.ok) {
                   const data = await res.json()
                   setCustomFonts(data)
+                  if (nameInput) nameInput.value = ''
+                } else {
+                  throw new Error('Failed to save font metadata')
                 }
-                if (nameInput) nameInput.value = ''
-              } catch {
-                setEditorLoadError('فشل رفع الخط')
+              } catch (err) {
+                console.error('Font upload error:', err)
+                setEditorLoadError(t('fontUploadFailed') ?? 'فشل رفع الخط وتطبيقه')
+              } finally {
+                setIsUploadingFont(false)
               }
             }}
           />
@@ -247,11 +263,19 @@ export default function RichTextEditor({
           /* ── Paste options: preserve all inline styles & colors ── */
           paste_data_images: true,
           paste_as_text: false,
-          paste_merge_formats: false,
-          smart_paste: false,
+          paste_merge_formats: true,
+          smart_paste: true,
           paste_webkit_styles: 'all',
           paste_retain_style_properties: 'all',
           paste_remove_styles_if_webkit: false,
+
+          /* ── Pre-process pasted content to ensure compatibility with overrides ── */
+          paste_preprocess: (plugin, args) => {
+            // We want to keep styles but make them overridable.
+            // Some stubborn styles like 'font-family' in every span can be problematic.
+            // But user wants to keep them unless they change them.
+            // No action needed here for now as we'll handle overrides in 'setup'
+          },
 
           style_formats: [
             { title: 'Paragraph', block: 'p' },
@@ -310,6 +334,19 @@ export default function RichTextEditor({
             editor.on('init', () => {
               if (customFontCss) {
                 editor.dom.addStyle(customFontCss)
+              }
+            })
+
+            /* ── Intercept font family application to clear child overrides ── */
+            editor.on('ExecCommand', (e) => {
+              if (e.command === 'FontName') {
+                const node = editor.selection.getNode()
+                // Clear font-family from all spans inside the selection 
+                // to let the new wrapping span take priority
+                const spans = editor.dom.select('span', node)
+                spans.forEach(span => {
+                  editor.dom.setStyle(span, 'font-family', '')
+                })
               }
             })
 
@@ -628,7 +665,7 @@ export default function RichTextEditor({
               'data-type', 'type', 'style', 'colspan', 'rowspan', 'data-float',
               'data-border-color', 'data-border-width', 'border', 'cellpadding', 'cellspacing',
               'class', 'id', 'dir', 'lang', 'color', 'bgcolor', 'align', 'valign', 'face', 'size',
-              'data-mce-style', 'data-mce-selected',
+              'data-mce-style', 'data-mce-selected', 'data-mce-href', 'data-mce-src'
             ],
             PARSER_MEDIA_TYPE: 'text/html',
             FORCE_BODY: false,
