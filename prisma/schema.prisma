@@ -1,8 +1,5 @@
-// Prisma schema for KINT (Kafri International) Website
-// Database: MariaDB/MySQL
-
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "linux-musl", "debian-openssl-1.1.x", "debian-openssl-3.0.x"]
 }
 
@@ -11,90 +8,84 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Admin User Model
 model Admin {
   id        String   @id @default(cuid())
   email     String   @unique
   password  String
   name      String
-  role      String   @default("admin") // admin, super_admin
+  role      String   @default("admin")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("admins")
 }
 
-// Category Model
 model Category {
-  id          String    @id @default(cuid())
-  name        String
-  name_ar     String
-  slug        String    @unique
-  description String?   @db.Text
-  description_ar String? @db.Text
-  image       String?
-  icon        String?   // Added as per plan
-  parentId    String?
-  parent      Category? @relation("CategoryToCategory", fields: [parentId], references: [id], onDelete: SetNull)
-  children    Category[] @relation("CategoryToCategory")
-  products    Product[]
-  order       Int       @default(0)
-  isActive    Boolean   @default(true)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id             String     @id @default(cuid())
+  name           String
+  slug           String     @unique
+  description    String?    @db.Text
+  image          String?
+  parentId       String?
+  order          Int        @default(0)
+  isActive       Boolean    @default(true)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  description_ar String?    @db.Text
+  name_ar        String
+  icon           String?
+  parent         Category?  @relation("CategoryToCategory", fields: [parentId], references: [id])
+  children       Category[] @relation("CategoryToCategory")
+  products       Product[]
 
   @@index([slug])
   @@index([parentId])
   @@map("categories")
 }
 
-// Product Model
 model Product {
-  id          String   @id @default(cuid())
-  name        String
-  slug        String   @unique
-  sku         String?  @unique // Added as per plan
-  description String?  @db.Text
-  shortDesc   String?  @db.Text
-  features    String?  @db.Text
-  benefits    String?  @db.Text
-  usage       String?  @db.Text
-  composition String?  @db.Text
-  usageTable  Json?    // Added as per plan (Dosage/Stage)
-  compTable   Json?    // Added as per plan (Nutrients)
-  tabs        Json?    // Dynamic tabs for product info
-  image       String?
-  images      ProductImage[]
-  downloads   Download[]     // Added as per plan
-  sections    ProductSection[] // Dynamic product sections
-  categoryId  String
-  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  isOrganic   Boolean  @default(false)
-  isFeatured  Boolean  @default(false)
-  isActive    Boolean  @default(true)
-  order       Int      @default(0)
-  colorTheme  String   @default("blue") // Product color theme
-  metaTitle   String?
-  metaTitle_ar String?
-  metaDesc    String?  @db.Text
-  metaDesc_ar String?  @db.Text
-  
-  // Arabic Content
+  id             String           @id @default(cuid())
+  name           String
+  slug           String           @unique
+  description    String?          @db.Text
+  shortDesc      String?          @db.Text
+  features       String?          @db.Text
+  benefits       String?          @db.Text
+  usage          String?          @db.Text
+  composition    String?          @db.Text
+  image          String?
+  categoryId     String
+  isOrganic      Boolean          @default(false)
+  isFeatured     Boolean          @default(false)
+  isActive       Boolean          @default(true)
+  order          Int              @default(0)
+  metaTitle      String?
+  metaDesc       String?          @db.Text
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  compTable      String?          @db.LongText
+  sku            String?          @unique
+  usageTable     String?          @db.LongText
+  benefits_ar    String?          @db.Text
+  compTable_ar   String?          @db.LongText
+  composition_ar String?          @db.Text
+  description_ar String?          @db.Text
+  features_ar    String?          @db.Text
+  metaDesc_ar    String?          @db.Text
+  metaTitle_ar   String?
   name_ar        String?
-  description_ar String?  @db.Text
-  shortDesc_ar   String?  @db.Text
-  features_ar    String?  @db.Text
-  benefits_ar    String?  @db.Text
-  usage_ar       String?  @db.Text
-  composition_ar String?  @db.Text
-  usageTable_ar  Json?
-  compTable_ar   Json?
-  tabs_ar        Json?
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  crops       Crop[]   @relation("CropRecommendedProducts")
-  animalTypes AnimalType[]
+  shortDesc_ar   String?          @db.Text
+  tabs           String?          @db.LongText
+  tabs_ar        String?          @db.LongText
+  usageTable_ar  String?          @db.LongText
+  usage_ar       String?          @db.Text
+  colorTheme     String           @default("blue")
+  downloads      Download[]
+  images         ProductImage[]
+  sections       ProductSection[]
+  category       Category         @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  animal_types   AnimalType[]     @relation("animaltypetoproduct")
+  crops          Crop[]           @relation("croprecommendedproducts")
 
   @@index([slug])
   @@index([categoryId])
@@ -103,69 +94,65 @@ model Product {
   @@map("products")
 }
 
-// Product Images Model
 model ProductImage {
   id        String   @id @default(cuid())
   url       String
   alt       String?
   order     Int      @default(0)
   productId String
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([productId])
   @@map("product_images")
 }
 
-// Download Model (Labels, SDS, Brochures)
 model Download {
-  id        String   @id @default(cuid())
-  title     String
-  title_ar  String?
-  fileUrl   String
+  id         String   @id @default(cuid())
+  title      String
+  fileUrl    String
+  type       String
+  productId  String?
+  createdAt  DateTime @default(now())
   fileUrl_ar String?
-  type      String   // SDS, Label, Brochure
-  productId String?
-  product   Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
+  title_ar   String?
+  product    Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([productId])
   @@map("downloads")
 }
 
-// Product Section Model (Dynamic content sections for product pages)
 model ProductSection {
-  id        String   @id @default(cuid())
-  title     String
-  title_ar  String?
-  content   String   @db.LongText
-  content_ar String? @db.LongText
-  order     Int      @default(0)
-  colorTheme String  @default("blue")
-  productId String
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(cuid())
+  title      String
+  title_ar   String?
+  content    String   @db.LongText
+  content_ar String?  @db.LongText
+  order      Int      @default(0)
+  colorTheme String   @default("blue")
+  productId  String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@index([productId])
   @@index([order])
   @@map("product_sections")
 }
 
-// Catalog Model (PDF catalogs system)
 model Catalog {
-  id          String   @id @default(cuid())
-  title       String
-  title_ar    String?
-  description String?  @db.Text
-  description_ar String? @db.Text
-  fileUrl     String
-  fileUrl_ar  String?
-  category    String   // agricultural | animal | technical
-  order       Int      @default(0)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String   @id @default(cuid())
+  title          String
+  title_ar       String?
+  description    String?  @db.Text
+  description_ar String?  @db.Text
+  fileUrl        String
+  category       String
+  order          Int      @default(0)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  fileUrl_ar     String?
 
   @@index([category])
   @@index([isActive])
@@ -173,95 +160,90 @@ model Catalog {
   @@map("catalogs")
 }
 
-// Headquarter Model
 model Headquarter {
-  id          String   @id @default(cuid())
-  title       String   @default("Company Headquarter")
-  title_ar    String?  @default("مقر الشركة")
-  content     String?  @db.Text
-  content_ar  String?  @db.Text
-  address     String?
-  address_ar  String?
-  latitude    Float?
-  longitude   Float?
-  updatedAt   DateTime @updatedAt
-  
+  id         String   @id @default(cuid())
+  title      String   @default("Company Headquarter")
+  title_ar   String?  @default("مقر الشركة")
+  content    String?  @db.Text
+  content_ar String?  @db.Text
+  address    String?
+  address_ar String?
+  latitude   Float?
+  longitude  Float?
+  updatedAt  DateTime @updatedAt
+
   @@map("headquarters")
 }
 
-
-// Crop Model
 model Crop {
-  id          String      @id @default(cuid())
-  name        String
-  name_ar     String?
-  slug        String      @unique
-  category    String?     // Crop category (e.g., vegetables, fruits, grains)
-  category_ar String?     // Category in Arabic
+  id               String      @id @default(cuid())
+  name             String
+  slug             String      @unique
+  image            String?
+  pdfUrl           String?
+  description      String?     @db.Text
+  isActive         Boolean     @default(true)
+  metaTitle        String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  description_ar   String?     @db.Text
   harvestSeason_ar String?
-  image             String?
-  pdfUrl            String?
-  pdfUrl_ar         String? // Added: PDF for Arabic
-  documentTitle     String?
-  documentTitle_ar  String?
-  documentIcon      String?
-  description       String?     @db.Text
-  description_ar    String?     @db.Text
-  stages      CropStage[]
-  isActive          Boolean     @default(true)
-  metaTitle         String?
-  metaTitle_ar      String?
-  recommendedProducts Product[]  @relation("CropRecommendedProducts")
-  createdAt         DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  metaTitle_ar     String?
+  name_ar          String?
+  category         String?
+  category_ar      String?
+  pdfUrl_ar        String?
+  documentIcon     String?
+  documentTitle    String?
+  documentTitle_ar String?
+  stages           CropStage[]
+  products         Product[]   @relation("croprecommendedproducts")
 
   @@index([slug])
   @@index([category])
   @@map("crops")
 }
 
-// Crop Stage Model
 model CropStage {
   id             String   @id @default(cuid())
   name           String
+  order          Int      @default(0)
+  cropId         String
+  recommendation String?  @db.LongText
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
   name_ar        String?
   description    String?  @db.Text
   description_ar String?  @db.Text
-  order          Int      @default(0)
-  cropId         String
   crop           Crop     @relation(fields: [cropId], references: [id], onDelete: Cascade)
-  recommendation Json?    // Recommended products for this stage
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
 
   @@index([cropId])
   @@map("crop_stages")
 }
 
-// Blog Post Model
 model BlogPost {
-  id          String   @id @default(cuid())
-  title       String
-  title_ar    String?
-  slug        String   @unique
-  excerpt     String?  @db.Text
-  excerpt_ar  String?  @db.Text
-  content     String   @db.LongText
-  content_ar  String?  @db.LongText
-  image       String?
-  author      String
-  author_ar   String?
-  tags        String?  @db.Text // JSON array stored as text
-  tags_ar     String?  @db.Text // JSON array stored as text
-  isPublished Boolean  @default(false)
-  publishedAt DateTime?
-  metaTitle   String?
+  id           String    @id @default(cuid())
+  title        String
+  slug         String    @unique
+  excerpt      String?   @db.Text
+  content      String    @db.LongText
+  image        String?
+  author       String
+  tags         String?   @db.Text
+  isPublished  Boolean   @default(false)
+  publishedAt  DateTime?
+  metaTitle    String?
+  metaDesc     String?   @db.Text
+  views        Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  content_ar   String?   @db.LongText
+  excerpt_ar   String?   @db.Text
+  metaDesc_ar  String?   @db.Text
   metaTitle_ar String?
-  metaDesc    String?  @db.Text
-  metaDesc_ar String?  @db.Text
-  views       Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  title_ar     String?
+  author_ar    String?
+  tags_ar      String?   @db.Text
 
   @@index([slug])
   @@index([isPublished])
@@ -269,41 +251,38 @@ model BlogPost {
   @@map("blog_posts")
 }
 
-// Static Page Model
 model Page {
-  id        String   @id @default(cuid())
-  title     String
-  title_ar  String?
-  slug      String   @unique
-  content   String   @db.LongText
-  content_ar String? @db.LongText
-  template  String   @default("default")
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(cuid())
+  title      String
+  slug       String   @unique
+  content    String   @db.LongText
+  template   String   @default("default")
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  content_ar String?  @db.LongText
+  title_ar   String?
 
   @@index([slug])
   @@map("pages")
 }
 
-// Contact Form Submissions
 model ContactSubmission {
-  id        String   @id @default(cuid())
-  name      String
-  email     String
-  phone     String?
-  subject   String?
-  department String? // Added as per plan
-  message   String   @db.Text
-  isRead    Boolean  @default(false)
-  createdAt DateTime @default(now())
+  id         String   @id @default(cuid())
+  name       String
+  email      String
+  phone      String?
+  subject    String?
+  message    String   @db.Text
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  department String?
 
   @@index([isRead])
   @@index([createdAt])
   @@map("contact_submissions")
 }
 
-// Settings Model for site-wide configurations
 model Setting {
   id        String   @id @default(cuid())
   key       String   @unique
@@ -313,28 +292,27 @@ model Setting {
   @@map("settings")
 }
 
-// Experts' Forum Article Model
 model ExpertArticle {
-  id          String   @id @default(cuid())
-  title       String
-  title_ar    String?
-  slug        String   @unique
-  excerpt     String?  @db.Text
-  excerpt_ar  String?  @db.Text
-  content     String   @db.LongText
-  content_ar  String?  @db.LongText
-  image       String?
-  category    String   // arable, fruit, vegetable
-  order       Int      @default(0)
-  isPublished Boolean  @default(true)
-  publishedAt DateTime?
-  metaTitle   String?
+  id           String    @id @default(cuid())
+  title        String
+  slug         String    @unique
+  excerpt      String?   @db.Text
+  content      String    @db.LongText
+  image        String?
+  category     String
+  order        Int       @default(0)
+  isPublished  Boolean   @default(true)
+  publishedAt  DateTime?
+  metaTitle    String?
+  metaDesc     String?   @db.Text
+  views        Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  content_ar   String?   @db.LongText
+  excerpt_ar   String?   @db.Text
+  metaDesc_ar  String?   @db.Text
   metaTitle_ar String?
-  metaDesc    String?  @db.Text
-  metaDesc_ar String?  @db.Text
-  views       Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  title_ar     String?
 
   @@index([slug])
   @@index([category])
@@ -343,56 +321,54 @@ model ExpertArticle {
   @@map("expert_articles")
 }
 
-// Job Offer Model
 model JobOffer {
-  id            String   @id @default(cuid())
-  title         String
-  title_ar      String?
-  location      String?
-  location_ar   String?
-  workType      String?
-  workType_ar   String?
-  contractType  String?
-  contractType_ar String?
-  employmentType String?
-  employmentType_ar String?
-  companyIntro  String?  @db.Text
-  companyIntro_ar String? @db.Text
-  responsibilities String? @db.Text
-  responsibilities_ar String? @db.Text
-  benefits      String?  @db.Text
-  benefits_ar   String?  @db.Text
-  qualifications String? @db.Text
-  qualifications_ar String? @db.Text
-  isActive      Boolean  @default(true)
-  expiresAt     DateTime?
-  publishedAt   DateTime @default(now())
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  applications  JobApplication[]
+  id                  String           @id @default(cuid())
+  title               String
+  location            String?
+  workType            String?
+  contractType        String?
+  employmentType      String?
+  companyIntro        String?          @db.Text
+  responsibilities    String?          @db.Text
+  benefits            String?          @db.Text
+  qualifications      String?          @db.Text
+  isActive            Boolean          @default(true)
+  publishedAt         DateTime         @default(now())
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  benefits_ar         String?          @db.Text
+  companyIntro_ar     String?          @db.Text
+  contractType_ar     String?
+  employmentType_ar   String?
+  location_ar         String?
+  qualifications_ar   String?          @db.Text
+  responsibilities_ar String?          @db.Text
+  title_ar            String?
+  workType_ar         String?
+  expiresAt           DateTime?
+  applications        JobApplication[]
 
   @@index([isActive])
   @@index([publishedAt])
   @@map("job_offers")
 }
 
-// Job Application Model
 model JobApplication {
-  id            String   @id @default(cuid())
-  jobOfferId    String
-  jobOffer      JobOffer @relation(fields: [jobOfferId], references: [id], onDelete: Cascade)
-  firstName     String
-  lastName      String
-  email         String
-  phone         String?
-  address       String?  @db.Text
-  linkedIn      String?
-  cvUrl         String?  @db.Text
-  coverLetter   String?  @db.Text
-  status        String   @default("pending") // pending, reviewed, contacted, rejected, hired
-  notes         String?  @db.Text
-  submittedAt   DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id          String   @id @default(cuid())
+  jobOfferId  String
+  firstName   String
+  lastName    String
+  email       String
+  phone       String?
+  address     String?  @db.Text
+  linkedIn    String?
+  cvUrl       String?  @db.Text
+  coverLetter String?  @db.Text
+  status      String   @default("pending")
+  notes       String?  @db.Text
+  submittedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  jobOffer    JobOffer @relation(fields: [jobOfferId], references: [id], onDelete: Cascade)
 
   @@index([jobOfferId])
   @@index([status])
@@ -400,21 +376,19 @@ model JobApplication {
   @@map("job_applications")
 }
 
-
-// PDF Document Model for managing downloadable files
 model Document {
-  id          String   @id @default(cuid())
-  title       String
-  title_ar    String?
-  slug        String   @unique
-  description String?  @db.Text
-  description_ar String? @db.Text
-  filePath    String   // Path to the uploaded PDF file
-  category    String   // optimum-conditions, mixing-table, etc.
-  isActive    Boolean  @default(true)
-  downloads   Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String   @id @default(cuid())
+  title          String
+  title_ar       String?
+  slug           String   @unique
+  description    String?  @db.Text
+  description_ar String?  @db.Text
+  filePath       String
+  category       String
+  isActive       Boolean  @default(true)
+  downloads      Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@index([slug])
   @@index([category])
@@ -422,32 +396,31 @@ model Document {
   @@map("documents")
 }
 
-// Animal Types (Livestock)
 model AnimalType {
-  id               String        @id @default(cuid())
-  name             String
-  name_ar          String?
-  slug             String        @unique
-  category         String?
-  category_ar      String?
+  id                  String          @id @default(cuid())
+  name                String
+  name_ar             String?
+  slug                String          @unique
+  description         String?         @db.Text
+  description_ar      String?         @db.Text
+  imageUrl            String?
+  icon                String?
+  order               Int             @default(0)
+  isActive            Boolean         @default(true)
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  category            String?
+  category_ar         String?
+  documentTitle       String?
+  documentTitle_ar    String?
+  metaTitle           String?
+  metaTitle_ar        String?
+  pdfUrl              String?
+  pdfUrl_ar           String?
   productionSeason_ar String?
-  description      String?       @db.Text
-  description_ar   String?       @db.Text
-  imageUrl         String?
-  icon             String?
-  pdfUrl           String?
-  pdfUrl_ar        String?
-  documentTitle    String?
-  documentTitle_ar String?
-  order            Int           @default(0)
-  isActive         Boolean       @default(true)
-  issues           AnimalIssue[]
-  tabs             AnimalTypeTab[]
-  products         Product[]
-  metaTitle        String?
-  metaTitle_ar     String?
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
+  issues              AnimalIssue[]
+  tabs                AnimalTypeTab[]
+  products            Product[]       @relation("animaltypetoproduct")
 
   @@index([slug])
   @@index([isActive])
@@ -455,7 +428,6 @@ model AnimalType {
   @@map("animal_types")
 }
 
-// Most Common Issues per Animal Type
 model AnimalIssue {
   id             String     @id @default(cuid())
   title          String
@@ -465,10 +437,10 @@ model AnimalIssue {
   order          Int        @default(0)
   isActive       Boolean    @default(true)
   animalTypeId   String
-  animalType     AnimalType @relation(fields: [animalTypeId], references: [id], onDelete: Cascade)
-  recommendation Json?      // Recommended products for this issue
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
+  recommendation String?    @db.LongText
+  animalType     AnimalType @relation(fields: [animalTypeId], references: [id], onDelete: Cascade)
 
   @@index([animalTypeId])
   @@index([isActive])
@@ -476,7 +448,6 @@ model AnimalIssue {
   @@map("animal_issues")
 }
 
-// Tab for an Animal Type
 model AnimalTypeTab {
   id             String               @id @default(cuid())
   title          String
@@ -485,17 +456,16 @@ model AnimalTypeTab {
   description_ar String?              @db.Text
   order          Int                  @default(0)
   animalTypeId   String
-  animalType     AnimalType           @relation(fields: [animalTypeId], references: [id], onDelete: Cascade)
-  images         AnimalTypeTabImage[]
   createdAt      DateTime             @default(now())
   updatedAt      DateTime             @updatedAt
+  images         AnimalTypeTabImage[]
+  animalType     AnimalType           @relation(fields: [animalTypeId], references: [id], onDelete: Cascade)
 
   @@index([animalTypeId])
   @@index([order])
   @@map("animal_type_tabs")
 }
 
-// Image for an Animal Type Tab
 model AnimalTypeTabImage {
   id             String        @id @default(cuid())
   imageUrl       String
@@ -505,27 +475,26 @@ model AnimalTypeTabImage {
   description_ar String?       @db.Text
   order          Int           @default(0)
   tabId          String
-  tab            AnimalTypeTab @relation(fields: [tabId], references: [id], onDelete: Cascade)
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
+  tab            AnimalTypeTab @relation(fields: [tabId], references: [id], onDelete: Cascade)
 
   @@index([tabId])
   @@index([order])
   @@map("animal_type_tab_images")
 }
 
-// Custom Fonts Model - Store uploaded fonts with metadata
 model CustomFont {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  url       String   // URL path to the font file (e.g., /uploads/Cairo-1234567890.ttf)
-  fileName  String   // Original file name
-  fileSize  Int      // File size in bytes
-  mimeType  String   // MIME type (e.g., font/ttf, font/otf, font/woff2)
-  displayName String? // User-friendly display name
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  name        String   @unique
+  url         String
+  fileName    String
+  fileSize    Int
+  mimeType    String
+  displayName String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@index([isActive])
   @@map("custom_fonts")

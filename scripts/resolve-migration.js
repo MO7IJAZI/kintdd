@@ -6,7 +6,7 @@ console.log('Resolving failed migration...');
 // is inconsistent with what Prisma expects. Since we manually fixed the DB tables with fix-db,
 // we can tell Prisma to ignore this specific migration error.
 
-const MIGRATION_NAME = "20260227214622_create_crop_recommended_products_table";
+const MIGRATION_NAME = "20260423144653_add_custom_fonts_t";
 
 console.log(`Marking migration ${MIGRATION_NAME} as resolved...`);
 
@@ -21,14 +21,17 @@ exec(`npx prisma migrate resolve --applied ${MIGRATION_NAME}`, (error, stdout, s
              } else {
                  console.log('Successfully marked migration as rolled back.');
                  console.log(out2);
+                 console.log('\nNow try running: npm run build');
              }
         });
         return;
     }
     if (stderr) {
         console.error(`Stderr: ${stderr}`);
+        console.log('\nNow try running: npm run build');
         return;
     }
     console.log(`Success! Migration resolved.`);
     console.log(stdout);
+    console.log('\nNow try running: npm run build');
 });
