@@ -50,7 +50,7 @@ export default function Hero() {
             backdropFilter: 'blur(10px)'
           }}>
             <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: 'var(--primary)' }}></span>
-            <span style={{ fontSize: '0.9rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--primary)' }}>
+            <span style={{ fontSize: '0.9rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', color: 'var(--primary-light)' }}>
               {tHomeNew('innovation')}
             </span>
           </div>

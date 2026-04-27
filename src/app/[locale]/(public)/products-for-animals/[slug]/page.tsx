@@ -186,7 +186,7 @@ export default async function AnimalDetail({ params }: { params: Promise<{ slug:
                   </a>
                   {/* View — wide rectangle */}
                   <a
-                    href={`/${locale}/catalogs/viewer?source=${encodeURIComponent(normalizedPdfUrl)}&title=${encodeURIComponent(name)}`}
+                    href={`/${locale}/catalogs/viewer?source=${encodeURIComponent(normalizedPdfUrl)}&title=${encodeURIComponent(name)}&mode=single`}
                     style={{
                       flex: 1,
                       display: 'flex',

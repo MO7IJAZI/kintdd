@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { CheckCircle2, Layers, Package } from 'lucide-react';
+import { CheckCircle2, Layers, Wrench } from 'lucide-react';
 
 interface FeatureCardProps {
   icon: React.ReactNode;
@@ -88,7 +88,7 @@ export default function ProductsFeaturesGrid() {
       iconColor: '#142346'
     },
     {
-      icon: <Package className="w-8 h-8" />,
+      icon: <Wrench className="w-8 h-8" />,
       title: t('sustainableSolutions'),
       description: t('sustainableSolutionsDesc'),
       bgColor: 'linear-gradient(135deg, rgba(233,73,108,0.2), rgba(233,73,108,0.1))',

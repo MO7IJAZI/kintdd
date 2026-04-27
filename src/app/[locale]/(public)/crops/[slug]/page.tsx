@@ -416,7 +416,6 @@ export default async function CropDetail({ params }: { params: Promise<{ slug: s
                                                         flexDirection: 'column',
                                                         justifyContent: 'center'
                                                     }}>
-                                                        <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--primary)', textTransform: 'uppercase', opacity: 0.7 }}>{t('developmentPhase')}</span>
                                                         <h4 style={{ fontSize: '1.15rem', fontWeight: 900, marginTop: '0.5rem', color: 'var(--foreground)', direction: isRtl ? 'rtl' : 'ltr' }}>{stageName.toUpperCase()}</h4>
                                                     </div>
 

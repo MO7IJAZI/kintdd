@@ -31,18 +31,15 @@ interface InitialData {
   description?: string;
   description_ar?: string;
   imageUrl?: string;
-  icon?: string;
   pdfUrl?: string;
   pdfUrl_ar?: string;
   documentTitle?: string;
   documentTitle_ar?: string;
   category?: string;
   category_ar?: string;
-  productionSeason_ar?: string;
   metaTitle?: string;
   metaTitle_ar?: string;
-  products?: any[];
-  order?: number;
+  productIds?: string[];
   issues?: IssueItem[];
 }
 
@@ -60,19 +57,26 @@ export default function AnimalTypeForm({ initialData, products = [] }: { initial
   const [slugEdited, setSlugEdited] = useState(false);
   const [description, setDescription] = useState(initialData?.description || "");
   const [description_ar, setDescriptionAr] = useState(initialData?.description_ar || "");
-  const [imageUrl, setImageUrl] = useState(initialData?.imageUrl || initialData?.icon || "");
+  const [descriptionTab, setDescriptionTab] = useState<'en' | 'ar'>('en');
+  const [imageUrl, setImageUrl] = useState(initialData?.imageUrl || "");
   const [pdfUrl, setPdfUrl] = useState(initialData?.pdfUrl || "");
   const [pdfUrl_ar, setPdfUrlAr] = useState(initialData?.pdfUrl_ar || "");
   const [documentTitle, setDocumentTitle] = useState(initialData?.documentTitle || "");
   const [documentTitle_ar, setDocumentTitleAr] = useState(initialData?.documentTitle_ar || "");
-  const [category, setCategory] = useState(initialData?.category || "");
-  const [category_ar, setCategoryAr] = useState(initialData?.category_ar || "");
-  const [productionSeason_ar, setProductionSeasonAr] = useState(initialData?.productionSeason_ar || "");
   const [metaTitle, setMetaTitle] = useState(initialData?.metaTitle || "");
   const [metaTitle_ar, setMetaTitleAr] = useState(initialData?.metaTitle_ar || "");
-  const [selectedProducts, setSelectedProducts] = useState<string[]>(initialData?.products?.map(p => p.id) || []);
-  const [order, setOrder] = useState(initialData?.order || 0);
-  
+  const [selectedProducts, setSelectedProducts] = useState<string[]>(initialData?.productIds || []);
+  const predefinedCategories = ["poultry", "cattle", "fish", "bees", "other"]; // Example categories, adjust as needed
+  const isExistingInitialCategory = initialData?.category ? predefinedCategories.includes(initialData.category) : true;
+  const [categoryMode, setCategoryMode] = useState<'existing' | 'new'>(isExistingInitialCategory ? 'existing' : 'new');
+  const [selectedCategory, setSelectedCategory] = useState(
+      isExistingInitialCategory ? (initialData?.category || "poultry") : "poultry"
+  );
+  const [newCategoryEn, setNewCategoryEn] = useState(isExistingInitialCategory ? "" : (initialData?.category || ""));
+  const [newCategoryAr, setNewCategoryAr] = useState(isExistingInitialCategory ? "" : (initialData?.category_ar || ""));
+
+  const storageKey = `${initialData?.id ? `animalType:${initialData.id}` : 'animalType:new'}:${isRtl ? 'ar' : 'en'}`;
+
   // Map issues to generic "stages" structure used by StagesEditor
   const initialStages = (initialData?.issues || []).map(i => ({
     id: i.id,
@@ -87,7 +91,73 @@ export default function AnimalTypeForm({ initialData, products = [] }: { initial
   const [isPending, setIsPending] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleNameChange = (val: string) => {
+  useEffect(() => {
+    try {
+        const raw = localStorage.getItem(storageKey);
+        if (!raw) return;
+        const saved = JSON.parse(raw) as {
+            description?: string;
+            description_ar?: string;
+            imageUrl?: string;
+            pdfUrl?: string;
+            pdfUrl_ar?: string;
+            documentTitle?: string;
+            documentTitle_ar?: string;
+            slug?: string;
+            selectedProducts?: string[];
+            stages?: any[];
+            selectedCategory?: string;
+            newCategoryEn?: string;
+            newCategoryAr?: string;
+            categoryMode?: 'existing' | 'new';
+        };
+        setTimeout(() => {
+            if (saved.description !== undefined) setDescription(prev => prev || saved.description || '');
+            if (saved.description_ar !== undefined) setDescriptionAr(prev => prev || saved.description_ar || '');
+            if (saved.imageUrl !== undefined) setImageUrl(prev => prev || saved.imageUrl || '');
+            if (saved.pdfUrl !== undefined) setPdfUrl(prev => prev || saved.pdfUrl || '');
+            if (saved.pdfUrl_ar !== undefined) setPdfUrlAr(prev => prev || saved.pdfUrl_ar || '');
+            if (saved.documentTitle !== undefined) setDocumentTitle(prev => prev || saved.documentTitle || '');
+            if (saved.documentTitle_ar !== undefined) setDocumentTitleAr(prev => prev || saved.documentTitle_ar || '');
+            if (saved.slug !== undefined) setSlug(prev => prev || saved.slug || '');
+            if (Array.isArray(saved.selectedProducts) && saved.selectedProducts.length) {
+                setSelectedProducts(prev => prev.length ? prev : saved.selectedProducts as string[]);
+            }
+            if (Array.isArray(saved.stages) && saved.stages.length) {
+                setStages(prev => prev.length ? prev : saved.stages as any[]);
+            }
+            if (saved.selectedCategory !== undefined) setSelectedCategory(prev => prev || saved.selectedCategory || '');
+            if (saved.newCategoryEn !== undefined) setNewCategoryEn(prev => prev || saved.newCategoryEn || '');
+            if (saved.newCategoryAr !== undefined) setNewCategoryAr(prev => prev || saved.newCategoryAr || '');
+            if (saved.categoryMode !== undefined) setCategoryMode(prev => prev || saved.categoryMode!);
+        }, 0);
+    } catch {}
+  }, [storageKey]);
+
+  useEffect(() => {
+    try {
+        const payload = JSON.stringify({
+            description,
+            description_ar,
+            imageUrl,
+            pdfUrl,
+            pdfUrl_ar,
+            documentTitle,
+            documentTitle_ar,
+            slug,
+            selectedProducts,
+            stages,
+            selectedCategory,
+            newCategoryEn,
+            newCategoryAr,
+            categoryMode,
+        });
+        localStorage.setItem(storageKey, payload);
+    } catch {}
+  }, [description, description_ar, imageUrl, pdfUrl, pdfUrl_ar, documentTitle, documentTitle_ar, slug, selectedProducts, stages, selectedCategory, newCategoryEn, newCategoryAr, categoryMode, storageKey]);
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
     setName(val);
     if (!slugEdited && !initialData?.id) {
       setSlug(generateSlug(val));
@@ -95,15 +165,19 @@ export default function AnimalTypeForm({ initialData, products = [] }: { initial
     if (errors.name) setErrors(prev => ({ ...prev, name: '' }));
   };
 
-  const handleNameArChange = (val: string) => {
-    setNameAr(val);
+  const handleNameArChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNameAr(e.target.value);
     if (errors.name_ar) setErrors(prev => ({ ...prev, name_ar: '' }));
   };
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-    if (!name.trim()) newErrors.name = t('nameRequired') || "Name is required";
-    if (!name_ar.trim()) newErrors.name_ar = t('nameArRequired') || "Arabic name is required";
+    if (!name.trim()) newErrors.name = t('nameRequired');
+    if (!name_ar.trim()) newErrors.name_ar = t('nameArRequired');
+    if (categoryMode === 'new') {
+      if (!newCategoryEn.trim()) newErrors.category = t('newCategoryEnRequired');
+      if (!newCategoryAr.trim()) newErrors.category_ar = t('newCategoryArRequired');
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -127,7 +201,7 @@ export default function AnimalTypeForm({ initialData, products = [] }: { initial
     setIsPending(true);
  
      try {
-       const payload = { 
+       const payload: any = { 
          name, 
          name_ar, 
          slug, 
@@ -138,13 +212,9 @@ export default function AnimalTypeForm({ initialData, products = [] }: { initial
          pdfUrl_ar,
          documentTitle,
          documentTitle_ar,
-         category,
-         category_ar,
-         productionSeason_ar,
          metaTitle,
          metaTitle_ar,
          productIds: selectedProducts,
-         order, 
          issues: stages.map((s, idx) => ({
            id: s.id,
            title: s.name,
@@ -154,8 +224,11 @@ export default function AnimalTypeForm({ initialData, products = [] }: { initial
            order: idx,
            isActive: true,
            recommendation: { products: s.products }
-         })), 
+         })),
+         category: categoryMode === 'new' ? newCategoryEn.trim() : selectedCategory,
+         category_ar: categoryMode === 'new' ? newCategoryAr.trim() : (initialData?.category_ar || "")
        };
+
        if (initialData?.id) {
          await updateAnimalType(initialData.id, payload);
        } else {
@@ -163,6 +236,9 @@ export default function AnimalTypeForm({ initialData, products = [] }: { initial
        }
        router.push('/admin/animal-types');
        router.refresh();
+       try {
+           localStorage.removeItem(storageKey);
+       } catch {}
      } catch (error) {
        console.error(error);
      } finally {
@@ -171,69 +247,108 @@ export default function AnimalTypeForm({ initialData, products = [] }: { initial
    };
 
   return (
-    <form onSubmit={onSubmit} className="form-grid">
-      <div className="form-group-grid">
+    <form onSubmit={onSubmit} className="card" style={{ padding: '2.5rem', maxWidth: '1000px', backgroundColor: 'white' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
         <div className="form-field">
-          <label>{t('EnglishName')} <span style={{ color: 'red' }}>*</span></label>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.9rem' }}>{t('EnglishName')} <span style={{ color: 'red' }}>*</span></label>
           <input 
             value={name} 
-            onChange={e => handleNameChange(e.target.value)} 
+            onChange={handleNameChange} 
             className={`input ${errors.name ? 'border-red-500' : ''}`} 
+            style={{ width: '100%' }}
+            placeholder={t('animalNamePlaceholder')}
           />
           {errors.name && <p style={{ color: 'red', fontSize: '0.8rem', marginTop: '0.25rem' }}>{errors.name}</p>}
         </div>
         <div className="form-field" dir="rtl">
-          <label>{t('ArabicName')} <span style={{ color: 'red' }}>*</span></label>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.9rem' }}>{t('ArabicName')} <span style={{ color: 'red' }}>*</span></label>
           <input 
             value={name_ar} 
-            onChange={e => handleNameArChange(e.target.value)} 
+            onChange={handleNameArChange} 
             className={`input ${errors.name_ar ? 'border-red-500' : ''}`} 
+            style={{ width: '100%' }}
+            placeholder={t('animalNameArPlaceholder')}
           />
           {errors.name_ar && <p style={{ color: 'red', fontSize: '0.8rem', marginTop: '0.25rem' }}>{errors.name_ar}</p>}
         </div>
       </div>
-      <div className="form-group-grid">
-        <div className="form-field">
-          <label>{t('Order') || 'Order'}</label>
-          <input type="number" value={order} onChange={e => setOrder(parseInt(e.target.value || '0'))} className="input" />
-        </div>
-        <div className="form-field">
-            <label>{t('CategoryEn')}</label>
-            <input 
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
+      <input type="hidden" name="slug" value={slug} />
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem', marginBottom: '2rem' }}>
+        <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.9rem' }}>{t('categoryEn')}</label>
+            <select
+                value={categoryMode === 'new' ? '__new__' : selectedCategory}
+                onChange={(e) => {
+                    if (e.target.value === '__new__') {
+                        setCategoryMode('new');
+                    } else {
+                        setCategoryMode('existing');
+                        setSelectedCategory(e.target.value);
+                    }
+                }}
                 className="input"
-                placeholder="e.g. Poultry, Cattle"
+                style={{ width: '100%' }}
+            >
+                {predefinedCategories.map(cat => (
+                    <option key={cat} value={cat}>{t(cat)}</option>
+                ))}
+                <option value="__new__">{t('addNewCategoryOption')}</option>
+            </select>
+            {categoryMode === 'new' && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '0.75rem' }}>
+                    <div>
+                        <input
+                            value={newCategoryEn}
+                            onChange={(e) => setNewCategoryEn(e.target.value)}
+                            className="input"
+                            style={{ width: '100%' }}
+                            placeholder={t('newCategoryEnPlaceholder')}
+                        />
+                        {errors.category && <p style={{ color: 'red', fontSize: '0.8rem', marginTop: '0.25rem' }}>{errors.category}</p>}
+                    </div>
+                    <div dir="rtl">
+                        <input
+                            value={newCategoryAr}
+                            onChange={(e) => setNewCategoryAr(e.target.value)}
+                            className="input"
+                            style={{ width: '100%' }}
+                            placeholder={t('newCategoryArPlaceholder')}
+                        />
+                        {errors.category_ar && <p style={{ color: 'red', fontSize: '0.8rem', marginTop: '0.25rem' }}>{errors.category_ar}</p>}
+                    </div>
+                </div>
+            )}
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2.5rem' }}>
+        <div>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.9rem' }}>
+                {t('MetaTitleEn')}
+            </label>
+            <input 
+                value={metaTitle}
+                onChange={(e) => setMetaTitle(e.target.value)}
+                className="input"
+                style={{ width: '100%' }}
+                placeholder="English meta title..."
             />
         </div>
-        <div className="form-field" dir="rtl">
-            <label>{t('CategoryAr')}</label>
+        <div dir="rtl">
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.9rem' }}>
+                {t('MetaTitleAr')}
+            </label>
             <input 
-                value={category_ar}
-                onChange={(e) => setCategoryAr(e.target.value)}
+                value={metaTitle_ar}
+                onChange={(e) => setMetaTitleAr(e.target.value)}
                 className="input"
-                placeholder="مثال: الدواجن، المواشي"
+                style={{ width: '100%' }}
+                placeholder={t('metaTitleArPlaceholder')}
             />
         </div>
       </div>
 
-      <div className="form-group-grid">
-        <div className="form-field">
-            <label>{t('MetaTitleEn')}</label>
-            <input value={metaTitle} onChange={e => setMetaTitle(e.target.value)} className="input" placeholder="Meta title..." />
-        </div>
-        <div className="form-field" dir="rtl">
-            <label>{t('MetaTitleAr')}</label>
-            <input value={metaTitle_ar} onChange={e => setMetaTitleAr(e.target.value)} className="input" placeholder="عنوان الميتا..." />
-        </div>
-      </div>
-
-      <div className="form-group-grid">
-        <div className="form-field" dir="rtl">
-            <label>{t('ProductionSeason')}</label>
-            <input value={productionSeason_ar} onChange={e => setProductionSeasonAr(e.target.value)} className="input" placeholder="مثال: طوال العام" />
-        </div>
-      </div>
       <div className="form-field">
         <ImageUpload
           label={t('ImageOrIcon')}
@@ -243,52 +358,101 @@ export default function AnimalTypeForm({ initialData, products = [] }: { initial
       </div>
 
       {/* PDF & Document Fields */}
-      <div className="form-group-grid" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '2rem', marginBottom: '2.5rem' }}>
         <FileUpload
-          label={`PDF (English)`}
+          label={`${t('pdf')} (${t('english')})`}
           value={pdfUrl}
           onChange={setPdfUrl}
         />
         <FileUpload
-          label={`PDF (العربية)`}
+          label={`${t('pdf')} (${t('arabic')})`}
           value={pdfUrl_ar}
           onChange={setPdfUrlAr}
         />
       </div>
-      <div className="form-group-grid">
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2.5rem' }}>
         <div className="form-field">
-          <label>{t('DocumentTitleEn')}</label>
-          <input value={documentTitle} onChange={e => setDocumentTitle(e.target.value)} className="input" placeholder="e.g. Poultry Nutrition Guide" />
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.9rem' }}>
+            {t('DocumentTitleEn')}
+          </label>
+          <input 
+            value={documentTitle}
+            onChange={(e) => setDocumentTitle(e.target.value)}
+            className="input"
+            style={{ width: '100%' }}
+            placeholder={t('documentTitlePlaceholder')}
+          />
         </div>
         <div className="form-field" dir="rtl">
-          <label>{t('DocumentTitleAr')}</label>
-          <input value={documentTitle_ar} onChange={e => setDocumentTitleAr(e.target.value)} className="input" placeholder="مثال: دليل تغذية الدواجن" />
-        </div>
-      </div>
-      <div className="form-group-grid">
-        <div className="form-field">
-          <label>{t('MetaTitleEn')}</label>
-          <input value={metaTitle} onChange={e => setMetaTitle(e.target.value)} className="input" placeholder="SEO title in English" />
-        </div>
-        <div className="form-field" dir="rtl">
-          <label>{t('MetaTitleAr')}</label>
-          <input value={metaTitle_ar} onChange={e => setMetaTitleAr(e.target.value)} className="input" placeholder="عنوان SEO بالعربي" />
-        </div>
-        <div className="form-field" dir="rtl">
-          <label>{t('ProductionSeason')}</label>
-          <input value={productionSeason_ar} onChange={e => setProductionSeasonAr(e.target.value)} className="input" placeholder="مثال: طوال العام، الشتاء..." />
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.9rem' }}>
+            {t('DocumentTitleAr')}
+          </label>
+          <input 
+            value={documentTitle_ar}
+            onChange={(e) => setDocumentTitleAr(e.target.value)}
+            className="input"
+            style={{ width: '100%' }}
+            placeholder={t('documentTitleArPlaceholder')}
+          />
         </div>
       </div>
 
-      <div className="form-group-grid">
-        <div className="form-field">
-          <label>{t('DescriptionEN')}</label>
-          <textarea value={description} onChange={e => setDescription(e.target.value)} rows={3} className="input" />
-        </div>
-        <div className="form-field">
-          <label>{t('DescriptionAR')}</label>
-          <textarea value={description_ar} onChange={e => setDescriptionAr(e.target.value)} rows={3} className="input" dir="rtl" />
-        </div>
+      <div style={{ marginBottom: '2rem' }}>
+          {/* Language Tabs */}
+          <div style={{ 
+              display: 'flex', 
+              gap: '0.5rem', 
+              marginBottom: '1rem',
+              borderBottom: '2px solid #e5e7eb'
+          }}>
+              <button
+                  type="button"
+                  onClick={() => setDescriptionTab('en')}
+                  style={{
+                      padding: '0.75rem 1.5rem',
+                      border: 'none',
+                      background: descriptionTab === 'en' ? '#3b82f6' : 'transparent',
+                      color: descriptionTab === 'en' ? 'white' : '#374151',
+                      fontWeight: '600',
+                      fontSize: '0.875rem',
+                      cursor: 'pointer',
+                      borderRadius: '8px 8px 0 0',
+                      transition: 'all 0.2s',
+                  }}
+              >
+                  {t('english')} 🇬🇧
+              </button>
+              <button
+                  type="button"
+                  onClick={() => setDescriptionTab('ar')}
+                  style={{
+                      padding: '0.75rem 1.5rem',
+                      border: 'none',
+                      background: descriptionTab === 'ar' ? '#3b82f6' : 'transparent',
+                      color: descriptionTab === 'ar' ? 'white' : '#374151',
+                      fontWeight: '600',
+                      fontSize: '0.875rem',
+                      cursor: 'pointer',
+                      borderRadius: '8px 8px 0 0',
+                      transition: 'all 0.2s',
+                  }}
+              >
+                  {t('arabic')} 🇸🇦
+              </button>
+          </div>
+          {descriptionTab === 'en' && (
+              <RichTextEditor 
+                  value={description} 
+                  onChange={setDescription} 
+              />
+          )}
+          {descriptionTab === 'ar' && (
+              <RichTextEditor 
+                  value={description_ar} 
+                  onChange={setDescriptionAr} 
+                  dir="rtl"
+              />
+          )}
       </div>
 
       <div className="form-section">

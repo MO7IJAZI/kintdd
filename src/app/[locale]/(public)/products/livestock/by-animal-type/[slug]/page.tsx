@@ -201,7 +201,7 @@ export default async function AnimalDetail({ params }: { params: Promise<{ slug:
                   </a>
                   {/* View — wide rectangle */}
                   <a
-                    href={`/${locale}/catalogs/viewer?source=${encodeURIComponent(normalizedPdfUrl)}&title=${encodeURIComponent(name)}`}
+                    href={`/${locale}/catalogs/viewer?source=${encodeURIComponent(normalizedPdfUrl)}&title=${encodeURIComponent(name)}&mode=single`}
                     style={{
                       flex: 1,
                       display: 'flex',
@@ -302,9 +302,7 @@ export default async function AnimalDetail({ params }: { params: Promise<{ slug:
                           flexDirection: 'column',
                           justifyContent: 'center'
                         }}>
-                          <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#142346', textTransform: 'uppercase', opacity: 0.7 }}>
-                            {isAr ? 'البرنامج' : 'Program'}
-                          </span>
+                        
                           <h4 style={{ fontSize: '1.15rem', fontWeight: 900, marginTop: '0.5rem', color: 'var(--foreground)', direction: isAr ? 'rtl' : 'ltr' }}>
                             {issueName.toUpperCase()}
                           </h4>

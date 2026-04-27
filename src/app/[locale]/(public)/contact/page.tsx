@@ -50,11 +50,9 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
                                             <p style={{ color: 'var(--muted-foreground)' }}>
                                                 {t('generalInquiries')}: <span dir="ltr" style={{ unicodeBidi: 'plaintext' }}>info@kint-group.com</span>
                                             </p>
+                                           
                                             <p style={{ color: 'var(--muted-foreground)' }}>
-                                                {t('exportDept')}: <span dir="ltr" style={{ unicodeBidi: 'plaintext' }}>export@kint-group.com</span>
-                                            </p>
-                                            <p style={{ color: 'var(--muted-foreground)' }}>
-                                                {t('support')}: <span dir="ltr" style={{ unicodeBidi: 'plaintext' }}>+48 12 345 67 89</span>
+                                                {t('support')}: <span dir="ltr" style={{ unicodeBidi: 'plaintext' }}>+962 780 547 194</span>
                                             </p>
                                         </div>
                                     </div>
