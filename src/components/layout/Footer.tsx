@@ -49,11 +49,12 @@ export default function Footer({ productCategories = [] }: { productCategories?:
             }} />
 
             <div className="container">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-20 gap-y-10 mb-20" style={{
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-10 mb-20" style={{
                     textAlign: isRtl ? 'right' : 'left',
+                    columnGap: '10rem'
                 }}>
                     {/* Brand Section */}
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                         <Link href="/" style={{
                             fontSize: '1.75rem',
                             fontWeight: 900,
@@ -61,8 +62,7 @@ export default function Footer({ productCategories = [] }: { productCategories?:
                             display: 'flex',
                             alignItems: 'center',
                             gap: '0.75rem',
-                            marginBottom: '1.5rem',
-                            marginTop: '-1.15rem' // Fine-tuned to align logo baseline/top with h4 titles
+                            marginTop: '-3.5rem' // Aligned to match h4 bottom baseline
                         }}>
                             <div style={{
                                 width: '200px',
@@ -77,10 +77,10 @@ export default function Footer({ productCategories = [] }: { productCategories?:
                                 <Image src="/images/logo_down.png" alt="KINT Logo" width={200} height={200} style={{ objectFit: 'contain' }} />
                             </div>
                         </Link>
-                        <p style={{ color: 'rgba(255,255,255,0.6)', lineHeight: '1.6', marginBottom: '2rem', fontSize: '0.95rem' }}>
+                        <p style={{ color: 'rgba(255,255,255,0.6)', lineHeight: '1.6', fontSize: '0.95rem', maxWidth: '200px' }}>
                             {t('description')}
                         </p>
-                        <div style={{ display: 'flex', gap: '1rem' }}>
+                        <div style={{ display: 'flex', gap: '1.5rem' }}>
                             <a
                                 href="https://www.facebook.com/share/1Aa6zbV7A2/"
                                 target="_blank"
@@ -123,9 +123,9 @@ export default function Footer({ productCategories = [] }: { productCategories?:
                     </div>
 
                     {/* Products Section */}
-                    <div>
-                        <h4 style={{ fontSize: '1.15rem', marginBottom: '1.5rem', fontWeight: '700' }}>{tNav('products')}</h4>
-                        <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                        <h4 style={{ fontSize: '1.15rem', fontWeight: '700' }}>{tNav('products')}</h4>
+                        <ul style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                             {categories.map((category) => (
                                 <li key={category.id}>
                                     <Link href={`/products/${category.slug}` as any} style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }} className="hover:text-primary">
@@ -138,29 +138,29 @@ export default function Footer({ productCategories = [] }: { productCategories?:
                     </div>
 
                     {/* Contact Pages Section */}
-                    <div>
-                        <h4 style={{ fontSize: '1.15rem', marginBottom: '1.5rem', fontWeight: '700' }}>{tNav('contact')}</h4>
-                        <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                        <h4 style={{ fontSize: '1.15rem', fontWeight: '700' }}>{tNav('contact')}</h4>
+                        <ul style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                             <li><Link href="/contact/headquarter" style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }} className="hover:text-primary">{tNav('companyHeadquarter')}</Link></li>
                             <li><Link href="/contact" style={{ color: 'rgba(255,255,255,0.6)', transition: '0.3s' }} className="hover:text-primary">{tNav('contactForm')}</Link></li>
                         </ul>
                     </div>
 
                     {/* Contact Info */}
-                    <div>
-                        <h4 style={{ fontSize: '1.15rem', marginBottom: '1.5rem', fontWeight: '700' }}>{t('contactUs')}</h4>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', color: 'rgba(255,255,255,0.6)' }}>
-                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                        <h4 style={{ fontSize: '1.15rem', fontWeight: '700' }}>{t('contactUs')}</h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', color: 'rgba(255,255,255,0.6)' }}>
+                            <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
                                 <span style={{ color: 'var(--primary)', marginTop: '4px' }}><MapPin size={20} /></span>
                                 <span>{t('address')}</span>
                             </div>
-                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
                                 <span style={{ color: 'var(--primary)' }}><Phone size={20} /></span>
                                 <a href="tel:+962780547194" dir="ltr" style={{ unicodeBidi: 'plaintext', color: 'inherit', transition: '0.3s' }} className="hover:text-primary">
                                     +962 780 547 194
                                 </a>
                             </div>
-                            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
                                 <span style={{ color: 'var(--primary)' }}><Mail size={20} /></span>
                                 <a href="mailto:info@kint-group.com" dir="ltr" style={{ unicodeBidi: 'plaintext', color: 'inherit', transition: '0.3s' }} className="hover:text-primary">
                                     info@kint-group.com
