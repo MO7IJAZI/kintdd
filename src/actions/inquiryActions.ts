@@ -51,6 +51,28 @@ export async function getInquiries() {
     return getInquiriesCached();
 }
 
+export async function getInquiry(id: string) {
+    const session = await auth();
+    if (!session) {
+        throw new Error("Unauthorized");
+    }
+
+    return prisma.contactSubmission.findUnique({
+        where: { id },
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            subject: true,
+            message: true,
+            isRead: true,
+            createdAt: true,
+            department: true,
+        },
+    });
+}
+
 export async function markAsRead(id: string) {
     const session = await auth();
     if (!session) {

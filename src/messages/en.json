@@ -1082,6 +1082,12 @@
     "read": "Read",
     "new": "New",
     "view": "View",
+    "detailsTitle": "Inquiry Details",
+    "back": "Back",
+    "phone": "Phone",
+    "message": "Message",
+    "department": "Department",
+    "sentAt": "Sent At",
     "noSubject": "No Subject",
     "noData": "No messages received yet."
   },

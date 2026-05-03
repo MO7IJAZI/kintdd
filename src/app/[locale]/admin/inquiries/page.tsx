@@ -1,12 +1,14 @@
+import Link from "next/link";
 import { getInquiries } from "@/actions/inquiryActions";
 import DeleteButton from "@/components/admin/DeleteButton";
 import { getTranslations } from 'next-intl/server';
 
 export const dynamic = 'force-dynamic';
 
-export default async function AdminInquiries() {
+export default async function AdminInquiries({ params }: { params: { locale: string } }) {
     const inquiries = await getInquiries();
     const t = await getTranslations('AdminInquiries');
+    const locale = params.locale;
 
     return (
         <div>
@@ -50,7 +52,9 @@ export default async function AdminInquiries() {
                                     </span>
                                 </td>
                                 <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
-                                    <button style={{ color: 'var(--primary)', fontWeight: '600', marginRight: '1rem' }}>{t('view')}</button>
+                                    <Link href={`/${locale}/admin/inquiries/${iq.id}`} style={{ color: 'var(--primary)', fontWeight: '600', marginRight: '1rem', textDecoration: 'none' }}>
+                                        {t('view')}
+                                    </Link>
                                     <DeleteButton id={iq.id} type="inquiry" />
                                 </td>
                             </tr>
