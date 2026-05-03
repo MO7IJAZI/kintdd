@@ -10,6 +10,7 @@ export async function submitInquiry(formData: FormData) {
     const phone = formData.get("phone") as string;
     const subject = formData.get("subject") as string;
     const message = formData.get("message") as string;
+    const department = (formData.get("department") as string) || null;
 
     await prisma.contactSubmission.create({
         data: {
@@ -18,6 +19,7 @@ export async function submitInquiry(formData: FormData) {
             phone,
             subject,
             message,
+            department,
         },
     });
 
@@ -82,8 +84,6 @@ export async function markAsRead(id: string) {
         where: { id },
         data: { isRead: true },
     });
-    revalidatePath("/admin/inquiries");
-    revalidateTag("inquiries", { expire: 0 });
 }
 
 export async function deleteInquiry(id: string) {

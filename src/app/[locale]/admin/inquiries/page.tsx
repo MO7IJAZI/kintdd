@@ -5,10 +5,10 @@ import { getTranslations } from 'next-intl/server';
 
 export const dynamic = 'force-dynamic';
 
-export default async function AdminInquiries({ params }: { params: { locale: string } }) {
+export default async function AdminInquiries({ params }: { params: Promise<{ locale: string }> }) {
+    const { locale } = await params;
     const inquiries = await getInquiries();
     const t = await getTranslations('AdminInquiries');
-    const locale = params.locale;
 
     return (
         <div>
@@ -52,10 +52,12 @@ export default async function AdminInquiries({ params }: { params: { locale: str
                                     </span>
                                 </td>
                                 <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
-                                    <Link href={`/${locale}/admin/inquiries/${iq.id}`} style={{ color: 'var(--primary)', fontWeight: '600', marginRight: '1rem', textDecoration: 'none' }}>
-                                        {t('view')}
-                                    </Link>
-                                    <DeleteButton id={iq.id} type="inquiry" />
+                                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '1rem' }}>
+                                        <Link href={`/${locale}/admin/inquiries/${iq.id}`} style={{ color: 'var(--primary)', fontWeight: '600', textDecoration: 'none' }}>
+                                            {t('view')}
+                                        </Link>
+                                        <DeleteButton id={iq.id} type="inquiry" />
+                                    </div>
                                 </td>
                             </tr>
                         ))}

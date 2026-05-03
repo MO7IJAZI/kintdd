@@ -5,14 +5,15 @@ import { getTranslations } from "next-intl/server";
 
 export const dynamic = 'force-dynamic';
 
-export default async function AdminInquiryDetails({ params }: { params: { locale: string; id: string } }) {
-    const inquiry = await getInquiry(params.id);
+export default async function AdminInquiryDetails({ params }: { params: Promise<{ locale: string; id: string }> }) {
+    const { locale, id } = await params;
+    const inquiry = await getInquiry(id);
     if (!inquiry) {
         notFound();
     }
 
     if (!inquiry.isRead) {
-        await markAsRead(params.id);
+        await markAsRead(id);
     }
 
     const t = await getTranslations('AdminInquiries');
@@ -21,7 +22,7 @@ export default async function AdminInquiryDetails({ params }: { params: { locale
         <div>
             <div style={{ marginBottom: '2.5rem' }}>
                 <Link
-                    href={`/${params.locale}/admin/inquiries`}
+                    href={`/${locale}/admin/inquiries`}
                     style={{ display: 'inline-block', marginBottom: '1rem', color: 'var(--primary)', fontWeight: 600, textDecoration: 'none' }}
                 >
                     ← {t('back')}
