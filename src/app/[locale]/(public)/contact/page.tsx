@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { getTranslations } from 'next-intl/server';
 import prisma from '@/lib/prisma';
 import { stripScripts } from "@/lib/sanitizeHtml";
+import { getSettings } from '@/actions/settingsActions';
 
 export const revalidate = 300;
 
@@ -15,6 +16,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
     const page = await prisma.page.findUnique({ where: { slug: 'contact' } });
     const content = page ? (isAr ? (page.content_ar || page.content) : page.content) : null;
     const safeContent = content ? stripScripts(content) : null;
+    const settings = await getSettings();
 
     return (
         <div className="section" style={{ direction: isAr ? 'rtl' : 'ltr' }}>
@@ -48,7 +50,7 @@ export default async function ContactPage({ params }: { params: Promise<{ locale
                                         <div>
                                             <h4 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>{t('directContact')}</h4>
                                             <p style={{ color: 'var(--muted-foreground)' }}>
-                                                {t('generalInquiries')}: <span dir="ltr" style={{ unicodeBidi: 'plaintext' }}>info@kint-group.com</span>
+                                                {t('generalInquiries')}: <span dir="ltr" style={{ unicodeBidi: 'plaintext' }}>{settings.contactEmail}</span>
                                             </p>
                                            
                                             <p style={{ color: 'var(--muted-foreground)' }}>

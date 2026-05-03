@@ -884,9 +884,12 @@
       "siteName": "اسم الموقع",
       "contactEmail": "بريد الاتصال",
       "socialMedia": "وسائل التواصل الاجتماعي",
-      "linkedin": "لينكد إن",
-      "youtube": "يوتيوب",
-      "save": "حفظ الإعدادات"
+      "facebook": "فيسبوك",
+      "instagram": "إنستاجرام",
+      "save": "حفظ الإعدادات",
+      "saving": "جارٍ الحفظ...",
+      "settingsSaved": "تم حفظ الإعدادات بنجاح.",
+      "saveError": "فشل حفظ الإعدادات. يرجى المحاولة مرة أخرى."
     },
     "AdminExpertArticleForm": {
       "english": "English",

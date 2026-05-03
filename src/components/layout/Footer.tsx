@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { Link } from '@/navigation';
 import { useTranslations, useLocale } from 'next-intl';
+import type { GlobalSettings } from '@/actions/settingsActions';
 import { Facebook, Instagram, Phone, Mail, MapPin } from 'lucide-react';
 
 type ProductCategoryNav = {
@@ -11,12 +12,15 @@ type ProductCategoryNav = {
   parentId?: string | null;
 };
 
-export default function Footer({ productCategories = [] }: { productCategories?: ProductCategoryNav[] }) {
+export default function Footer({ productCategories = [], settings }: { productCategories?: ProductCategoryNav[]; settings?: GlobalSettings }) {
     const t = useTranslations('Footer');
     const tNav = useTranslations('Navigation');
     const locale = useLocale();
     const isRtl = locale === 'ar';
     const currentYear = new Date().getFullYear();
+    const facebookUrl = settings?.facebookUrl || 'https://www.facebook.com/share/1Aa6zbV7A2/';
+    const instagramUrl = settings?.instagramUrl || 'https://www.instagram.com/kafri.international?igsh=MTZxdjNtYTNkemFncQ==';
+    const contactEmail = settings?.contactEmail || 'info@kint-group.com';
 
     const fallbackCategories: ProductCategoryNav[] = [
       { id: 'livestock', name: 'Livestock', name_ar: 'الثروة الحيوانية', slug: 'livestock', parentId: null },
@@ -82,7 +86,7 @@ export default function Footer({ productCategories = [] }: { productCategories?:
                         </p>
                         <div style={{ display: 'flex', gap: '1.5rem' }}>
                             <a
-                                href="https://www.facebook.com/share/1Aa6zbV7A2/"
+                                href={facebookUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 style={{
@@ -101,7 +105,7 @@ export default function Footer({ productCategories = [] }: { productCategories?:
                                 <Facebook size={20} />
                             </a>
                             <a
-                                href="https://www.instagram.com/kafri.international?igsh=MTZxdjNtYTNkemFncQ=="
+                                href={instagramUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 style={{
@@ -162,8 +166,8 @@ export default function Footer({ productCategories = [] }: { productCategories?:
                             </div>
                             <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
                                 <span style={{ color: 'var(--primary)' }}><Mail size={20} /></span>
-                                <a href="mailto:info@kint-group.com" dir="ltr" style={{ unicodeBidi: 'plaintext', color: 'inherit', transition: '0.3s' }} className="hover:text-primary">
-                                    info@kint-group.com
+                                <a href={`mailto:${contactEmail}`} dir="ltr" style={{ unicodeBidi: 'plaintext', color: 'inherit', transition: '0.3s' }} className="hover:text-primary">
+                                    {contactEmail}
                                 </a>
                             </div>
                         </div>

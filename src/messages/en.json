@@ -979,9 +979,12 @@
       "siteName": "Site Name",
       "contactEmail": "Contact Email",
       "socialMedia": "Social Media",
-      "linkedin": "LinkedIn",
-      "youtube": "YouTube",
-      "save": "Save Settings"
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "save": "Save Settings",
+      "saving": "Saving...",
+      "settingsSaved": "Settings saved successfully.",
+      "saveError": "Failed to save settings. Please try again."
     },
     "AdminExpertArticleForm": {
       "english": "English",
