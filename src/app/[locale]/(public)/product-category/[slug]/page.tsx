@@ -119,7 +119,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
                                           src={displayImage}
                                           alt={pName}
                                           fill
-                                          style={{ objectFit: 'contain' }}
+                                          style={{ objectFit: 'cover' }}
                                       />
                                   </div>
                                 <div style={{ padding: '2rem', flex: 1, display: 'flex', flexDirection: 'column', borderTop: '1px solid #e2e8f0' }}>

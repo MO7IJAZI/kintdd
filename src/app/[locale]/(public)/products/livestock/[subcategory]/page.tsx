@@ -243,7 +243,7 @@ export default async function SubcategoryPage({
                             src={productCardImage}
                             alt={productName}
                             fill
-                            style={{ objectFit: 'contain' }}
+                            style={{ objectFit: 'cover' }}
                           />
                       </div>
 

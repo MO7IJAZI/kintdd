@@ -247,7 +247,7 @@ export default function CategoriesSection({ products = [], categories = [] }: Ca
                                 }}>
                                     <div style={{ position: 'relative', height: '220px', backgroundColor: '#fff', padding: '0' }}>
                                         {displayImage && (
-                                            <Image src={displayImage} alt={title} fill style={{ objectFit: 'contain' }} />
+                                            <Image src={displayImage} alt={title} fill style={{ objectFit: 'cover' }} />
                                         )}
                                     </div>
                                     <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column', borderTop: '1px solid var(--border)' }}>

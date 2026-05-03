@@ -63,7 +63,7 @@ export default function FeaturedProductsSection({ products }: FeaturedProductsSe
                             }}>
                                 <div style={{ position: 'relative', height: '260px', backgroundColor: '#fff', padding: '0' }}>
                                     {displayImage && (
-                                        <Image src={displayImage} alt={title} fill style={{ objectFit: 'contain' }} />
+                                        <Image src={displayImage} alt={title} fill style={{ objectFit: 'cover' }} />
                                     )}
                                 </div>
                                 <div style={{ padding: '2rem', flex: 1, display: 'flex', flexDirection: 'column', borderTop: '1px solid var(--border)' }}>

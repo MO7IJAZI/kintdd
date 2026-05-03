@@ -116,7 +116,7 @@ export default async function DynamicProductsCategoryPage({
                                         src={product.image || "/images/cat-biostimulants.png"}
                                         alt={pName}
                                         fill
-                                        style={{ objectFit: "contain", padding: "1rem" }}
+                                        style={{ objectFit: "cover" }}
                                     />
                                 </div>
                                 <div style={{ padding: "1.5rem" }}>

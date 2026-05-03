@@ -230,7 +230,7 @@ export default async function ProductsForAnimalsPage({
                           src={animal.imageUrl}
                           alt={animalName}
                           fill
-                          style={{ objectFit: 'contain', padding: '1rem' }}
+                          style={{ objectFit: 'cover' }}
                         />
                       ) : (
                         <div style={{

@@ -308,7 +308,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                                 alt={name || product.name}
                                 width={450}
                                 height={450}
-                                style={{ objectFit: 'contain', position: 'relative', zIndex: 1 }}
+                                style={{ objectFit: 'cover', position: 'relative', zIndex: 1 }}
                                 priority
                             />
                         </div>
@@ -580,7 +580,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                                               alt={related.name} 
                                               fill 
                                               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                                              style={{ objectFit: 'contain' }}
+                                              style={{ objectFit: 'cover' }}
                                               loading="lazy"
                                           />
                                       </div>
