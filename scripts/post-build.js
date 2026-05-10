@@ -50,23 +50,34 @@ try {
     
     console.log('Post-build copy completed successfully.');
 
-    // Restore backed-up public/images
-    const tempImagesSrc = path.join(process.cwd(), 'temp_public_images_backup');
-    const standalonePublicImagesDest = path.join(standaloneDir, 'public', 'images');
+    // Restore backed-up public assets
+    const tempBackupDir = path.join(process.cwd(), 'temp_public_backup');
 
-    if (fs.existsSync(tempImagesSrc)) {
-        console.log('Restoring public/images from backup...');
-        // Ensure the destination directory exists
-        if (!fs.existsSync(standalonePublicImagesDest)) {
-            fs.mkdirSync(standalonePublicImagesDest, { recursive: true });
+    if (fs.existsSync(tempBackupDir)) {
+        console.log('Restoring public assets from backup...');
+        const directoriesToRestore = ['images', 'documents', 'fonts', 'uploads'];
+
+        for (const dirName of directoriesToRestore) {
+            const srcPath = path.join(tempBackupDir, dirName);
+            const destPath = path.join(standaloneDir, 'public', dirName);
+
+            if (fs.existsSync(srcPath)) {
+                // Ensure the destination directory exists
+                if (!fs.existsSync(destPath)) {
+                    fs.mkdirSync(destPath, { recursive: true });
+                }
+                copyDir(srcPath, destPath);
+                console.log(`public/${dirName} restored successfully.`);
+            } else {
+                console.log(`No backup found for public/${dirName}.`);
+            }
         }
-        copyDir(tempImagesSrc, standalonePublicImagesDest);
-        console.log('public/images restored successfully.');
+
         // Clean up backup
-        fs.rmSync(tempImagesSrc, { recursive: true, force: true });
+        fs.rmSync(tempBackupDir, { recursive: true, force: true });
         console.log('Temporary backup cleaned up.');
     } else {
-        console.log('No public/images backup found to restore.');
+        console.log('No public assets backup found to restore.');
     }
 
 } catch (error) {
