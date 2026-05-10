@@ -49,7 +49,27 @@ try {
     }
     
     console.log('Post-build copy completed successfully.');
+
+    // Restore backed-up public/images
+    const tempImagesSrc = path.join(process.cwd(), 'temp_public_images_backup');
+    const standalonePublicImagesDest = path.join(standaloneDir, 'public', 'images');
+
+    if (fs.existsSync(tempImagesSrc)) {
+        console.log('Restoring public/images from backup...');
+        // Ensure the destination directory exists
+        if (!fs.existsSync(standalonePublicImagesDest)) {
+            fs.mkdirSync(standalonePublicImagesDest, { recursive: true });
+        }
+        copyDir(tempImagesSrc, standalonePublicImagesDest);
+        console.log('public/images restored successfully.');
+        // Clean up backup
+        fs.rmSync(tempImagesSrc, { recursive: true, force: true });
+        console.log('Temporary backup cleaned up.');
+    } else {
+        console.log('No public/images backup found to restore.');
+    }
+
 } catch (error) {
-    console.error('Error during post-build copy:', error);
+    console.error('Error during post-build copy or restore:', error);
     process.exit(1);
 }
