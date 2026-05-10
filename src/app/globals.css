@@ -1213,7 +1213,15 @@ button {
   padding: 0;
   box-sizing: border-box;
   max-width: 100%;
+  position: relative !important; /* Ensure normal positioning context */
+  z-index: auto !important; /* Reset z-index to default */
+  display: block !important; /* Ensure block display for divs */
   /* Ensure nested divs don't break layout */
+}
+
+.rich-content p, .rich-content h1, .rich-content h2, .rich-content h3, .rich-content h4, .rich-content h5, .rich-content h6, .rich-content ul, .rich-content ol, .rich-content li, .rich-content blockquote, .rich-content pre, .rich-content table {
+  position: relative !important; /* Ensure normal positioning context for block elements */
+  z-index: auto !important; /* Reset z-index to default */
 }
 
 .rich-content img, .rich-content video, .rich-content iframe {

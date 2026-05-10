@@ -710,6 +710,7 @@ export default function RichTextEditor({
               color: #334155;
               padding: 14px;
               direction: ${dir === 'rtl' ? 'rtl' : 'ltr'};
+              overflow-y: auto !important; /* Ensure content is scrollable */
             }
             
             /* Ensure custom fonts are available throughout the editor */
