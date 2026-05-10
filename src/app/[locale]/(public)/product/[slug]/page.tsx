@@ -450,7 +450,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                                                         <Eye size={16} strokeWidth={2.2} />
                                                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.2 }}>
                                                             
-                                                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '150px' }}>{title}</span>
+                                                            <span style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{title}</span>
                                                         </div>
                                                     </a>
                                                 </div>

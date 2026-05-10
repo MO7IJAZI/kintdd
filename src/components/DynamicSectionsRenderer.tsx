@@ -138,7 +138,7 @@ export default function DynamicSectionsRenderer({ sections, isRtl }: DynamicSect
                                     maxHeight: isExpanded ? '2000px' : '0',
                                     overflow: 'hidden',
                                     transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-                                    opacity: isExpanded ? 1 : 0.5,
+                                    opacity: isExpanded ? 1 : 0, /* Changed opacity to 0 when collapsed */
                                 }}>
                                     <div style={{ padding: '1.4rem 1.25rem' }}>
                                         <div

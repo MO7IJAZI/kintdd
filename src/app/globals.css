@@ -1205,53 +1205,17 @@ button {
   max-width: 100%;
   overflow-wrap: break-word;
   word-break: break-word;
+  white-space: normal !important; /* Ensure proper text wrapping */
 }
 
-/* Headings */
-.rich-content h1 { font-size: 2rem;   font-weight: 800; margin: 1.2rem 0 0.6rem; line-height: 1.2; }
-.rich-content h2 { font-size: 1.6rem; font-weight: 700; margin: 1rem 0 0.5rem;  line-height: 1.3; }
-.rich-content h3 { font-size: 1.3rem; font-weight: 600; margin: 0.9rem 0 0.4rem; line-height: 1.35; }
-.rich-content h4 { font-size: 1.1rem; font-weight: 600; margin: 0.75rem 0 0.35rem; }
-.rich-content h5, .rich-content h6 { font-size: 1rem; font-weight: 600; margin: 0.5rem 0 0.25rem; }
-
-/* Body text */
-.rich-content p  { margin: 0.6rem 0; }
-.rich-content ul, .rich-content ol { padding-inline-start: 1.75rem; margin: 0.6rem 0; }
-.rich-content li { margin: 0.3rem 0; }
-.rich-content blockquote {
-  border-inline-start: 4px solid var(--primary);
-  padding: 0.5rem 1.2rem;
-  margin: 1rem 0;
-  color: #64748b;
-  font-style: italic;
-}
-.rich-content strong { font-weight: 700; }
-.rich-content em     { font-style: italic; }
-.rich-content s      { text-decoration: line-through; }
-.rich-content a      { color: var(--primary); text-decoration: underline; }
-.rich-content a:hover { color: var(--primary-hover); }
-.rich-content code   { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: #f1f5f9; padding: 0.1em 0.4em; border-radius: 4px; font-size: 0.9em; }
-.rich-content pre    { background: #0f172a; color: #e2e8f0; padding: 1rem 1.25rem; border-radius: 10px; overflow-x: auto; margin: 1rem 0; }
-.rich-content pre code { background: transparent; padding: 0; font-size: 0.875rem; }
-
-/* Tables */
-.rich-content table  { border-collapse: collapse; width: 100%; margin: 1.5rem 0; border: 1px solid #94a3b8; }
-.rich-content tbody, .rich-content thead, .rich-content tfoot, .rich-content tr, .rich-content th, .rich-content td {
-    border-color: inherit; border-style: inherit; border-width: inherit;
-}
-.rich-content th,
-.rich-content td     { padding: 10px 14px; text-align: start; vertical-align: top; word-break: normal; overflow-wrap: break-word; }
-.rich-content th     { background-color: #f8fafc; font-weight: 700; }
-.rich-content tr:nth-child(even) td { background-color: transparent; } /* Removes hardcoded striping constraint */
-
-/* Images & media */
 .rich-content img, .rich-content video, .rich-content iframe {
   max-width: 100%;
   height: auto;
   border-radius: 6px;
   display: inline-block;
+  /* Ensure images within rich content are responsive */
 }
-.rich-content iframe { display: block; margin: 0.75rem auto; }
+
 
 /* Float: text beside image */
 .rich-content img[style*="float: left"],
