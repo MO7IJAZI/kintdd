@@ -10,6 +10,8 @@ import FileUpload from "./FileUpload";
 import StagesEditor from "./StagesEditor";
 import { generateSlug } from "@/lib/slugUtils";
 import { useLocale } from "next-intl";
+import CategoryManagerModal from "./CategoryManagerModal";
+import { getDynamicCategories, DynamicCategory } from "@/actions/categorySettingsActions";
 
 interface CropProduct {
     id: string;
@@ -85,14 +87,18 @@ export default function CropForm({ initialData, products = [] }: CropFormProps) 
     const [metaTitle, setMetaTitle] = useState(initialData?.metaTitle || "");
     const [metaTitleAr, setMetaTitleAr] = useState(initialData?.metaTitle_ar || "");
     const [errors, setErrors] = useState<Record<string, string>>({});
-    const predefinedCategories = ["vegetables", "fruits", "legumes", "cereals", "industrial", "herbs"];
-    const isExistingInitialCategory = initialData?.category ? predefinedCategories.includes(initialData.category) : true;
-    const [categoryMode, setCategoryMode] = useState<'existing' | 'new'>(isExistingInitialCategory ? 'existing' : 'new');
-    const [selectedCategory, setSelectedCategory] = useState(
-        isExistingInitialCategory ? (initialData?.category || "vegetables") : "vegetables"
-    );
-    const [newCategoryEn, setNewCategoryEn] = useState(isExistingInitialCategory ? "" : (initialData?.category || ""));
-    const [newCategoryAr, setNewCategoryAr] = useState(isExistingInitialCategory ? "" : (initialData?.category_ar || ""));
+    const [categories, setCategories] = useState<DynamicCategory[]>([]);
+    const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState(initialData?.category || "");
+
+    useEffect(() => {
+        getDynamicCategories('crop').then(data => {
+            setCategories(data);
+            if (!selectedCategory && data.length > 0) {
+                setSelectedCategory(data[0].nameEn);
+            }
+        });
+    }, []);
 
     // Legacy simple product selection (might be redundant if stages are used, but good to keep for general recommendations)
     const [selectedProducts, setSelectedProducts] = useState<string[]>(
@@ -195,10 +201,7 @@ export default function CropForm({ initialData, products = [] }: CropFormProps) 
         const newErrors: Record<string, string> = {};
         if (!name.trim()) newErrors.name = t('nameRequired');
         if (!name_ar.trim()) newErrors.name_ar = t('nameArRequired');
-        if (categoryMode === 'new') {
-            if (!newCategoryEn.trim()) newErrors.category = t('newCategoryEnRequired');
-            if (!newCategoryAr.trim()) newErrors.category_ar = t('newCategoryArRequired');
-        }
+        if (!selectedCategory) newErrors.category = t('categoryRequired') || 'Category is required';
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -226,13 +229,8 @@ export default function CropForm({ initialData, products = [] }: CropFormProps) 
         formData.set("metaTitle", metaTitle);
         formData.set("metaTitle_ar", metaTitleAr);
         formData.set("slug", slug);
-        if (categoryMode === 'new') {
-            formData.set("category", newCategoryEn.trim());
-            formData.set("category_ar", newCategoryAr.trim());
-        } else {
-            formData.set("category", selectedCategory);
-            formData.delete("category_ar");
-        }
+        formData.set("category", selectedCategory);
+        formData.set("category_ar", categories.find(c => c.nameEn === selectedCategory)?.nameAr || selectedCategory);
         formData.set("productIds", JSON.stringify(selectedProducts));
         formData.set("stages", JSON.stringify(stages));
 
@@ -263,8 +261,8 @@ export default function CropForm({ initialData, products = [] }: CropFormProps) 
     };
 
     return (
-        <form onSubmit={handleSubmit} className="card" style={{ padding: '2.5rem', maxWidth: '1000px', backgroundColor: 'white' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
+        <form onSubmit={handleSubmit} className="card" style={{ padding: '2.5rem', maxWidth: '1000px', backgroundColor: 'white', width: '100%' }}>
+            <div className="form-grid" style={{ marginBottom: '2rem' }}>
                 <div>
                     <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.9rem' }}>
                         {t('cropNameEn')} <span style={{ color: 'red' }}>*</span>
@@ -299,58 +297,43 @@ export default function CropForm({ initialData, products = [] }: CropFormProps) 
             <input type="hidden" name="slug" value={slug} />
             <input type="hidden" name="pdfUrl" value={pdfUrl} />
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem', marginBottom: '2rem' }}>
+            <div className="form-grid" style={{ marginBottom: '2rem' }}>
                 <div>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.9rem' }}>{t('categoryEn')}</label>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                        <label style={{ fontWeight: '700', fontSize: '0.9rem' }}>{t('categoryEn') || 'Category'}</label>
+                        <button type="button" onClick={() => setIsCategoryModalOpen(true)} className="btn btn-outline" style={{ padding: '0.3rem 0.75rem', fontSize: '0.8rem' }}>
+                            {t('manageCategories') || 'Manage Categories'}
+                        </button>
+                    </div>
                     <select
-                        value={categoryMode === 'new' ? '__new__' : selectedCategory}
-                        onChange={(e) => {
-                            if (e.target.value === '__new__') {
-                                setCategoryMode('new');
-                            } else {
-                                setCategoryMode('existing');
-                                setSelectedCategory(e.target.value);
-                            }
-                        }}
-                        className="input"
+                        value={selectedCategory}
+                        onChange={(e) => setSelectedCategory(e.target.value)}
+                        className={`input ${errors.category ? 'border-red-500' : ''}`}
                         style={{ width: '100%' }}
                     >
-                        <option value="vegetables">{t('vegetables')}</option>
-                        <option value="fruits">{t('fruits')}</option>
-                        <option value="legumes">{t('legumes')}</option>
-                        <option value="cereals">{t('cereals')}</option>
-                        <option value="industrial">{t('industrial')}</option>
-                        <option value="herbs">{t('herbs')}</option>
-                        <option value="__new__">{t('addNewCategoryOption')}</option>
+                        {categories.map(cat => (
+                            <option key={cat.id} value={cat.nameEn}>
+                                {cat.nameEn} - {cat.nameAr}
+                            </option>
+                        ))}
                     </select>
-                    {categoryMode === 'new' && (
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '0.75rem' }}>
-                            <div>
-                                <input
-                                    value={newCategoryEn}
-                                    onChange={(e) => setNewCategoryEn(e.target.value)}
-                                    className="input"
-                                    style={{ width: '100%' }}
-                                    placeholder={t('newCategoryEnPlaceholder')}
-                                />
-                                {errors.category && <p style={{ color: 'red', fontSize: '0.8rem', marginTop: '0.25rem' }}>{errors.category}</p>}
-                            </div>
-                            <div dir="rtl">
-                                <input
-                                    value={newCategoryAr}
-                                    onChange={(e) => setNewCategoryAr(e.target.value)}
-                                    className="input"
-                                    style={{ width: '100%' }}
-                                    placeholder={t('newCategoryArPlaceholder')}
-                                />
-                                {errors.category_ar && <p style={{ color: 'red', fontSize: '0.8rem', marginTop: '0.25rem' }}>{errors.category_ar}</p>}
-                            </div>
-                        </div>
-                    )}
+                    {errors.category && <p style={{ color: 'red', fontSize: '0.8rem', marginTop: '0.25rem' }}>{errors.category}</p>}
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '2rem', marginBottom: '2.5rem' }}>
+            <CategoryManagerModal 
+                isOpen={isCategoryModalOpen}
+                onClose={() => setIsCategoryModalOpen(false)}
+                type="crop"
+                onCategoriesUpdated={(cats) => {
+                    setCategories(cats);
+                    if (!cats.find(c => c.nameEn === selectedCategory) && cats.length > 0) {
+                        setSelectedCategory(cats[0].nameEn);
+                    }
+                }}
+            />
+
+            <div className="form-grid-3" style={{ marginBottom: '2.5rem' }}>
                 <ImageUpload
                     label={t('image')}
                     value={image}
@@ -368,7 +351,7 @@ export default function CropForm({ initialData, products = [] }: CropFormProps) 
                 />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '2rem', marginBottom: '2.5rem' }}>
+            <div className="form-grid" style={{ marginBottom: '2.5rem' }}>
                 <div>
                     <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.9rem' }}>
                         {t('documentTitleEn')}
@@ -395,7 +378,7 @@ export default function CropForm({ initialData, products = [] }: CropFormProps) 
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2.5rem' }}>
+            <div className="form-grid" style={{ marginBottom: '2.5rem' }}>
                 <div>
                     <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.9rem' }}>
                         {t('metaTitle')}

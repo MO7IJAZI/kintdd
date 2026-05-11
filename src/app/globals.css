@@ -198,6 +198,44 @@
   margin: 0;
 }
 
+/* Responsive Grid Utilities */
+.form-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.form-grid-3 {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+@media (max-width: 768px) {
+  .form-grid, .form-grid-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── TinyMCE resize handle position fix ── */
+/*
+  TinyMCE positions its resize handles as absolutely-positioned elements
+  inside .tox-tinymce which must have position:relative so the overlay
+  stays anchored to the editor boundaries, not the page.
+*/
+.tox.tox-tinymce {
+  position: relative !important;
+}
+/* The resize overlay must clip inside the editor */
+.tox .tox-edit-area {
+  position: relative !important;
+  overflow: hidden !important;
+}
+/* Force the resize grip container to stay inside the iframe wrapper */
+.tox .tox-edit-area__iframe {
+  display: block !important;
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -758,6 +796,32 @@ button {
   background: #fff;
 }
 
+.prose table:last-child,
+.blog-content table:last-child,
+.technical-content table:last-child,
+.rich-content table:last-child,
+.prose table:has(+ p:last-child:empty),
+.blog-content table:has(+ p:last-child:empty),
+.technical-content table:has(+ p:last-child:empty),
+.rich-content table:has(+ p:last-child:empty),
+.prose table:has(+ p:last-child > br:only-child),
+.blog-content table:has(+ p:last-child > br:only-child),
+.technical-content table:has(+ p:last-child > br:only-child),
+.rich-content table:has(+ p:last-child > br:only-child) {
+  margin-bottom: 0;
+}
+
+.prose > p:last-child:empty,
+.blog-content > p:last-child:empty,
+.technical-content > p:last-child:empty,
+.rich-content > p:last-child:empty,
+.prose > p:last-child:has(br:only-child),
+.blog-content > p:last-child:has(br:only-child),
+.technical-content > p:last-child:has(br:only-child),
+.rich-content > p:last-child:has(br:only-child) {
+  display: none;
+}
+
 .prose th,
 .prose td,
 .blog-content th,
@@ -768,6 +832,16 @@ button {
   border-width: calc(var(--table-border-width, 1) * 1px);
   border-color: var(--table-border-color, #64748b);
   padding: 0.65rem 0.8rem;
+  vertical-align: top;
+}
+
+.prose th p,
+.prose td p,
+.blog-content th p,
+.blog-content td p,
+.technical-content th p,
+.technical-content td p {
+  margin: 0 !important;
 }
 
 .prose thead th,
@@ -1209,14 +1283,22 @@ button {
 }
 
 .rich-content div {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  max-width: 100%;
-  position: relative !important; /* Ensure normal positioning context */
-  z-index: auto !important; /* Reset z-index to default */
-  display: block !important; /* Ensure block display for divs */
-  /* Ensure nested divs don't break layout */
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  max-width: 100% !important;
+  position: relative !important; /* Force relative positioning for stacking context */
+  z-index: auto !important;      /* Reset z-index */
+  display: block !important;      /* Ensure block display */
+  float: none !important;         /* Prevent floating */
+  clear: both !important;         /* Clear floats */
+
+  overflow: visible !important;   /* Ensure content is not clipped */
+  top: auto !important;           /* Reset top position */
+  bottom: auto !important;        /* Reset bottom position */
+  left: auto !important;          /* Reset left position */
+  right: auto !important;         /* Reset right position */
+  transform: none !important;     /* Reset any transforms */
 }
 
 .rich-content p, .rich-content h1, .rich-content h2, .rich-content h3, .rich-content h4, .rich-content h5, .rich-content h6, .rich-content ul, .rich-content ol, .rich-content li, .rich-content blockquote, .rich-content pre, .rich-content table {
@@ -1224,13 +1306,87 @@ button {
   z-index: auto !important; /* Reset z-index to default */
 }
 
-.rich-content img, .rich-content video, .rich-content iframe {
-  max-width: 100%;
-  height: auto;
-  border-radius: 6px;
-  display: inline-block;
-  /* Ensure images within rich content are responsive */
+.rich-content div {
+  box-sizing: border-box !important;
+  max-width: 100% !important;
+  position: relative !important;
+  z-index: auto !important;
+  display: block !important;
+  float: none !important;
+  clear: both !important;
+  overflow: visible !important;
 }
+
+.rich-content * {
+  position: static !important;
+  z-index: auto !important;
+  float: none !important;
+  clear: both !important;
+  transform: none !important;
+  overflow-wrap: break-word !important;
+  word-break: break-word !important;
+  white-space: normal !important;
+}
+
+.rich-content img, .rich-content video, .rich-content iframe {
+  max-width: 100% !important;
+  height: auto !important;
+  border-radius: 6px;
+  display: inline-block !important;
+  position: relative !important;
+  z-index: auto !important;
+  float: none !important;
+  clear: both !important;
+  transform: none !important;
+}
+
+.rich-content img[width],
+.rich-content img[style*="width:"] {
+  max-width: none !important;
+}
+
+/* Ensure basic rich-content elements have default styling */
+.rich-content p { margin: 0.6rem 0; }
+.rich-content h1 { font-size: 2rem;   font-weight: 800; margin: 1.2rem 0 0.6rem; line-height: 1.2; }
+.rich-content h2 { font-size: 1.6rem; font-weight: 700; margin: 1rem 0 0.5rem;  line-height: 1.3; }
+.rich-content h3 { font-size: 1.3rem; font-weight: 600; margin: 0.9rem 0 0.4rem; line-height: 1.35; }
+.rich-content h4 { font-size: 1.1rem; font-weight: 600; margin: 0.75rem 0 0.35rem; }
+.rich-content h5, .rich-content h6 { font-size: 1rem; font-weight: 600; margin: 0.5rem 0 0.25rem; }
+.rich-content ul, .rich-content ol { padding-inline-start: 1.75rem; margin: 0.6rem 0; }
+.rich-content li { margin: 0.3rem 0; }
+.rich-content blockquote {
+  border-inline-start: 4px solid var(--primary);
+  padding: 0.5rem 1.2rem;
+  margin: 1rem 0;
+  color: #64748b;
+  font-style: italic;
+}
+.rich-content strong { font-weight: 700; }
+.rich-content em     { font-style: italic; }
+.rich-content s      { text-decoration: line-through; }
+.rich-content a      { color: var(--primary); text-decoration: underline; }
+.rich-content a:hover { color: var(--primary-hover); }
+.rich-content code   { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: #f1f5f9; padding: 0.1em 0.4em; border-radius: 4px; font-size: 0.9em; }
+.rich-content pre    { background: #0f172a; color: #e2e8f0; padding: 1rem 1.25rem; border-radius: 10px; overflow-x: auto; margin: 1rem 0; }
+.rich-content pre code { background: transparent; padding: 0; font-size: 0.875rem; }
+
+/* Tables */
+.rich-content table  { border-collapse: collapse; width: 100%; margin: 1.5rem 0; border: 1px solid #94a3b8; }
+#additional-info .rich-content table { margin: 0.8rem 0; }
+#additional-info .rich-content table:last-child { margin-bottom: 0; }
+#additional-info .rich-content table + p:empty { display: none; margin: 0; padding: 0; }
+.rich-content tbody, .rich-content thead, .rich-content tfoot, .rich-content tr, .rich-content th, .rich-content td {
+    border-color: inherit; border-style: inherit; border-width: inherit;
+}
+.rich-content th,
+.rich-content td     { padding: 0.75rem 0.9rem; text-align: start; vertical-align: top; word-break: normal; overflow-wrap: break-word; }
+.rich-content td[colspan], .rich-content th[colspan] { vertical-align: top; }
+.rich-content td p, .rich-content th p { margin: 0; }
+.rich-content th     { background-color: #f8fafc; font-weight: 700; }
+.rich-content tr:nth-child(even) td { background-color: transparent; } /* Removes hardcoded striping constraint */
+
+/* Images & media */
+.rich-content iframe { display: block; margin: 0.75rem auto; }
 
 
 /* Float: text beside image */

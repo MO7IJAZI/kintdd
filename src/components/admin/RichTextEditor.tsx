@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import React from 'react'
+import { useState, useEffect, useCallback, useMemo, useId, useRef } from 'react'
 import { Editor as TinyMCEEditor } from '@tinymce/tinymce-react'
 import DOMPurify from 'dompurify'
 import debounce from 'lodash.debounce'
@@ -39,6 +40,16 @@ export default function RichTextEditor({
   const [stats, setStats] = useState({ words: 0, chars: 0, lines: 1 })
   const [editorLoadError, setEditorLoadError] = useState<string | null>(null)
   const editorValue = onChange ? value : localContent
+  const fontNameInputId = useId(); // Generate a unique ID
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  const editorRef = useRef<any>(null)
+
+  /* ── Custom image resize overlay state ── */
+  const [resizeOverlay, setResizeOverlay] = useState<{
+    visible: boolean
+    top: number; left: number; width: number; height: number
+    imgEl: HTMLImageElement | null
+  }>({ visible: false, top: 0, left: 0, width: 0, height: 0, imgEl: null })
 
   /* ── Custom font upload state ── */
   const [customFonts, setCustomFonts] = useState<{ name: string; url: string }[]>([])
@@ -76,7 +87,35 @@ export default function RichTextEditor({
   )
 
   useEffect(() => {
-    return () => { autosave.cancel() }
+    // Add DOMPurify hook when component mounts
+    DOMPurify.addHook('uponSanitizeAttribute' as any, function (node: Node, attr: Attr | null) {
+      if (!attr) return; // Add null check for attr
+      if (attr.name === 'style') {
+        const nodeName = node.nodeName.toLowerCase();
+        const isMedia = nodeName === 'img' || nodeName === 'video' || nodeName === 'iframe';
+        
+        let forbiddenLayoutStyles = [
+          'position', 'z-index', 'float', 'clear', 'transform',
+          'top', 'bottom', 'left', 'right',
+          'display'
+        ];
+        
+        if (!isMedia) {
+          forbiddenLayoutStyles.push('width', 'height', 'min-width', 'min-height', 'max-width', 'max-height');
+        }
+
+        attr.value = attr.value.split(';').filter((s: string) => {
+          const prop = s.split(':')[0].trim().toLowerCase();
+          return !forbiddenLayoutStyles.some(fs => prop.includes(fs));
+        }).join(';');
+      }
+    });
+
+    // Clean up the hook when the component unmounts
+    return () => {
+      autosave.cancel()
+      DOMPurify.removeHook('uponSanitizeAttribute');
+    }
   }, [autosave])
 
   const updateStats = (html: string) => {
@@ -110,11 +149,88 @@ export default function RichTextEditor({
     'Courier New=courier new,courier,monospace',
   ].join(';')
 
+  /* ── Compute the overlay rect from an img inside the iframe ── */
+  const updateResizeOverlay = useCallback((imgEl: HTMLImageElement | null) => {
+    if (!imgEl || !wrapperRef.current) {
+      setResizeOverlay(o => ({ ...o, visible: false, imgEl: null }))
+      return
+    }
+    const iframeEl = wrapperRef.current.querySelector<HTMLIFrameElement>(
+      '.tox-edit-area__iframe'
+    )
+    if (!iframeEl) return
+    const iframeRect = iframeEl.getBoundingClientRect()
+    const wrapRect = wrapperRef.current.getBoundingClientRect()
+    const imgRect = imgEl.getBoundingClientRect()
+    // img rect is in the iframe viewport; convert to outer page coords
+    setResizeOverlay({
+      visible: true,
+      imgEl,
+      top: iframeRect.top - wrapRect.top + imgRect.top,
+      left: iframeRect.left - wrapRect.left + imgRect.left,
+      width: imgRect.width,
+      height: imgRect.height,
+    })
+  }, [])
+
   return (
-    <div className="rich-text-editor-wrapper" dir={dir === 'auto' ? undefined : dir}>
+    <div className="rich-text-editor-wrapper" ref={wrapperRef} style={{ position: 'relative' }}>
       {/* ── Global style for custom fonts in admin preview ── */}
       {customFontCss && <style dangerouslySetInnerHTML={{ __html: customFontCss }} />}
-      
+
+      {/* ── Custom image resize overlay ── */}
+      {resizeOverlay.visible && resizeOverlay.imgEl && (() => {
+        const { top, left, width, height, imgEl } = resizeOverlay
+        const HANDLE = 10
+        const handles: { cursor: string; dx: number; dy: number; style: React.CSSProperties }[] = [
+          { cursor: 'nwse-resize', dx: -1, dy: -1, style: { top: -HANDLE/2, left: -HANDLE/2 } },
+          { cursor: 'ns-resize',   dx:  0, dy: -1, style: { top: -HANDLE/2, left: width/2 - HANDLE/2 } },
+          { cursor: 'nesw-resize', dx:  1, dy: -1, style: { top: -HANDLE/2, right: -HANDLE/2 } },
+          { cursor: 'ew-resize',   dx: -1, dy:  0, style: { top: height/2 - HANDLE/2, left: -HANDLE/2 } },
+          { cursor: 'ew-resize',   dx:  1, dy:  0, style: { top: height/2 - HANDLE/2, right: -HANDLE/2 } },
+          { cursor: 'nesw-resize', dx: -1, dy:  1, style: { bottom: -HANDLE/2, left: -HANDLE/2 } },
+          { cursor: 'ns-resize',   dx:  0, dy:  1, style: { bottom: -HANDLE/2, left: width/2 - HANDLE/2 } },
+          { cursor: 'nwse-resize', dx:  1, dy:  1, style: { bottom: -HANDLE/2, right: -HANDLE/2 } },
+        ]
+        const onMouseDown = (dx: number, dy: number) => (e: React.MouseEvent) => {
+          e.preventDefault()
+          const startX = e.clientX, startY = e.clientY
+          const startW = imgEl.offsetWidth, startH = imgEl.offsetHeight
+          const onMove = (ev: MouseEvent) => {
+            const diffX = ev.clientX - startX
+            const diffY = ev.clientY - startY
+            if (dx !== 0) imgEl.style.width = Math.max(30, startW + dx * diffX) + 'px'
+            if (dy !== 0) imgEl.style.height = Math.max(30, startH + dy * diffY) + 'px'
+            imgEl.removeAttribute('width'); imgEl.removeAttribute('height')
+            updateResizeOverlay(imgEl)
+          }
+          const onUp = () => {
+            document.removeEventListener('mousemove', onMove)
+            document.removeEventListener('mouseup', onUp)
+            editorRef.current?.fire('Change')
+          }
+          document.addEventListener('mousemove', onMove)
+          document.addEventListener('mouseup', onUp)
+        }
+        return (
+          <div style={{
+            position: 'absolute', top, left, width, height,
+            outline: '2px solid #3b82f6', pointerEvents: 'none',
+            zIndex: 999,
+          }}>
+            {handles.map((h, i) => (
+              <div key={i} onMouseDown={onMouseDown(h.dx, h.dy)} style={{
+                position: 'absolute', ...h.style,
+                width: HANDLE, height: HANDLE,
+                background: '#3b82f6', borderRadius: 2,
+                cursor: h.cursor, pointerEvents: 'all',
+                zIndex: 1000,
+              }} />
+            ))}
+          </div>
+        )
+      })()}
+
       {label && <label className="editor-label">{label}</label>}
 
       {/* ── Custom font uploader ── */}
@@ -129,8 +245,10 @@ export default function RichTextEditor({
         </span>
         <input
           type="text"
-          id="custom-font-name"
+          id={fontNameInputId}
+          name="custom-font-name"
           placeholder={t('fontName') ?? 'اسم الخط (مثال: Cairo)'}
+          aria-label={t('fontName') ?? 'اسم الخط'}
           style={{
             padding: '0.35rem 0.6rem', borderRadius: '6px',
             border: '1px solid #cbd5e1', fontSize: '0.82rem',
@@ -138,7 +256,7 @@ export default function RichTextEditor({
           }}
           disabled={isUploadingFont}
         />
-        <label style={{
+        <label htmlFor={fontNameInputId} style={{
           padding: '0.35rem 0.9rem', borderRadius: '6px',
           background: isUploadingFont ? '#94a3b8' : '#e9496c', 
           color: 'white', fontWeight: 700,
@@ -149,13 +267,15 @@ export default function RichTextEditor({
           {isUploadingFont ? (t('uploading') ?? 'جاري الرفع...') : (t('chooseFont') ?? 'اختر ملف الخط')}
           <input
             type="file"
+            id={`${fontNameInputId}-file`}
+            name="custom-font-file"
             accept=".ttf,.otf,.woff,.woff2"
             style={{ display: 'none' }}
             disabled={isUploadingFont}
             onChange={async (e) => {
               const file = e.target.files?.[0]
               if (!file) return
-              const nameInput = document.getElementById('custom-font-name') as HTMLInputElement
+              const nameInput = document.getElementById(fontNameInputId) as HTMLInputElement
               const fontName = nameInput?.value?.trim() || file.name.replace(/\.[^.]+$/, '')
               
               setIsUploadingFont(true)
@@ -260,7 +380,41 @@ export default function RichTextEditor({
         tinymceScriptSrc="https://cdn.jsdelivr.net/npm/tinymce@7.7.1/tinymce.min.js"
         licenseKey="gpl"
         value={editorValue}
-        onInit={() => setEditorLoadError(null)}
+        onInit={(_evt, editor) => {
+          setEditorLoadError(null)
+          editorRef.current = editor
+
+          /* Wire up the custom resize overlay for images */
+          editor.on('click', (e) => {
+            const target = e.target as HTMLElement
+            if (target?.tagName === 'IMG') {
+              updateResizeOverlay(target as HTMLImageElement)
+            } else {
+              setResizeOverlay(o => ({ ...o, visible: false, imgEl: null }))
+            }
+          })
+          editor.on('keydown mousedown', () => {
+            // Hide overlay when user clicks elsewhere in editor
+            const selected = editor.selection?.getNode() as HTMLElement
+            if (selected?.tagName !== 'IMG') {
+              setResizeOverlay(o => ({ ...o, visible: false, imgEl: null }))
+            }
+          })
+          editor.on('NodeChange', () => {
+            const node = editor.selection?.getNode() as HTMLElement
+            if (node?.tagName === 'IMG') {
+              updateResizeOverlay(node as HTMLImageElement)
+            } else {
+              setResizeOverlay(o => ({ ...o, visible: false, imgEl: null }))
+            }
+          })
+          // Recalculate on editor scroll
+          const iframeDoc = editor.getDoc()
+          iframeDoc?.addEventListener('scroll', () => {
+            const node = editor.selection?.getNode() as HTMLElement
+            if (node?.tagName === 'IMG') updateResizeOverlay(node as HTMLImageElement)
+          }, { passive: true })
+        }}
         init={{
           height: 560,
           min_height: 420,
@@ -268,15 +422,16 @@ export default function RichTextEditor({
           menubar: 'file edit view insert format tools table help',
           branding: false,
           promotion: false,
-          skin: 'oxide',
-          content_css: 'default',
+          premium_upgrade_promos: false,
+          // skin: 'oxide', // Removed due to loading issues and deprecation warnings
+          // content_css: false, // Use TinyMCE's default content CSS for better compatibility
           directionality: dir === 'rtl' ? 'rtl' : 'ltr',
           toolbar_mode: 'wrap',
           plugins: [
             'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
             'anchor', 'searchreplace', 'visualblocks', 'code', 'codesample', 'fullscreen',
             'insertdatetime', 'directionality', 'nonbreaking', 'pagebreak',
-            'quickbars', 'save', 'visualchars', 'emoticons', 'autoresize',
+            'quickbars', 'save', 'visualchars', 'emoticons',
             'media', 'table', 'wordcount',
           ],
           automatic_uploads: true,
@@ -301,17 +456,40 @@ export default function RichTextEditor({
           paste_merge_formats: true,
           smart_paste: true,
           paste_webkit_styles: 'all',
-          paste_retain_style_properties: 'all',
           paste_remove_styles_if_webkit: false,
 
-          /* ─── Pre-process pasted content to ensure styles are preserved ─── */
-          paste_preprocess: () => {
-            // Keep pasted content styling intact
-            // We'll handle overrides in the ExecCommand handler
-            // This allows users to paste styled content and then change the font if needed
+          /* ── Pre-process pasted content to ensure styles are preserved ── */
+          paste_preprocess: (plugin, args) => {
+            // Remove specific problematic inline styles early
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = args.content;
+            
+            const elements = tempDiv.querySelectorAll('*[style]');
+            elements.forEach(el => {
+              const style = el.getAttribute('style');
+              if (style) {
+                const filteredStyle = style.split(';').filter(s => {
+                  const prop = s.split(':')[0].trim().toLowerCase();
+                  const forbidden = [
+                    'position', 'z-index', 'float', 'clear', 'transform',
+                    'top', 'bottom', 'left', 'right',
+                    // Consider adding width/height/display if still problematic
+                    // 'width', 'height', 'min-width', 'min-height', 'max-width', 'max-height',
+                    // 'display'
+                  ];
+                  return !forbidden.some(f => prop.includes(f));
+                }).join(';');
+                if (filteredStyle) {
+                  el.setAttribute('style', filteredStyle);
+                } else {
+                  el.removeAttribute('style');
+                }
+              }
+            });
+            args.content = tempDiv.innerHTML;
           },
 
-          /* ─── Post-process pasted content to fix any style issues ─── */
+          /* ── Post-process pasted content to fix any style issues ── */
           paste_postprocess: (editor, args) => {
             // Normalize pasted content to be compatible with font changes
             const dom = editor.dom
@@ -343,8 +521,7 @@ export default function RichTextEditor({
           autosave_ask_before_unload: false,
           autosave_restore_when_empty: true,
           browser_spellcheck: true,
-          object_resizing: true,
-          resize_img_proportional: true,
+          object_resizing: false,
 
           /* ── Table settings: enable merge/split + color UI ── */
           table_use_colgroups: true,
@@ -717,6 +894,27 @@ export default function RichTextEditor({
             * {
               /* Allow fonts to apply properly */
             }
+
+            /* Aggressive reset for nested divs to prevent layout issues */
+            div {
+              margin: 0 !important;
+              padding: 0 !important;
+              box-sizing: border-box !important;
+              max-width: 100% !important;
+              position: relative !important;
+              z-index: auto !important;
+              float: none !important;
+              clear: both !important;
+              display: block !important;
+              top: auto !important;
+              bottom: auto !important;
+              left: auto !important;
+              right: auto !important;
+              transform: none !important;
+              min-height: auto !important;
+              height: auto !important;
+              overflow: visible !important;
+            }
             
             /* Table styling */
             table {
@@ -731,6 +929,10 @@ export default function RichTextEditor({
             }
             table th, table td {
               padding: 10px 12px;
+              vertical-align: top;
+            }
+            table th p, table td p {
+              margin: 0 !important;
             }
             table th {
               background: #f8fafc;
@@ -753,7 +955,6 @@ export default function RichTextEditor({
             /* Media styling */
             img, video, iframe {
               max-width: 100%;
-              height: auto;
             }
             img[data-mce-selected], video[data-mce-selected], iframe[data-mce-selected] {
               outline: 2px solid #3b82f6;
@@ -772,22 +973,28 @@ export default function RichTextEditor({
             span[style*="font-family"] {
               /* Keep pasted font styles intact */
             }
+            
+            /* Minimize the forced empty paragraph after tables */
+            body > p:last-child {
+              margin-bottom: 0;
+            }
           `,
         }}
         onEditorChange={(html) => {
-          const clean = DOMPurify.sanitize(html, {
+          let clean = DOMPurify.sanitize(html, {
             ADD_TAGS: ['video', 'source', 'iframe', 'table', 'thead', 'tbody', 'tr', 'td', 'th', 'colgroup', 'col', 'span', 'font', 'style'],
             ADD_ATTR: [
               'controls', 'width', 'height', 'src', 'allow', 'allowfullscreen', 'frameborder',
               'data-type', 'type', 'style', 'colspan', 'rowspan', 'data-float',
               'data-border-color', 'data-border-width', 'border', 'cellpadding', 'cellspacing',
               'class', 'id', 'dir', 'lang', 'color', 'bgcolor', 'align', 'valign', 'face', 'size',
-              'data-mce-style', 'data-mce-selected', 'data-mce-href', 'data-mce-src'
+              'data-mce-style', 'data-mce-selected', 'data-mce-href', 'data-mce-src', 'data-mce-bogus'
             ],
             PARSER_MEDIA_TYPE: 'text/html',
             FORCE_BODY: false,
             WHOLE_DOCUMENT: false,
           })
+          
           if (!onChange) setLocalContent(clean)
           updateStats(clean)
           autosave(clean)

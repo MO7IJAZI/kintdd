@@ -45,7 +45,7 @@ export default async function LocaleLayout({
   const direction = locale === 'ar' ? 'rtl' : 'ltr';
 
   return (
-    <html lang={locale} dir={direction} className={`${inter.variable} ${outfit.variable} ${cairo.variable}`}>
+    <html lang={locale} dir={direction} className={`${inter.variable} ${outfit.variable} ${cairo.variable}`} data-scroll-behavior="smooth">
       <body className={locale === 'ar' ? 'font-arabic' : 'font-latin'}>
         <CustomFontsLoader />
         <NextIntlClientProvider messages={messages}>

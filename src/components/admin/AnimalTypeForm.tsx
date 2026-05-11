@@ -9,6 +9,8 @@ import ImageUpload from "./ImageUpload";
 import FileUpload from "./FileUpload";
 import { generateSlug } from "@/lib/slugUtils";
 import StagesEditor from "./StagesEditor";
+import CategoryManagerModal from "./CategoryManagerModal";
+import { getDynamicCategories, DynamicCategory } from "@/actions/categorySettingsActions";
 
 const RichTextEditor = dynamic(() => import("./RichTextEditor"), { ssr: false });
 
@@ -66,14 +68,19 @@ export default function AnimalTypeForm({ initialData, products = [] }: { initial
   const [metaTitle, setMetaTitle] = useState(initialData?.metaTitle || "");
   const [metaTitle_ar, setMetaTitleAr] = useState(initialData?.metaTitle_ar || "");
   const [selectedProducts, setSelectedProducts] = useState<string[]>(initialData?.productIds || []);
-  const predefinedCategories = ["poultry", "cattle", "fish", "bees", "other"]; // Example categories, adjust as needed
-  const isExistingInitialCategory = initialData?.category ? predefinedCategories.includes(initialData.category) : true;
-  const [categoryMode, setCategoryMode] = useState<'existing' | 'new'>(isExistingInitialCategory ? 'existing' : 'new');
-  const [selectedCategory, setSelectedCategory] = useState(
-      isExistingInitialCategory ? (initialData?.category || "poultry") : "poultry"
-  );
-  const [newCategoryEn, setNewCategoryEn] = useState(isExistingInitialCategory ? "" : (initialData?.category || ""));
-  const [newCategoryAr, setNewCategoryAr] = useState(isExistingInitialCategory ? "" : (initialData?.category_ar || ""));
+  
+  const [categories, setCategories] = useState<DynamicCategory[]>([]);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(initialData?.category || "");
+
+  useEffect(() => {
+      getDynamicCategories('animal').then(data => {
+          setCategories(data);
+          if (!selectedCategory && data.length > 0) {
+              setSelectedCategory(data[0].nameEn);
+          }
+      });
+  }, []);
 
   const storageKey = `${initialData?.id ? `animalType:${initialData.id}` : 'animalType:new'}:${isRtl ? 'ar' : 'en'}`;
 
@@ -107,9 +114,6 @@ export default function AnimalTypeForm({ initialData, products = [] }: { initial
             selectedProducts?: string[];
             stages?: any[];
             selectedCategory?: string;
-            newCategoryEn?: string;
-            newCategoryAr?: string;
-            categoryMode?: 'existing' | 'new';
         };
         setTimeout(() => {
             if (saved.description !== undefined) setDescription(prev => prev || saved.description || '');
@@ -127,9 +131,6 @@ export default function AnimalTypeForm({ initialData, products = [] }: { initial
                 setStages(prev => prev.length ? prev : saved.stages as any[]);
             }
             if (saved.selectedCategory !== undefined) setSelectedCategory(prev => prev || saved.selectedCategory || '');
-            if (saved.newCategoryEn !== undefined) setNewCategoryEn(prev => prev || saved.newCategoryEn || '');
-            if (saved.newCategoryAr !== undefined) setNewCategoryAr(prev => prev || saved.newCategoryAr || '');
-            if (saved.categoryMode !== undefined) setCategoryMode(prev => prev || saved.categoryMode!);
         }, 0);
     } catch {}
   }, [storageKey]);
@@ -148,13 +149,10 @@ export default function AnimalTypeForm({ initialData, products = [] }: { initial
             selectedProducts,
             stages,
             selectedCategory,
-            newCategoryEn,
-            newCategoryAr,
-            categoryMode,
         });
         localStorage.setItem(storageKey, payload);
     } catch {}
-  }, [description, description_ar, imageUrl, pdfUrl, pdfUrl_ar, documentTitle, documentTitle_ar, slug, selectedProducts, stages, selectedCategory, newCategoryEn, newCategoryAr, categoryMode, storageKey]);
+    }, [description, description_ar, imageUrl, pdfUrl, pdfUrl_ar, documentTitle, documentTitle_ar, slug, selectedProducts, stages, selectedCategory, storageKey]);
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
@@ -174,10 +172,7 @@ export default function AnimalTypeForm({ initialData, products = [] }: { initial
     const newErrors: Record<string, string> = {};
     if (!name.trim()) newErrors.name = t('nameRequired');
     if (!name_ar.trim()) newErrors.name_ar = t('nameArRequired');
-    if (categoryMode === 'new') {
-      if (!newCategoryEn.trim()) newErrors.category = t('newCategoryEnRequired');
-      if (!newCategoryAr.trim()) newErrors.category_ar = t('newCategoryArRequired');
-    }
+    if (!selectedCategory) newErrors.category = t('categoryRequired') || 'Category is required';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -225,8 +220,8 @@ export default function AnimalTypeForm({ initialData, products = [] }: { initial
            isActive: true,
            recommendation: { products: s.products }
          })),
-         category: categoryMode === 'new' ? newCategoryEn.trim() : selectedCategory,
-         category_ar: categoryMode === 'new' ? newCategoryAr.trim() : (initialData?.category_ar || "")
+         category: selectedCategory,
+         category_ar: categories.find(c => c.nameEn === selectedCategory)?.nameAr || selectedCategory
        };
 
        if (initialData?.id) {
@@ -247,8 +242,8 @@ export default function AnimalTypeForm({ initialData, products = [] }: { initial
    };
 
   return (
-    <form onSubmit={onSubmit} className="card" style={{ padding: '2.5rem', maxWidth: '1000px', backgroundColor: 'white' }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
+    <form onSubmit={onSubmit} className="card" style={{ padding: '2.5rem', maxWidth: '1000px', backgroundColor: 'white', width: '100%' }}>
+      <div className="form-grid" style={{ marginBottom: '2rem' }}>
         <div className="form-field">
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.9rem' }}>{t('EnglishName')} <span style={{ color: 'red' }}>*</span></label>
           <input 
@@ -274,55 +269,43 @@ export default function AnimalTypeForm({ initialData, products = [] }: { initial
       </div>
       <input type="hidden" name="slug" value={slug} />
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem', marginBottom: '2rem' }}>
+      <div className="form-grid" style={{ marginBottom: '2rem' }}>
         <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.9rem' }}>{t('categoryEn')}</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <label style={{ fontWeight: '700', fontSize: '0.9rem' }}>{t('categoryEn') || 'Category'}</label>
+                <button type="button" onClick={() => setIsCategoryModalOpen(true)} className="btn btn-outline" style={{ padding: '0.3rem 0.75rem', fontSize: '0.8rem' }}>
+                    {t('manageCategories') || 'Manage Categories'}
+                </button>
+            </div>
             <select
-                value={categoryMode === 'new' ? '__new__' : selectedCategory}
-                onChange={(e) => {
-                    if (e.target.value === '__new__') {
-                        setCategoryMode('new');
-                    } else {
-                        setCategoryMode('existing');
-                        setSelectedCategory(e.target.value);
-                    }
-                }}
-                className="input"
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className={`input ${errors.category ? 'border-red-500' : ''}`}
                 style={{ width: '100%' }}
             >
-                {predefinedCategories.map(cat => (
-                    <option key={cat} value={cat}>{t(cat)}</option>
+                {categories.map(cat => (
+                    <option key={cat.id} value={cat.nameEn}>
+                        {cat.nameEn} - {cat.nameAr}
+                    </option>
                 ))}
-                <option value="__new__">{t('addNewCategoryOption')}</option>
             </select>
-            {categoryMode === 'new' && (
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '0.75rem' }}>
-                    <div>
-                        <input
-                            value={newCategoryEn}
-                            onChange={(e) => setNewCategoryEn(e.target.value)}
-                            className="input"
-                            style={{ width: '100%' }}
-                            placeholder={t('newCategoryEnPlaceholder')}
-                        />
-                        {errors.category && <p style={{ color: 'red', fontSize: '0.8rem', marginTop: '0.25rem' }}>{errors.category}</p>}
-                    </div>
-                    <div dir="rtl">
-                        <input
-                            value={newCategoryAr}
-                            onChange={(e) => setNewCategoryAr(e.target.value)}
-                            className="input"
-                            style={{ width: '100%' }}
-                            placeholder={t('newCategoryArPlaceholder')}
-                        />
-                        {errors.category_ar && <p style={{ color: 'red', fontSize: '0.8rem', marginTop: '0.25rem' }}>{errors.category_ar}</p>}
-                    </div>
-                </div>
-            )}
+            {errors.category && <p style={{ color: 'red', fontSize: '0.8rem', marginTop: '0.25rem' }}>{errors.category}</p>}
         </div>
       </div>
+      
+      <CategoryManagerModal 
+          isOpen={isCategoryModalOpen}
+          onClose={() => setIsCategoryModalOpen(false)}
+          type="animal"
+          onCategoriesUpdated={(cats) => {
+              setCategories(cats);
+              if (!cats.find(c => c.nameEn === selectedCategory) && cats.length > 0) {
+                  setSelectedCategory(cats[0].nameEn);
+              }
+          }}
+      />
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2.5rem' }}>
+      <div className="form-grid" style={{ marginBottom: '2.5rem' }}>
         <div>
             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.9rem' }}>
                 {t('MetaTitleEn')}
@@ -358,7 +341,7 @@ export default function AnimalTypeForm({ initialData, products = [] }: { initial
       </div>
 
       {/* PDF & Document Fields */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '2rem', marginBottom: '2.5rem' }}>
+      <div className="form-grid-3" style={{ marginBottom: '2.5rem' }}>
         <FileUpload
           label={`${t('pdf')} (${t('english')})`}
           value={pdfUrl}
@@ -370,7 +353,7 @@ export default function AnimalTypeForm({ initialData, products = [] }: { initial
           onChange={setPdfUrlAr}
         />
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2.5rem' }}>
+      <div className="form-grid" style={{ marginBottom: '2.5rem' }}>
         <div className="form-field">
           <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '700', fontSize: '0.9rem' }}>
             {t('DocumentTitleEn')}

@@ -47,9 +47,9 @@ export default function DynamicSectionsRenderer({ sections, isRtl }: DynamicSect
     };
 
     return (
-        <section style={{ padding: '1rem 0 4rem', backgroundColor: '#ffffff' }}>
+        <section style={{ padding: '1rem 0 2rem', backgroundColor: '#ffffff' }}>
             <div className="container">
-                <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+                <div style={{ textAlign: 'center', marginBottom: '2.2rem' }}>
                     <h2 style={{ 
                         fontSize: '2rem', 
                         fontWeight: 800, 
@@ -66,7 +66,9 @@ export default function DynamicSectionsRenderer({ sections, isRtl }: DynamicSect
                     {sections.map((section) => {
                         const title = locale === 'ar' && section.title_ar ? section.title_ar : section.title;
                         const content = locale === 'ar' && section.content_ar ? section.content_ar : section.content;
-                        const safeContent = stripScripts(content);
+                        let safeContent = stripScripts(content || '');
+                        // Strip trailing empty paragraphs to prevent unwanted white space below tables
+                        safeContent = safeContent.replace(/(?:<p>(?:<br\s*\/?>|&nbsp;|\s)*<\/p>\s*)+$/, '');
                         const isExpanded = expandedId === section.id;
                         
                         // Determine the background color: prioritize direct 'color' prop, then mapped 'colorTheme', then fallback
@@ -140,7 +142,7 @@ export default function DynamicSectionsRenderer({ sections, isRtl }: DynamicSect
                                     transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
                                     opacity: isExpanded ? 1 : 0, /* Changed opacity to 0 when collapsed */
                                 }}>
-                                    <div style={{ padding: '1.4rem 1.25rem' }}>
+                                    <div style={{ padding: '0.50rem 0.95rem 0.5rem' }}>
                                         <div
                                             className="rich-content"
                                             style={{

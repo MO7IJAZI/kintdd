@@ -178,6 +178,7 @@
     "newCategoryArRequired": "Arabic Category Name is required",
     "animalNamePlaceholder": "Animal Name",
     "animalNameArPlaceholder": "Animal Name (Arabic)",
+    "manageCategories": "Manage Categories",
     "addNewCategoryOption": "Add New Category",
     "newCategoryEnPlaceholder": "New Category Name (English)",
     "newCategoryArPlaceholder": "New Category Name (Arabic)",
@@ -591,6 +592,7 @@
     "cereals": "Cereals",
     "industrial": "Industrial",
     "herbs": "Herbs",
+    "manageCategories": "Manage Categories",
     "addNewCategoryOption": "+ Add new category",
     "newCategoryEnPlaceholder": "New category name in English",
     "newCategoryArPlaceholder": "New category name in Arabic",
@@ -1887,5 +1889,12 @@
     "sort": "Sort",
     "apply": "Apply",
     "clear": "Clear"
+  },
+  "CategoryManager": {
+    "manageCategories": "Manage Categories",
+    "englishName": "English Name",
+    "arabicName": "Arabic Name",
+    "add": "Add",
+    "confirmDelete": "Are you sure? This will move associated items to Uncategorized."
   }
 }

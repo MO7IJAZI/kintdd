@@ -178,6 +178,7 @@
     "newCategoryArRequired": "اسم الفئة العربية مطلوب",
     "animalNamePlaceholder": "اسم الحيوان",
     "animalNameArPlaceholder": "اسم الحيوان باللغة العربية",
+    "manageCategories": "إدارة الفئات",
     "addNewCategoryOption": "إضافة فئة جديدة",
     "newCategoryEnPlaceholder": "اسم الفئة الجديدة (الإنجليزية)",
     "newCategoryArPlaceholder": "اسم الفئة الجديدة (العربية)",
@@ -444,6 +445,7 @@
     "cereals": "الحبوب",
     "industrial": "الصناعية",
     "herbs": "الأعشاب",
+    "manageCategories": "إدارة الفئات",
     "addNewCategoryOption": "+ إضافة قسم جديد",
     "newCategoryEnPlaceholder": "اسم القسم الجديد بالإنجليزية",
     "newCategoryArPlaceholder": "اسم القسم الجديد بالعربية",
@@ -1875,5 +1877,12 @@
     "sort": "ترتيب",
     "apply": "تطبيق",
     "clear": "مسح"
+  },
+  "CategoryManager": {
+    "manageCategories": "إدارة الفئات",
+    "englishName": "الاسم بالإنجليزية",
+    "arabicName": "الاسم بالعربية",
+    "add": "إضافة",
+    "confirmDelete": "هل أنت متأكد؟ سيؤدي هذا إلى نقل العناصر المرتبطة إلى فئة 'غير مصنف'."
   }
 }

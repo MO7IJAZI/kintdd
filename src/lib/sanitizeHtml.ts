@@ -1,22 +1,132 @@
+/**
+ * Remove only CSS properties that cause overlapping/z-index issues
+ * Keep all other styling intact, but remove custom properties and complex flexbox
+ */
+function removeDangerousCssProperties(styleStr: string, preserveImageSizes = false): string {
+  if (!styleStr || typeof styleStr !== 'string') return '';
+  
+  // List of dangerous properties to remove
+  const dangerousProperties = [
+    'z-index',
+    'position',
+    'top',
+    'bottom',
+    'left',
+    'right',
+    'pointer-events',
+    'display', // Remove display to prevent flexbox issues
+    'flex',
+    'flex-direction',
+    'flex-wrap',
+    'justify-content',
+    'align-items',
+    'align-content',
+    'gap',
+    'order',
+    'align-self',
+    'flex-grow',
+    'flex-shrink',
+    'flex-basis',
+    'transform',
+    'transition'
+  ];
+
+  if (!preserveImageSizes) {
+    dangerousProperties.push(
+      'height', // Remove fixed heights that cause overlapping
+      'min-height',
+      'max-height',
+      'width', // Remove widths that might overflow
+      'min-width',
+      'max-width'
+    );
+  }
+  
+  // Split by semicolon and process each property
+  const styles: Record<string, string> = {};
+  
+  styleStr.split(';').forEach(pair => {
+    const colonIndex = pair.indexOf(':');
+    if (colonIndex > -1) {
+      const key = pair.substring(0, colonIndex).trim().toLowerCase();
+      const value = pair.substring(colonIndex + 1).trim();
+      
+      if (key && value) {
+        // Skip CSS custom properties (--variable-name)
+        if (key.startsWith('--')) {
+          return;
+        }
+        
+        // Skip dangerous properties
+        if (dangerousProperties.includes(key)) {
+          return;
+        }
+        
+        // Also remove negative margins and paddings
+        if (key.startsWith('margin') || key.startsWith('padding')) {
+          if (value.startsWith('-')) {
+            return;
+          }
+        }
+        
+        // Remove transform and other complex properties
+        if (key === 'transform' || key === 'transition') {
+          return;
+        }
+        
+        styles[key] = value;
+      }
+    }
+  });
+  
+  // Reconstruct the style string
+  return Object.entries(styles)
+    .map(([key, value]) => `${key}: ${value}`)
+    .join('; ')
+    .trim();
+}
+
 export function stripScripts(html: string): string {
   const input = html ?? "";
-  const withoutScripts = input.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
-  return withoutScripts.replace(
-    /<([a-z0-9-]+)([^>]*?)\sdata-mce-style=(["'])(.*?)\3([^>]*)>/gi,
-    (_full, tag, before, _quote, mceStyle, after) => {
-      const attrs = `${before}${after}`;
-      if (/style\s*=/i.test(attrs)) {
-        const merged = attrs.replace(
-          /style=(["'])(.*?)\1/i,
-          (_styleFull, styleQuote, styleValue) => {
-            const base = String(styleValue || '').trim();
-            const sep = base.endsWith(';') || base.length === 0 ? '' : ';';
-            return `style=${styleQuote}${base}${sep} ${mceStyle}${styleQuote}`;
-          }
-        );
-        return `<${tag}${merged}>`;
+  
+  // First: Remove script tags
+  let cleaned = input.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
+  
+  // Second: Remove style tags
+  cleaned = cleaned.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "");
+  
+  // Third: Remove iframes and other dangerous elements
+  cleaned = cleaned.replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, "");
+  cleaned = cleaned.replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, "");
+  cleaned = cleaned.replace(/<embed\b[^<]*(\/?)>/gi, "");
+  
+  // Fourth: Remove all Elementor/builder-specific attributes except class names
+  cleaned = cleaned.replace(/\s+data-[a-z-]*\s*=\s*(["'].*?["']|[^\s>]+)/gi, '');
+  
+  // Fifth: Clean dangerous style properties while keeping styling
+  cleaned = cleaned.replace(/<([a-zA-Z][^>\s]*)\b([^>]*)\sstyle\s*=\s*(["'])(.*?)\3([^>]*)>/gi,
+    (match, tagName, before, quote, styleValue, after) => {
+      const isImg = tagName.toLowerCase() === 'img';
+      const cleanedStyle = removeDangerousCssProperties(styleValue, isImg);
+      if (!cleanedStyle) {
+        return `<${tagName}${before}${after}>`;
       }
-      return `<${tag}${before} style="` + mceStyle + `"${after}>`;
+      return `<${tagName}${before} style="${cleanedStyle}"${after}>`;
     }
   );
+  
+  // Sixth: Clean data-mce-style attributes
+  cleaned = cleaned.replace(/\s+data-mce-style\s*=\s*(["'])(.*?)\1/gi, (match, quote, styleValue) => {
+    const cleanedStyle = removeDangerousCssProperties(styleValue);
+    return cleanedStyle ? ` style="${cleanedStyle}"` : '';
+  });
+  
+  // Seventh: Remove potentially dangerous event handlers
+  cleaned = cleaned.replace(/\s+on\w+\s*=\s*(["'].*?["']|[^\s>]+)/gi, '');
+  
+  // Eighth: Remove invalid image height attributes such as height="auto"
+  cleaned = cleaned.replace(/<img\b([^>]*?)\sheight=(['"])auto\1([^>]*?)>/gi, '<img$1$2$3>');
+  cleaned = cleaned.replace(/<img\b([^>]*?)\swidth=(['"])auto\1([^>]*?)>/gi, '<img$1$2$3>');
+  
+  return cleaned;
 }
