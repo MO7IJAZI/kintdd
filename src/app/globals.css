@@ -1277,6 +1277,7 @@ button {
   color: inherit;
   font-size: inherit;
   max-width: 100%;
+  overflow-x: auto;
   overflow-wrap: break-word;
   word-break: break-word;
   white-space: normal !important; /* Ensure proper text wrapping */
@@ -1454,7 +1455,7 @@ button {
 
 .rich-content img[width],
 .rich-content img[style*="width:"] {
-  max-width: none !important;
+  max-width: 100% !important;
 }
 
 /* Ensure basic rich-content elements have default styling */
@@ -1485,7 +1486,7 @@ button {
 /* Tables */
 .rich-content table  { border-collapse: collapse; max-width: 100%; margin: 1.5rem 0; border: 1px solid #94a3b8; }
 .rich-content table:not([width]):not([style*="width"]) { width: 100%; }
-.rich-content table[width], .rich-content table[style*="width"] { table-layout: fixed; }
+.rich-content table[width], .rich-content table[style*="width"] { table-layout: fixed; width: 100% !important; max-width: 100% !important; }
 #additional-info .rich-content table { margin: 0.1rem 0; }
 #additional-info .rich-content > table:first-child { margin-top: 0.1rem; }
 #additional-info .additional-section-content:has(.rich-content > table:first-child) { padding-top: 0.1rem !important; }
