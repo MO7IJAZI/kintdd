@@ -62,7 +62,7 @@ export default function DynamicSectionsRenderer({ sections, isRtl }: DynamicSect
                     </h2>
                 </div>
 
-                <div style={{ maxWidth: '1100px', width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                <div style={{ maxWidth: '1320px', width: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
                     {sections.map((section) => {
                         const title = locale === 'ar' && section.title_ar ? section.title_ar : section.title;
                         const content = locale === 'ar' && section.content_ar ? section.content_ar : section.content;
@@ -142,7 +142,7 @@ export default function DynamicSectionsRenderer({ sections, isRtl }: DynamicSect
                                     transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
                                     opacity: isExpanded ? 1 : 0, /* Changed opacity to 0 when collapsed */
                                 }}>
-                                    <div style={{ padding: '0.50rem 0.95rem 0.5rem' }}>
+                                    <div className="additional-section-content" style={{ padding: '0.50rem 0.95rem 0.5rem' }}>
                                         <div
                                             className="rich-content"
                                             style={{

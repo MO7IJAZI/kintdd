@@ -1291,7 +1291,7 @@ button {
   z-index: auto !important;      /* Reset z-index */
   display: block !important;      /* Ensure block display */
   float: none !important;         /* Prevent floating */
-  clear: both !important;         /* Clear floats */
+  clear: none !important;
 
   overflow: visible !important;   /* Ensure content is not clipped */
   top: auto !important;           /* Reset top position */
@@ -1313,7 +1313,7 @@ button {
   z-index: auto !important;
   display: block !important;
   float: none !important;
-  clear: both !important;
+  clear: none !important;
   overflow: visible !important;
 }
 
@@ -1329,15 +1329,127 @@ button {
 }
 
 .rich-content img, .rich-content video, .rich-content iframe {
-  max-width: 100% !important;
-  height: auto !important;
+  max-width: 100%;
   border-radius: 6px;
-  display: inline-block !important;
   position: relative !important;
   z-index: auto !important;
   float: none !important;
   clear: both !important;
   transform: none !important;
+}
+
+.rich-content img {
+  height: auto;
+  display: inline-block;
+}
+
+.rich-content video,
+.rich-content iframe {
+  display: block !important;
+  margin: 0.75rem auto;
+}
+
+.rich-content iframe:not([height]):not([style*="height"]) {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  height: auto;
+}
+
+.rich-content video:not([height]):not([style*="height"]) {
+  height: auto;
+}
+
+.rich-content .kint-behind-container {
+  position: relative !important;
+  z-index: 0 !important;
+}
+
+.rich-content .kint-behind-container img.kint-wrap-behind,
+.rich-content .kint-behind-container video.kint-wrap-behind,
+.rich-content .kint-behind-container iframe.kint-wrap-behind {
+  position: absolute !important;
+  z-index: 0 !important;
+}
+
+.rich-content .kint-behind-container > :not(img.kint-wrap-behind):not(video.kint-wrap-behind):not(iframe.kint-wrap-behind) {
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+.rich-content img.kint-wrap-left,
+.rich-content video.kint-wrap-left,
+.rich-content iframe.kint-wrap-left,
+.rich-content img.kint-wrap-tight-left,
+.rich-content video.kint-wrap-tight-left,
+.rich-content iframe.kint-wrap-tight-left {
+  float: left !important;
+  clear: none !important;
+}
+
+.rich-content img.kint-wrap-right,
+.rich-content video.kint-wrap-right,
+.rich-content iframe.kint-wrap-right,
+.rich-content img.kint-wrap-tight-right,
+.rich-content video.kint-wrap-tight-right,
+.rich-content iframe.kint-wrap-tight-right {
+  float: right !important;
+  clear: none !important;
+}
+
+.rich-content img.kint-wrap-left,
+.rich-content video.kint-wrap-left,
+.rich-content iframe.kint-wrap-left,
+.rich-content img.kint-wrap-right,
+.rich-content video.kint-wrap-right,
+.rich-content iframe.kint-wrap-right {
+  margin: 0 1rem 0.5rem 0;
+  max-width: 45%;
+}
+
+.rich-content img.kint-wrap-right,
+.rich-content video.kint-wrap-right,
+.rich-content iframe.kint-wrap-right {
+  margin: 0 0 0.5rem 1rem;
+}
+
+.rich-content img.kint-wrap-tight-left,
+.rich-content video.kint-wrap-tight-left,
+.rich-content iframe.kint-wrap-tight-left {
+  margin: 0 0.6rem 0.35rem 0;
+  max-width: 45%;
+}
+
+.rich-content img.kint-wrap-tight-right,
+.rich-content video.kint-wrap-tight-right,
+.rich-content iframe.kint-wrap-tight-right {
+  margin: 0 0 0.35rem 0.6rem;
+  max-width: 45%;
+}
+
+.rich-content img.kint-wrap-inline,
+.rich-content video.kint-wrap-inline,
+.rich-content iframe.kint-wrap-inline {
+  float: none !important;
+  clear: none !important;
+  max-width: 100%;
+  display: block !important;
+  margin: 0.75rem auto;
+}
+
+.rich-content p,
+.rich-content h1,
+.rich-content h2,
+.rich-content h3,
+.rich-content h4,
+.rich-content h5,
+.rich-content h6,
+.rich-content ul,
+.rich-content ol,
+.rich-content li,
+.rich-content blockquote,
+.rich-content pre,
+.rich-content table {
+  clear: none !important;
 }
 
 .rich-content img[width],
@@ -1371,15 +1483,30 @@ button {
 .rich-content pre code { background: transparent; padding: 0; font-size: 0.875rem; }
 
 /* Tables */
-.rich-content table  { border-collapse: collapse; width: 100%; margin: 1.5rem 0; border: 1px solid #94a3b8; }
-#additional-info .rich-content table { margin: 0.8rem 0; }
+.rich-content table  { border-collapse: collapse; max-width: 100%; margin: 1.5rem 0; border: 1px solid #94a3b8; }
+.rich-content table:not([width]):not([style*="width"]) { width: 100%; }
+.rich-content table[width], .rich-content table[style*="width"] { table-layout: fixed; }
+#additional-info .rich-content table { margin: 0.1rem 0; }
+#additional-info .rich-content > table:first-child { margin-top: 0.1rem; }
+#additional-info .additional-section-content:has(.rich-content > table:first-child) { padding-top: 0.1rem !important; }
+#additional-info .rich-content > p:has(+ table) { margin-bottom: 0.1rem; }
+#additional-info .rich-content > p:empty:has(+ table),
+#additional-info .rich-content > p:has(br:only-child):has(+ table) {
+  display: none;
+  margin: 0;
+  padding: 0;
+}
+#additional-info .rich-content > p:empty + table,
+#additional-info .rich-content > p:has(br:only-child) + table {
+  margin-top: 0.1rem;
+}
 #additional-info .rich-content table:last-child { margin-bottom: 0; }
 #additional-info .rich-content table + p:empty { display: none; margin: 0; padding: 0; }
 .rich-content tbody, .rich-content thead, .rich-content tfoot, .rich-content tr, .rich-content th, .rich-content td {
     border-color: inherit; border-style: inherit; border-width: inherit;
 }
 .rich-content th,
-.rich-content td     { padding: 0.75rem 0.9rem; text-align: start; vertical-align: top; word-break: normal; overflow-wrap: break-word; }
+.rich-content td     { padding: 0.75rem 0.9rem; text-align: start; vertical-align: top; word-break: break-word; overflow-wrap: anywhere; }
 .rich-content td[colspan], .rich-content th[colspan] { vertical-align: top; }
 .rich-content td p, .rich-content th p { margin: 0; }
 .rich-content th     { background-color: #f8fafc; font-weight: 700; }

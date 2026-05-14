@@ -318,7 +318,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
             {/* 2. STRUCTURED INFO BLOCK (Legacy Fields + Tabs + Sections) */}
             <section style={{ padding: '6rem 0' }}>
-                <div className="container">
+                <div className="container" style={{ maxWidth: '1400px' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '4rem' }}>
                         {/* Main Description & Benefits */}
                         <div style={{ gridColumn: 'span 2' }}>

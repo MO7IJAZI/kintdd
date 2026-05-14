@@ -64,7 +64,7 @@ export async function wrapContentWithFontStyles(html: string): Promise<string> {
  * Used for form select options in admin panels
  */
 export async function getFontOptions(): Promise<{ value: string; label: string }[]> {
-    const { prisma } = await import('./prisma')
+    const { default: prisma } = await import('./prisma')
     
     try {
         const fonts = await prisma.customFont.findMany({
@@ -73,7 +73,7 @@ export async function getFontOptions(): Promise<{ value: string; label: string }
             select: { name: true, displayName: true },
         })
         
-        return fonts.map(f => ({
+        return fonts.map((f: { name: string; displayName: string | null }) => ({
             value: f.name,
             label: f.displayName || f.name,
         }))
@@ -88,7 +88,7 @@ export async function getFontOptions(): Promise<{ value: string; label: string }
  * Returns missing fonts if any
  */
 export async function verifyContentFonts(html: string): Promise<string[]> {
-    const { prisma } = await import('./prisma')
+    const { default: prisma } = await import('./prisma')
     
     // Extract font families used in the HTML
     const fontRegex = /font-family\s*:\s*['"]?([^'";\n]+)['"]?[;]/g
@@ -110,7 +110,7 @@ export async function verifyContentFonts(html: string): Promise<string[]> {
         select: { name: true },
     })
     
-    const dbFontNames = new Set(dbFonts.map(f => f.name))
+    const dbFontNames = new Set(dbFonts.map((f: { name: string }) => f.name))
     const missingFonts = Array.from(foundFonts).filter(f => !dbFontNames.has(f))
     
     return missingFonts

@@ -92,12 +92,13 @@ export default function CropForm({ initialData, products = [] }: CropFormProps) 
     const [selectedCategory, setSelectedCategory] = useState(initialData?.category || "");
 
     useEffect(() => {
+        let alive = true;
         getDynamicCategories('crop').then(data => {
+            if (!alive) return;
             setCategories(data);
-            if (!selectedCategory && data.length > 0) {
-                setSelectedCategory(data[0].nameEn);
-            }
+            setSelectedCategory(prev => prev || (data[0]?.nameEn ?? ""));
         });
+        return () => { alive = false; };
     }, []);
 
     // Legacy simple product selection (might be redundant if stages are used, but good to keep for general recommendations)

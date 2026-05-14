@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { getDynamicCategories, saveDynamicCategories, deleteDynamicCategory, DynamicCategory } from "@/actions/categorySettingsActions";
 import { X, Edit2, Trash2, Plus, Save } from "lucide-react";
@@ -28,18 +28,19 @@ export default function CategoryManagerModal({ isOpen, onClose, type, onCategori
     const [newCategoryEn, setNewCategoryEn] = useState("");
     const [newCategoryAr, setNewCategoryAr] = useState("");
 
-    useEffect(() => {
-        if (isOpen) {
-            loadCategories();
-        }
-    }, [isOpen, type]);
-
-    const loadCategories = async () => {
+    const loadCategories = useCallback(async () => {
         setIsLoading(true);
         const data = await getDynamicCategories(type);
         setCategories(data);
         setIsLoading(false);
-    };
+    }, [type]);
+
+    useEffect(() => {
+        if (isOpen) {
+            const id = window.setTimeout(() => { void loadCategories(); }, 0);
+            return () => window.clearTimeout(id);
+        }
+    }, [isOpen, loadCategories]);
 
     const handleAdd = async () => {
         if (!newCategoryEn.trim() || !newCategoryAr.trim()) return;

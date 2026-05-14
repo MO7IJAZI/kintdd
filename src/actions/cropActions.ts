@@ -341,6 +341,51 @@ export async function getCrops() {
     return getCropsCached();
 }
 
+export async function getAdminCrops(filters?: { q?: string; category?: string }) {
+    const session = await auth();
+    if (!session) {
+        throw new Error("Unauthorized");
+    }
+
+    const q = (filters?.q || "").trim();
+    const category = (filters?.category || "").trim();
+
+    return prisma.crop.findMany({
+        where: {
+            ...(category
+                ? {
+                      OR: [
+                          { category: { equals: category } },
+                          { category_ar: { equals: category } },
+                      ],
+                  }
+                : {}),
+            ...(q
+                ? {
+                      OR: [
+                          { name: { contains: q } },
+                          { name_ar: { contains: q } },
+                          { slug: { contains: q } },
+                          { category: { contains: q } },
+                          { category_ar: { contains: q } },
+                      ],
+                  }
+                : {}),
+        },
+        select: {
+            id: true,
+            name: true,
+            name_ar: true,
+            slug: true,
+            category: true,
+            category_ar: true,
+            isActive: true,
+            _count: { select: { stages: true } },
+        },
+        orderBy: { createdAt: "desc" },
+    });
+}
+
 export async function getCropBySlug(slug: string) {
     return getCropBySlugCached(slug);
 }

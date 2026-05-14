@@ -407,16 +407,34 @@ export async function getProducts() {
     return getProductsCached();
 }
 
-export async function getAdminProducts() {
+export async function getAdminProducts(filters?: { q?: string; categoryId?: string }) {
     const session = await auth();
     if (!session) {
         throw new Error("Unauthorized");
     }
     
+    const q = (filters?.q || "").trim();
+    const categoryId = (filters?.categoryId || "").trim();
+
     return prisma.product.findMany({
+        where: {
+            ...(categoryId ? { categoryId } : {}),
+            ...(q
+                ? {
+                      OR: [
+                          { name: { contains: q } },
+                          { name_ar: { contains: q } },
+                          { slug: { contains: q } },
+                          { category: { name: { contains: q } } },
+                          { category: { name_ar: { contains: q } } },
+                      ],
+                  }
+                : {}),
+        },
         select: {
             id: true,
             name: true,
+            name_ar: true,
             slug: true,
             image: true,
             isActive: true,
@@ -424,6 +442,7 @@ export async function getAdminProducts() {
                 select: {
                     id: true,
                     name: true,
+                    name_ar: true,
                 },
             },
         },

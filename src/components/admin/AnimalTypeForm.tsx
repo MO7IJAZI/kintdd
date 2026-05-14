@@ -74,12 +74,13 @@ export default function AnimalTypeForm({ initialData, products = [] }: { initial
   const [selectedCategory, setSelectedCategory] = useState(initialData?.category || "");
 
   useEffect(() => {
+      let alive = true;
       getDynamicCategories('animal').then(data => {
+          if (!alive) return;
           setCategories(data);
-          if (!selectedCategory && data.length > 0) {
-              setSelectedCategory(data[0].nameEn);
-          }
+          setSelectedCategory(prev => prev || (data[0]?.nameEn ?? ""));
       });
+      return () => { alive = false; };
   }, []);
 
   const storageKey = `${initialData?.id ? `animalType:${initialData.id}` : 'animalType:new'}:${isRtl ? 'ar' : 'en'}`;
