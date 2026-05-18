@@ -240,7 +240,19 @@
     "chooseFile": "اختر ملف ZIP",
     "importButton": "استعادة من ZIP",
     "importing": "جاري الاستعادة...",
-    "warning": "الاستعادة ستستبدل بيانات قاعدة البيانات الحالية والملفات المرفوعة على السيرفر."
+    "warning": "الاستعادة ستستبدل بيانات قاعدة البيانات الحالية وملفات الموقع على السيرفر.",
+    "stageQueued": "بالانتظار",
+    "stageMigrating": "تجهيز هيكل قاعدة البيانات",
+    "stagePreparingDb": "تصدير قاعدة البيانات",
+    "stageZipping": "ضغط الملفات",
+    "stageFinalizing": "اللمسات الأخيرة",
+    "stageUploading": "رفع ملف ZIP",
+    "stageExtracting": "فك الضغط",
+    "stageRestoringDb": "استعادة قاعدة البيانات",
+    "stageReplacingFiles": "استبدال ملفات الموقع",
+    "stageCleanup": "تنظيف الملفات المؤقتة",
+    "stageDone": "اكتمل",
+    "stageError": "خطأ"
   },
   "AdminCatalogs": {
     "management": "الإدارة",

@@ -63,9 +63,10 @@ export async function GET() {
 
     const db = await exportDatabase();
     const manifest = {
-        version: 1,
+        version: 2,
         createdAt: createdAt.toISOString(),
-        includes: ["db.json", "public/uploads", "public/documents", "public/fonts"],
+        type: "kint-full-backup",
+        includes: ["manifest.json", "db.json", "public/**"],
     };
 
     const passThrough = new PassThrough();
@@ -80,11 +81,8 @@ export async function GET() {
     archive.append(JSON.stringify(db), { name: "db.json" });
 
     const publicDir = path.join(process.cwd(), "public");
-    for (const folder of ["uploads", "documents", "fonts"]) {
-        const dir = path.join(publicDir, folder);
-        if (fs.existsSync(dir)) {
-            archive.directory(dir, path.posix.join("public", folder));
-        }
+    if (fs.existsSync(publicDir)) {
+        archive.directory(publicDir, "public");
     }
 
     void archive.finalize();
@@ -98,4 +96,3 @@ export async function GET() {
         },
     });
 }
-

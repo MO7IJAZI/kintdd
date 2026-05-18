@@ -240,7 +240,19 @@
     "chooseFile": "Choose ZIP file",
     "importButton": "Restore from ZIP",
     "importing": "Restoring...",
-    "warning": "Restoring will overwrite the current database and uploaded files on the server."
+    "warning": "Restoring will overwrite the current database and files on the server.",
+    "stageQueued": "Queued",
+    "stageMigrating": "Preparing database schema",
+    "stagePreparingDb": "Exporting database",
+    "stageZipping": "Packing files",
+    "stageFinalizing": "Finalizing",
+    "stageUploading": "Uploading ZIP",
+    "stageExtracting": "Extracting",
+    "stageRestoringDb": "Restoring database",
+    "stageReplacingFiles": "Replacing site files",
+    "stageCleanup": "Cleaning up",
+    "stageDone": "Done",
+    "stageError": "Error"
   },
   "AdminCatalogs": {
     "management": "Management",
