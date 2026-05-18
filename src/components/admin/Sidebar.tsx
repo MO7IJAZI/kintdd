@@ -33,6 +33,7 @@ export default function Sidebar() {
         { name: t('agents'), href: '/admin/agents', icon: '🤝' },
         { name: t('headquarter'), href: '/admin/headquarter', icon: '🏢' },
         { name: t('contactInquiries'), href: '/admin/inquiries', icon: '📧' },
+        { name: t('backup'), href: '/admin/backup', icon: '🗄️' },
         { name: t('settings'), href: '/admin/settings', icon: '⚙️' },
     ];
 

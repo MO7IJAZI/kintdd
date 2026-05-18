@@ -322,6 +322,12 @@ export default function RichTextEditor({
         }
       }
 
+      const selected = Array.from(doc.querySelectorAll('table td[data-mce-selected], table th[data-mce-selected], table td[aria-selected], table th[aria-selected]')) as HTMLElement[]
+      for (const el of selected) {
+        el.removeAttribute('data-mce-selected')
+        el.removeAttribute('aria-selected')
+      }
+
       return doc.body.innerHTML
     } catch {
       return html
@@ -1304,23 +1310,40 @@ export default function RichTextEditor({
           /* Wire up click → show overlay when a media/table element is selected */
           editor.on('click', (e) => {
             const target = e.target as HTMLElement
-            elementSelection.handleEditorClick(target)
+            const media =
+              (target?.closest?.('img,video,iframe') as HTMLElement | null) ??
+              ((target?.querySelector?.(':scope > img, :scope > video, :scope > iframe') as HTMLElement | null) ?? null)
+
+            if (media) {
+              elementSelection.handleEditorClick(target)
+            } else {
+              const inCell = !!target?.closest?.('td,th')
+              const inTable = !!target?.closest?.('table')
+              if (inCell || inTable) {
+                elementSelection.deselect()
+              } else {
+                elementSelection.handleEditorClick(target)
+              }
+            }
             scheduleBehindBtnUpdate()
           })
 
           const editorDoc = editor.getDoc?.() as Document | null
           const onDocPointerDown = (ev: PointerEvent) => {
             if (isInteractingRef.current) return
+            if (!editorDoc) return
             const target = ev.target as HTMLElement | null
             const media =
               (target?.closest?.('img,video,iframe') as HTMLElement | null) ??
               ((target?.querySelector?.(':scope > img, :scope > video, :scope > iframe') as HTMLElement | null) ?? null)
-            if (!media) return
-            ev.preventDefault()
-            ev.stopPropagation()
-            elementSelection.selectElement(media)
-            editor.selection?.select?.(media)
-            draggable.startDrag(ev, { armOnly: true })
+            if (media) {
+              ev.preventDefault()
+              ev.stopPropagation()
+              elementSelection.selectElement(media)
+              editor.selection?.select?.(media)
+              draggable.startDrag(ev, { armOnly: true })
+              return
+            }
           }
           editorDoc?.addEventListener('pointerdown', onDocPointerDown, { capture: true })
           editor.on('remove', () => {
@@ -1342,7 +1365,12 @@ export default function RichTextEditor({
           /* Update overlay on every selection change */
           editor.on('SelectionChange', () => {
             requestAnimationFrame(() => {
-              elementSelection.syncFromEditorSelection(editor)
+              const node = editor.selection?.getNode?.() as HTMLElement | null
+              const directTag = node?.tagName?.toUpperCase?.() || ''
+              const isDirectMedia = directTag === 'IMG' || directTag === 'VIDEO' || directTag === 'IFRAME'
+              const inTableCell = !!node?.closest?.('td,th')
+              if (inTableCell && !isDirectMedia) elementSelection.deselect()
+              else elementSelection.syncFromEditorSelection(editor)
               scheduleBehindBtnUpdate()
             })
           })
@@ -1531,7 +1559,7 @@ export default function RichTextEditor({
 
           /* ── Table settings: enable merge/split + color UI ── */
           table_use_colgroups: true,
-          table_resize_bars: true,
+          table_resize_bars: false,
           table_default_attributes: { border: '1' },
           table_default_styles: {
             width: '100%',
@@ -2170,7 +2198,8 @@ export default function RichTextEditor({
             editor.ui.registry.addContextMenu('kinttable', {
               update: (element) => {
                 const table = getClosest(element, 'table')
-                return table ? 'kintTableProps kintTableCellProps kintTableRowProps | kintTableInsertRowBefore kintTableInsertRowAfter kintTableDeleteRow | kintTableInsertColBefore kintTableInsertColAfter kintTableDeleteCol | kintMergeCells kintSplitCells | kintDeleteTable' : ''
+                if (!table) return ''
+                return 'kintTableProps kintTableCellProps kintTableRowProps | kintTableInsertRowBefore kintTableInsertRowAfter kintTableDeleteRow | kintTableInsertColBefore kintTableInsertColAfter kintTableDeleteCol | kintMergeCells kintSplitCells | kintDeleteTable'
               },
             })
             editor.ui.registry.addContextMenu('kintlink', {

@@ -219,6 +219,7 @@
     "headquarter": "المقر الرئيسي",
     "contactInquiries": "استفسارات التواصل",
     "pages": "صفحات التواصل",
+    "backup": "النسخ الاحتياطي",
     "settings": "الإعدادات",
     "backToSite": "العودة للموقع",
     "logout": "تسجيل الخروج",
@@ -229,6 +230,17 @@
     "password": "كلمة المرور",
     "loggingIn": "جاري تسجيل الدخول",
     "loginButton": "تسجيل الدخول"
+  },
+  "AdminBackup": {
+    "title": "النسخ الاحتياطي",
+    "description": "تصدير نسخة احتياطية كاملة (قاعدة البيانات + الملفات المرفوعة) وتنزيلها على جهازك، أو استعادة نسخة من ملف ZIP.",
+    "exportButton": "تنزيل نسخة احتياطية (ZIP)",
+    "exporting": "جاري تجهيز النسخة...",
+    "importTitle": "استعادة نسخة احتياطية",
+    "chooseFile": "اختر ملف ZIP",
+    "importButton": "استعادة من ZIP",
+    "importing": "جاري الاستعادة...",
+    "warning": "الاستعادة ستستبدل بيانات قاعدة البيانات الحالية والملفات المرفوعة على السيرفر."
   },
   "AdminCatalogs": {
     "management": "الإدارة",
@@ -701,7 +713,15 @@
     "selectBehind": "تحديد العنصر الخلفي",
     "tableFullWidth": "عرض الجدول 100%",
     "tableAutoWidth": "عرض الجدول تلقائي",
-    "tableDefaultWidth": "العرض الأساسي للجدول"
+    "tableDefaultWidth": "العرض الأساسي للجدول",
+    "tableSelectCell": "تحديد خلية",
+    "tableRangeStart": "بدء تحديد مجموعة",
+    "tableRangeEnd": "إنهاء تحديد مجموعة",
+    "tableClearSelection": "مسح التحديد",
+    "tableResizeSelection": "تغيير الحجم بالماوس",
+    "columnWidth": "عرض الأعمدة",
+    "rowHeight": "ارتفاع الصفوف",
+    "cancel": "إلغاء"
   },
   "AdminFileUpload": {
     "uploading": "جار التحميل...",

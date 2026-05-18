@@ -219,6 +219,7 @@
     "headquarter": "Headquarter",
     "contactInquiries": "Contact Inquiries",
     "pages": "Contact Pages",
+    "backup": "Backup",
     "settings": "Settings",
     "backToSite": "Back to Site",
     "logout": "Logout",
@@ -229,6 +230,17 @@
     "password": "Password",
     "loggingIn": "Signing in",
     "loginButton": "Sign In"
+  },
+  "AdminBackup": {
+    "title": "Backups",
+    "description": "Export a full backup (database + uploaded files) and download it to your computer, or restore a backup ZIP.",
+    "exportButton": "Download backup ZIP",
+    "exporting": "Preparing backup...",
+    "importTitle": "Restore backup",
+    "chooseFile": "Choose ZIP file",
+    "importButton": "Restore from ZIP",
+    "importing": "Restoring...",
+    "warning": "Restoring will overwrite the current database and uploaded files on the server."
   },
   "AdminCatalogs": {
     "management": "Management",
@@ -850,7 +862,15 @@
     "selectBehind": "Select behind",
     "tableFullWidth": "Table 100%",
     "tableAutoWidth": "Table Auto",
-    "tableDefaultWidth": "Table default"
+    "tableDefaultWidth": "Table default",
+    "tableSelectCell": "Select cell",
+    "tableRangeStart": "Start selection",
+    "tableRangeEnd": "End selection",
+    "tableClearSelection": "Clear selection",
+    "tableResizeSelection": "Resize by mouse",
+    "columnWidth": "Column width",
+    "rowHeight": "Row height",
+    "cancel": "Cancel"
   },
   "AdminFileUpload": {
     "uploading": "Uploading...",

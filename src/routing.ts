@@ -282,6 +282,10 @@ export const routing = defineRouting({
       en: '/admin/settings',
       ar: '/admin/settings'
     },
+    '/admin/backup': {
+      en: '/admin/backup',
+      ar: '/admin/backup'
+    },
     '/admin/documents': {
       en: '/admin/documents',
       ar: '/admin/documents'
